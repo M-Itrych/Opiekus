@@ -20,7 +20,7 @@ export default function DayPlan({ upcomingEvents }: { upcomingEvents: { title: s
                 variant="outline"
                 className="flex items-center justify-between gap-2 px-4"
             >
-                <a href="/calendar" className="flex items-center gap-2">
+                <a href="/HeadTeacher/calendar" className="flex items-center gap-2">
                     <span className="text-sm text-black hover:text-sky-500">
                         Przejdz do kalendarza
                     </span>

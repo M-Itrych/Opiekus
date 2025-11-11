@@ -26,7 +26,7 @@ export default function NavbarTemplate({ items, userName = "Użytkownik" }: Navb
     
     return (
         <div 
-            className="group flex flex-col items-center p-4 w-[80px] hover:w-[240px] h-screen shadow-xl shadow-slate-900/10 bg-linear-to-b from-white to-slate-50/50 sticky top-0 transition-all duration-300 ease-out overflow-hidden border-r border-slate-200/60"
+            className="group fixed left-0 top-0 flex flex-col items-center p-4 w-[80px] hover:w-[240px] h-screen shadow-xl shadow-slate-900/10 bg-linear-to-b from-white to-slate-50/50 transition-all duration-300 ease-out overflow-hidden border-r border-slate-200/60 z-50"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >

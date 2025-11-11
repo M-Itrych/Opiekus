@@ -82,7 +82,7 @@ export default function Topbar() {
     ];
 
     return (
-        <header className="sticky top-0 w-full border-b border-zinc-200 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/80">
+        <header className="fixed left-[80px] top-0 w-full border-b border-zinc-200 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/80">
             <nav className="flex w-full items-center justify-around gap-4 overflow-x-auto px-6 py-4 text-sm md:gap-6">
                 {topbarItems.map(({ href, Icon, label }) => {
                     const normalizedHref = href.toLowerCase();

@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Home from '@mui/icons-material/Home';
 import ChildCare from '@mui/icons-material/ChildCare';
 import CalendarMonth from '@mui/icons-material/CalendarMonth';
@@ -28,11 +27,7 @@ export default function Topbar() {
     return 'panel';
   };
 
-  const [activeTab, setActiveTab] = useState(() => getActiveTabFromPath(pathname));
-
-  useEffect(() => {
-    setActiveTab(getActiveTabFromPath(pathname));
-  }, [pathname]);
+  const activeTab = getActiveTabFromPath(pathname);
 
   const getRouteForTab = (tabId: string) => {
     const routes: { [key: string]: string } = {
@@ -44,7 +39,7 @@ export default function Topbar() {
       'ogloszenia': '/Parent/ogloszenia',
       'wiadomosci': '/Parent/wiadomosci',
       'platnosci': '/Parent/platnosci',
-      'wyloguj': '/',
+      'wyloguj': '/Login',
     };
     return routes[tabId] || '/Parent';
   };

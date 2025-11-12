@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ReactNode } from "react";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -20,10 +20,15 @@ interface NavbarTemplateProps {
     userName?: string;
 }
 
+
 export default function NavbarTemplate({ items, userName = "Użytkownik" }: NavbarTemplateProps) {
     const pathname = usePathname();
     const [isHovered, setIsHovered] = useState(false);
-    
+        
+        const router = useRouter();
+        const signOut = () => {
+            router.push("/Login");
+    }
     return (
         <div 
             className="group fixed left-0 top-0 flex flex-col items-center p-4 w-[80px] hover:w-[240px] h-screen shadow-xl shadow-slate-900/10 bg-linear-to-b from-white to-slate-50/50 transition-all duration-300 ease-out overflow-hidden border-r border-slate-200/60 z-50"
@@ -154,6 +159,9 @@ export default function NavbarTemplate({ items, userName = "Użytkownik" }: Navb
                                     ease: "easeOut",
                                 }}
                                 className="absolute left-14 text-sm whitespace-nowrap overflow-hidden font-semibold text-red-600"
+                                onClick={() => {
+                                    signOut();
+                                }}
                             >
                                 Wyloguj
                             </motion.span>

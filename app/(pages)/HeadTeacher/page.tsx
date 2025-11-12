@@ -1,10 +1,9 @@
 "use client";
 
-import Topbar from "@/app/components/global/TopBar/topbar";
-import NavbarHeadteacher from "@/app/components/global/NavBar/variants/navbar_headteacher";
 import AttendanceSummary from "@/app/components/headteacher/PanelGlowny/AttendanceSummary";
 import AttendanceChart from "@/app/components/headteacher/PanelGlowny/AttendanceChart";
 import DayPlan from "@/app/components/headteacher/PanelGlowny/DayPlan";
+import HeadTeacherLayout from "@/app/components/global/Layout/HeadTeacherLayout";
 
 type AttendanceKey = "present" | "reported" | "absent";
 
@@ -125,22 +124,16 @@ const upcomingEvents = [
 
 export default function HeadTeacher() {
   return (
-    <div className="flex min-h-screen w-full overflow-hidden bg-zinc-50 dark:bg-black">
-      <NavbarHeadteacher />
-      <div className="flex min-w-0 pt-[64px] flex-1 flex-col overflow-hidden ml-[80px]">
-        <Topbar />
-        <main className="flex flex-1 min-w-0 flex-col gap-6 overflow-y-auto px-6 py-6 md:px-8">
-          <DayPlan upcomingEvents={upcomingEvents} />
-          <AttendanceSummary
-            dniDanych={dniDanych}
-            attendanceStatuses={attendanceStatuses}
-          />
-          <AttendanceChart
-            dniDanych={dniDanych}
-            attendanceStatuses={attendanceStatuses}
-          />
-        </main>
-      </div>
-    </div>
+    <HeadTeacherLayout>
+      <DayPlan upcomingEvents={upcomingEvents} />
+      <AttendanceSummary
+        dniDanych={dniDanych}
+        attendanceStatuses={attendanceStatuses}
+      />
+      <AttendanceChart
+        dniDanych={dniDanych}
+        attendanceStatuses={attendanceStatuses}
+      />
+    </HeadTeacherLayout>
   );
 }

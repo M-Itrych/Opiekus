@@ -1,7 +1,5 @@
 "use client";
 
-import NavbarHeadteacher from "@/app/components/global/NavBar/variants/navbar_headteacher";
-import Topbar from "@/app/components/global/TopBar/topbar";
 import { useState } from "react";
 import { format, addDays, startOfWeek, isSameDay } from "date-fns";
 import { pl } from "date-fns/locale";
@@ -16,6 +14,8 @@ import {
   BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CalendarModal } from "@/app/components/headteacher/calendar/CalendarModal";
+import HeadTeacherLayout from "@/app/components/global/Layout/HeadTeacherLayout";
 
 interface Event {
   id: number;
@@ -70,6 +70,7 @@ const mockEvents: Event[] = [
 ];
 
 export default function HeadTeacher() {
+
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [weekStart, setWeekStart] = useState<Date>(startOfWeek(new Date(), { weekStartsOn: 1 }));
 
@@ -96,31 +97,25 @@ export default function HeadTeacher() {
   };
 
   return (
-    <div className="flex min-h-screen w-full overflow-hidden bg-zinc-50">
-      <NavbarHeadteacher />
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden pt-[64px] ml-[80px]">
-        <Topbar />
-        <main className="flex min-w-0 flex-1 flex-col gap-6 overflow-y-auto px-6 py-6 md:px-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-zinc-900">
-                Wydarzenia
-              </h1>
-              <p className="text-sm text-zinc-500 mt-1">
-                Plan wydarzeń przedszkolnych
-              </p>
-            </div>
-            <Button
-              onClick={() => {
-                setSelectedDate(new Date());
-                setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
-              }}
-              className="bg-sky-500 text-white px-4 py-2 hover:bg-sky-600 transition-colors flex items-center gap-2 shadow-sm"
-            >
-              <CalendarIcon className="h-4 w-4" />
-              Dzisiaj
-            </Button>
-          </div>
+    <HeadTeacherLayout
+      title="Wydarzenia"
+      description="Plan wydarzeń przedszkolnych"
+      headerAction={
+        <div className="flex items-center gap-2">
+          <CalendarModal />
+          <Button
+            onClick={() => {
+              setSelectedDate(new Date());
+              setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
+            }}
+            className="bg-sky-500 text-white px-4 py-2 hover:bg-sky-600 transition-colors flex items-center gap-2 shadow-sm"
+          >
+            <CalendarIcon className="h-4 w-4" />
+            Dzisiaj
+          </Button>
+        </div>
+      }
+    >
 
           <section className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between mb-3">
@@ -259,8 +254,6 @@ export default function HeadTeacher() {
               </div>
             )}
           </div>
-        </main>
-      </div>
-    </div>
+    </HeadTeacherLayout>
   );
 }

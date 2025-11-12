@@ -4,11 +4,8 @@ import Home from '@mui/icons-material/Home';
 import ChildCare from '@mui/icons-material/ChildCare';
 import CalendarMonth from '@mui/icons-material/CalendarMonth';
 import Notifications from '@mui/icons-material/Notifications';
-import Article from '@mui/icons-material/Article';
 import ImageIcon from '@mui/icons-material/Image';
 import Checklist from '@mui/icons-material/Checklist';
-import Payments from '@mui/icons-material/Payments';
-import ExitToApp from '@mui/icons-material/ExitToApp';
 import { usePathname, useRouter } from 'next/navigation';
 
 export default function Topbar() {
@@ -37,9 +34,6 @@ export default function Topbar() {
       'jadlospisy': '/Parent/jadlospis',
       'galeria': '/Parent/galeria',
       'ogloszenia': '/Parent/ogloszenia',
-      'wiadomosci': '/Parent/wiadomosci',
-      'platnosci': '/Parent/platnosci',
-      'wyloguj': '/Login',
     };
     return routes[tabId] || '/Parent';
   };
@@ -58,9 +52,6 @@ export default function Topbar() {
     { id: 'jadlospisy', label: 'Jadłospisy', icon: Checklist },
     { id: 'galeria', label: 'Galeria', icon: ImageIcon },
     { id: 'ogloszenia', label: 'Ogłoszenia', icon: Notifications },
-    { id: 'wiadomosci', label: 'Wiadomości', icon: Article },
-    { id: 'platnosci', label: 'Płatności', icon: Payments },
-    { id: 'wyloguj', label: 'Wyloguj', icon: ExitToApp },
   ];
 
   return (

@@ -17,6 +17,7 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import { QrCodeIcon } from 'lucide-react';
 
 type MealKey = 'breakfast' | 'secondBreakfast' | 'lunch' | 'afternoonSnack' | 'dinner';
 
@@ -189,6 +190,7 @@ export default function ParentPage() {
   const [attendanceStatus, setAttendanceStatus] = useState<'none' | 'arrived' | 'pickedUp'>('none');
   const [arrivalTime, setArrivalTime] = useState<Date | null>(null);
   const [pickupTime, setPickupTime] = useState<Date | null>(null);
+  const [kodOdbioru, setKodOdbioru] = useState<string>('');
 
   const { unreadCount, recentMessages } = useMemo(() => {
     const sorted = [...inboxSeed].sort(
@@ -244,6 +246,10 @@ export default function ParentPage() {
           minute: '2-digit',
         })
       : null;
+    const odswiezKodOdbioru = () => {
+      const randomCode = Math.floor(10000 + Math.random() * 90000).toString();
+      setKodOdbioru(randomCode);
+    };
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -253,6 +259,19 @@ export default function ParentPage() {
           <p className="text-sm text-gray-600">
             Szybki przegląd najważniejszych informacji z dzisiejszego dnia.
           </p>
+
+        </div>
+        <div className='flex flex-col items-center gap-2  '>
+          <button className='inline-flex items-center gap-2 rounded-lg border cursor-pointer border-sky-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors' onClick={() => {
+            odswiezKodOdbioru();
+          }}>
+            <RefreshIcon fontSize="small" />
+            Odśwież kod odbioru
+          </button>
+          <div className='flex items-center gap-2'>
+            <QrCodeIcon fontSize="small" />
+            <p className='text-sm text-gray-600 gap-2'>Kod odbioru: <span className='font-semibold text-gray-800 gap-2 text-xl font-bold'>{kodOdbioru ? kodOdbioru : 'Brak kodu odbioru'}</span></p>
+          </div>
         </div>
       </div>
 

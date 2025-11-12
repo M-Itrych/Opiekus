@@ -11,23 +11,23 @@ export default function NavbarParent() {
         <NavbarTemplate items={[
             {
                 icon: <MenuBookIcon />,
-                text: "Dziennik",
+                text: "Panel",
                 href: "/Parent",
             },
             {
                 icon: <MessageIcon />,
                 text: "Wiadomości",
-                href: "/Parent/Messages",
+                href: "/Parent/wiadomosci",
             },
             {
                 icon: <PaymentIcon />,
                 text: "Płatności",
-                href: "/Parent/Payments",
+                href: "/Parent/platnosci",
             },
             {
                 icon: <SettingsIcon />,
                 text: "Ustawienia",
-                href: "/Parent/Settings",
+                href: "/Parent/ustawienia",
             },
         ]} />
     )

@@ -131,13 +131,16 @@ export default function NavbarTemplate({ items, userName = "Użytkownik" }: Navb
                                 className="absolute left-14 flex flex-col whitespace-nowrap overflow-hidden"
                             >
                                 <span className="text-xs text-slate-500 font-medium">Zalogowany jako</span>
-                                <span className="text-sm font-semibold text-slate-800 truncate">{userName}</span>
+                                <span className="text-sm font-semibold text-slate-800 truncate">{pathname.split("/")[1]}</span>
                             </motion.div>
                         )}
                     </AnimatePresence>
                 </div>
 
                 <button 
+                    onClick={() => {
+                        signOut();
+                    }}
                     className="flex items-center justify-center group-hover:justify-start gap-2 p-3 rounded-xl hover:bg-red-50 hover:text-red-600 text-slate-600 w-full transition-all duration-300 ease-in-out overflow-visible transform hover:scale-[1.02] active:scale-[0.98] relative min-h-[48px] group/logout"
                 >
                     <span className="shrink-0 relative z-10 transition-transform duration-300 ease-in-out group-hover/logout:scale-110">
@@ -159,9 +162,6 @@ export default function NavbarTemplate({ items, userName = "Użytkownik" }: Navb
                                     ease: "easeOut",
                                 }}
                                 className="absolute left-14 text-sm whitespace-nowrap overflow-hidden font-semibold text-red-600"
-                                onClick={() => {
-                                    signOut();
-                                }}
                             >
                                 Wyloguj
                             </motion.span>

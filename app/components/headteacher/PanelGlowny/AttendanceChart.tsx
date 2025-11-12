@@ -85,7 +85,7 @@ export default function AttendanceChart({
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="flex items-center justify-between gap-2 px-4"
+              className="flex items-center justify-between gap-2 px-4 cursor-pointer"
             >
               <span>{selectedDate.toLocaleDateString()}</span>
               <ChevronDown className="ml-2 h-4 w-4 opacity-70" />
@@ -99,7 +99,7 @@ export default function AttendanceChart({
               <DropdownMenuItem
                 key={dayData.date.toISOString()}
                 onSelect={() => setSelectedDateIndex(index)}
-                className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-sky-50 hover:text-sky-700 focus:bg-sky-50 focus:text-sky-700 dark:text-zinc-200 dark:hover:bg-sky-900/30 dark:hover:text-sky-200 dark:focus:bg-sky-900/30 dark:focus:text-sky-200"
+                className="flex items-center justify-between cursor-pointer rounded-lg px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-sky-50 hover:text-sky-700 focus:bg-sky-50 focus:text-sky-700 dark:text-zinc-200 dark:hover:bg-sky-900/30 dark:hover:text-sky-200 dark:focus:bg-sky-900/30 dark:focus:text-sky-200"
               >
                 <span>{dayData.date.toLocaleDateString()}</span>
                 {index === selectedDateIndex && (
@@ -116,7 +116,7 @@ export default function AttendanceChart({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="flex w-full items-center justify-between gap-2 px-4"
+                className="flex w-full items-center justify-between gap-2 px-4 cursor-pointer"
               >
                 <span>{selectedGroup?.name}</span>
                 <ChevronDown className="ml-2 h-4 w-4 opacity-70" />
@@ -134,7 +134,7 @@ export default function AttendanceChart({
                   <DropdownMenuItem
                     key={name}
                     onSelect={() => setSelectedGroupName(name)}
-                    className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-sky-50 hover:text-sky-700 focus:bg-sky-50 focus:text-sky-700 dark:text-zinc-200 dark:hover:bg-sky-900/30 dark:hover:text-sky-200 dark:focus:bg-sky-900/30 dark:focus:text-sky-200"
+                    className="flex items-center justify-between  cursor-pointer rounded-lg px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-sky-50 hover:text-sky-700 focus:bg-sky-50 focus:text-sky-700 dark:text-zinc-200 dark:hover:bg-sky-900/30 dark:hover:text-sky-200 dark:focus:bg-sky-900/30 dark:focus:text-sky-200"
                   >
                     <span>{name}</span>
                     <span className="flex items-center gap-1 text-xs font-medium text-zinc-400 dark:text-zinc-500">

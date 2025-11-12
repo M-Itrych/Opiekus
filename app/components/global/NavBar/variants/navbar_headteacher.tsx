@@ -3,9 +3,7 @@
 import NavbarTemplate from "../navbar_template";
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import MessageIcon from '@mui/icons-material/Message';
-import ReceiptIcon from '@mui/icons-material/Receipt';
 import SettingsIcon from '@mui/icons-material/Settings';
-import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 
 export default function NavbarHeadteacher() {
     return (
@@ -13,22 +11,17 @@ export default function NavbarHeadteacher() {
             {
                 icon: <MenuBookIcon />,
                 text: "Dziennik",
-                href: "/",
+                href: "/HeadTeacher",
             },
             {
                 icon: <MessageIcon />,
-                text: "Wiadomosci",
-                href: "/wiadomosci",
-            },
-            {
-                icon: <ReceiptIcon />,
-                text: "Rozliczenia",
-                href: "/rozliczenia",
+                text: "Wiadomości",
+                href: "/HeadTeacher/Messages",
             },
             {
                 icon: <SettingsIcon />,
                 text: "Ustawienia",
-                href: "/ustawienia",
+                href: "/HeadTeacher/Settings",
             },
         ]} />
     )

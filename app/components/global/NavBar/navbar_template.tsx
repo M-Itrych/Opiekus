@@ -75,6 +75,7 @@ export default function NavbarTemplate({ items, userName = "Użytkownik" }: Navb
                         href={item.href} 
                         key={item.href} 
                         className={`${pathname === item.href ? "bg-blue-500 text-white shadow-md shadow-blue-500/30" : "text-slate-600 hover:bg-blue-50 hover:text-blue-600"} flex items-center justify-center group-hover:justify-start p-3 rounded-xl w-full transition-all duration-300 ease-in-out overflow-visible transform hover:scale-[1.02] active:scale-[0.98] relative min-h-[48px] group/item`}
+                        className={`${pathname === item.href ? "bg-sky-500 text-white shadow-md shadow-sky-500/30" : "text-slate-600 hover:bg-sky-50 hover:text-sky-600"} flex items-center justify-center group-hover:justify-start p-3 rounded-xl w-full transition-all duration-300 ease-in-out overflow-visible transform hover:scale-[1.02] active:scale-[0.98] relative min-h-[48px] group/item`}
                         style={{
                             transitionDelay: isHovered ? `${index * 10}ms` : '0ms'
                         }}
@@ -132,6 +133,7 @@ export default function NavbarTemplate({ items, userName = "Użytkownik" }: Navb
                             >
                                 <span className="text-xs text-slate-500 font-medium">Zalogowany jako</span>
                                 <span className="text-sm font-semibold text-slate-800 truncate">{userName}</span>
+                                <span className="text-sm font-semibold text-slate-800 truncate">{pathname.split("/")[1]}</span>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -139,6 +141,10 @@ export default function NavbarTemplate({ items, userName = "Użytkownik" }: Navb
 
                 <button 
                     className="flex items-center justify-center group-hover:justify-start gap-2 p-3 rounded-xl hover:bg-red-50 hover:text-red-600 text-slate-600 w-full transition-all duration-300 ease-in-out overflow-visible transform hover:scale-[1.02] active:scale-[0.98] relative min-h-[48px] group/logout"
+                    onClick={() => {
+                        signOut();
+                    }}
+                    className="flex items-center justify-center group-hover:justify-start gap-2 p-3 rounded-xl hover:bg-sky-50 hover:text-sky-600 text-slate-600 w-full transition-all duration-300 ease-in-out overflow-visible transform hover:scale-[1.02] active:scale-[0.98] relative min-h-[48px] group/logout"
                 >
                     <span className="shrink-0 relative z-10 transition-transform duration-300 ease-in-out group-hover/logout:scale-110">
                         <LogoutIcon />
@@ -162,6 +168,7 @@ export default function NavbarTemplate({ items, userName = "Użytkownik" }: Navb
                                 onClick={() => {
                                     signOut();
                                 }}
+                                className="absolute left-14 text-sm whitespace-nowrap overflow-hidden font-semibold text-sky-600"
                             >
                                 Wyloguj
                             </motion.span>

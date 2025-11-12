@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import Topbar from '../../components/global/NavBar/parenttopbar';
 import NavbarTemplate from '../../components/global/NavBar/navbar_template';
+import NavbarParent from '@/app/components/global/NavBar/variants/navbar_parent';
 
 export default function ParentLayout({ children }: { children: ReactNode }) {
   return (
@@ -9,6 +10,8 @@ export default function ParentLayout({ children }: { children: ReactNode }) {
       <div className="flex flex-1 overflow-hidden min-h-0">
         <NavbarTemplate items={[]} />
         <main className="flex-1 overflow-y-auto bg-blue-50 min-w-0">
+        <NavbarParent />
+        <main className="flex-1 overflow-y-auto bg-blue-50 min-w-0 ml-[100px]">
           {children}
         </main>
       </div>

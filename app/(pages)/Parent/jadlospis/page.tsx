@@ -96,7 +96,6 @@ export default function JadlospisPage() {
   const menuForDay = useMemo(() => {
     if (menuData[selectedDate]) return menuData[selectedDate];
 
-    // Fallback menu if day not found
     return {
       breakfast: {
         title: 'Kanapka z pastą warzywną',

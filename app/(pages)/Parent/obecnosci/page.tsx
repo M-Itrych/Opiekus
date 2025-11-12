@@ -383,7 +383,6 @@ export default function ObecnosciPage() {
           })}
         </div>
 
-        {/* Legenda */}
         <div className="mt-6 flex flex-wrap gap-4 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>

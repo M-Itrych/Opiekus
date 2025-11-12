@@ -3,11 +3,11 @@
 import CampaignOutlined from "@mui/icons-material/CampaignOutlined";
 import CollectionsOutlined from "@mui/icons-material/CollectionsOutlined";
 import DescriptionOutlined from "@mui/icons-material/DescriptionOutlined";
-import DirectionsBusFilledOutlined from "@mui/icons-material/DirectionsBusFilledOutlined";
+import PersonAddOutlined from "@mui/icons-material/PersonAddOutlined";
 import Groups2Outlined from "@mui/icons-material/Groups2Outlined";
 import HomeOutlined from "@mui/icons-material/HomeOutlined";
 import Link from "next/link";
-import PollOutlined from "@mui/icons-material/PollOutlined";
+import PersonOutlineOutlined from "@mui/icons-material/PersonOutlineOutlined";
 import RestaurantMenuOutlined from "@mui/icons-material/RestaurantMenuOutlined";
 import SchoolOutlined from "@mui/icons-material/SchoolOutlined";
 import { usePathname } from "next/navigation";
@@ -26,59 +26,60 @@ export default function Topbar() {
         },
         {
             label: "Kalendarz",
-            href: "/HeadTeacher/calendar",
+            href: "/HeadTeacher/Calendar",
             Icon: CalendarMonthOutlined,
         },
         {   
             label: "Raporty i statystyki",
-            href: "/reports-and-statistics",
+            href: "/HeadTeacher/Raports",
             Icon: BarChartOutlined,
         },
         {
-            label: "Zadania ",
-            href: "/tasks",
+            label: "Zadania",
+            href: "/HeadTeacher/Tasks",
             Icon: TaskOutlined,
         },
         {
             label: "Ogłoszenia",
-            href: "/announcements",
+            href: "/HeadTeacher/Announcements",
             Icon: CampaignOutlined,
         },
         {
-            label: "Zarzadzanie salami",
-            href: "/manage-rooms",
+            label: "Zarządzanie salami",
+            href: "/HeadTeacher/ManageRooms",
             Icon: SchoolOutlined,
         },
         {
-            label: "Zarzadzanie grupami",
-            href: "/manage-groups",
+            label: "Zarządzanie grupami",
+            href: "/HeadTeacher/ManageGroups",
             Icon: Groups2Outlined,
         },
         {
-            label: "Zarzadzanie galeria",
-            href: "/manage-gallery",
+            label: "Zarządzanie galerią",
+            href: "/HeadTeacher/ManageGallery",
             Icon: CollectionsOutlined,
         },
         {
+            label: "Zarządzanie kadrami",
+            href: "/HeadTeacher/ManageStaff",
+            Icon: PersonOutlineOutlined,
+        },
+        {
+            label: "Rekrutacja",
+            href: "/HeadTeacher/Recruitment",
+            Icon: PersonAddOutlined,
+        },
+        {
             label: "Jadłospis",
-            href: "/menu",
+            href: "/HeadTeacher/Menu",
             Icon: RestaurantMenuOutlined,
         },
         {
             label: "Dokumenty",
-            href: "/documents",
+            href: "/HeadTeacher/Documents",
             Icon: DescriptionOutlined,
         },
-        {
-            label: "Ankiety",
-            href: "/surveys",
-            Icon: PollOutlined,
-        },
-        {
-            label: "Wycieczki",
-            href: "/trips",
-            Icon: DirectionsBusFilledOutlined,
-        },
+        
     ];
 
     return (

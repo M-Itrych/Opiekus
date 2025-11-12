@@ -1,0 +1,489 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import { EventNote, CheckCircle, Cancel, CalendarToday, Save, ReportProblem, Close } from '@mui/icons-material';
+
+type DayStatus = 'present' | 'absent' | 'pending';
+
+interface AttendanceData {
+  status: DayStatus;
+  reason?: string;
+}
+
+interface DayData {
+  date: Date;
+  status: DayStatus;
+  reason?: string;
+}
+
+export default function ObecnosciPage() {
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [absenceReason, setAbsenceReason] = useState('');
+  const [hoveredDay, setHoveredDay] = useState<string | null>(null);
+
+  const [attendance, setAttendance] = useState<{ [key: string]: AttendanceData }>({
+  });
+
+  const daysInMonth = useMemo(() => {
+    const year = selectedYear;
+    const month = selectedMonth;
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const days: DayData[] = [];
+
+    const startDayOfWeek = firstDay.getDay();
+    const daysFromPrevMonth = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
+    
+    for (let i = daysFromPrevMonth - 1; i >= 0; i--) {
+      const date = new Date(year, month, -i);
+      days.push({
+        date,
+        status: 'pending' as DayStatus
+      });
+    }
+
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+      const date = new Date(year, month, day);
+      const dateKey = date.toISOString().split('T')[0];
+      const attendanceData = attendance[dateKey];
+      const status = attendanceData?.status || (date < new Date() ? 'present' : 'pending');
+      
+      days.push({
+        date,
+        status: date > new Date() ? 'pending' : status,
+        reason: attendanceData?.reason
+      });
+    }
+
+    const remainingDays = 42 - days.length;
+    for (let day = 1; day <= remainingDays; day++) {
+      const date = new Date(year, month + 1, day);
+      days.push({
+        date,
+        status: 'pending' as DayStatus
+      });
+    }
+
+    return days;
+  }, [selectedMonth, selectedYear, attendance]);
+
+  const stats = useMemo(() => {
+    const year = selectedYear;
+    const month = selectedMonth;
+    const lastDay = new Date(year, month + 1, 0);
+    let present = 0;
+    let absent = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+      const date = new Date(year, month, day);
+      const dateKey = date.toISOString().split('T')[0];
+      
+      if (date <= today && date.getDay() !== 0 && date.getDay() !== 6) {
+        const status = attendance[dateKey]?.status || 'present';
+        if (status === 'present') {
+          present++;
+        } else if (status === 'absent') {
+          absent++;
+        }
+      }
+    }
+
+    const total = present + absent;
+    const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+
+    return { present, absent, total, percentage };
+  }, [selectedMonth, selectedYear, attendance]);
+
+  const handleDayClick = (day: DayData, event: React.MouseEvent) => {
+
+    if (day.date.getDay() === 0 || day.date.getDay() === 6) return;
+
+    if (event.detail === 2 && day.status === 'absent' && day.reason) {
+      handleOpenModal(day.date, day.reason);
+      return;
+    }
+
+    const dateKey = day.date.toISOString().split('T')[0];
+    const newStatus: DayStatus = day.status === 'absent' ? 'present' : 'absent';
+    
+    setAttendance(prev => {
+      if (newStatus === 'present') {
+        const { [dateKey]: _, ...rest } = prev;
+        return rest;
+      }
+      return {
+        ...prev,
+        [dateKey]: {
+          status: newStatus,
+          reason: prev[dateKey]?.reason || ''
+        }
+      };
+    });
+    setHasChanges(true);
+  };
+
+  const handleOpenModal = (date?: Date, existingReason?: string) => {
+    setIsModalOpen(true);
+    setSelectedDate(date || new Date());
+    setAbsenceReason(existingReason || '');
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedDate(null);
+    setAbsenceReason('');
+  };
+
+  const handleSubmitAbsence = () => {
+    if (!selectedDate || !absenceReason.trim()) {
+      alert('Proszę wybrać datę i podać powód nieobecności');
+      return;
+    }
+
+    const selected = new Date(selectedDate);
+    selected.setHours(0, 0, 0, 0);
+
+    if (selected.getDay() === 0 || selected.getDay() === 6) {
+      alert('Nie można zgłaszać nieobecności na weekend');
+      return;
+    }
+
+    const dateKey = selected.toISOString().split('T')[0];
+    setAttendance(prev => ({
+      ...prev,
+      [dateKey]: {
+        status: 'absent',
+        reason: absenceReason.trim()
+      }
+    }));
+    setHasChanges(true);
+    handleCloseModal();
+    
+    if (selected.getMonth() !== selectedMonth || selected.getFullYear() !== selectedYear) {
+      setSelectedMonth(selected.getMonth());
+      setSelectedYear(selected.getFullYear());
+    }
+  };
+
+  const handleRemoveAbsence = () => {
+    if (!selectedDate) return;
+    
+    const dateKey = selectedDate.toISOString().split('T')[0];
+    setAttendance(prev => {
+      const { [dateKey]: _, ...rest } = prev;
+      return rest;
+    });
+    setHasChanges(true);
+    handleCloseModal();
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    setIsSaving(false);
+    setHasChanges(false);
+    alert('Zmiany zostały zapisane!');
+  };
+
+  const handleMonthChange = (direction: 'prev' | 'next') => {
+    if (direction === 'prev') {
+      if (selectedMonth === 0) {
+        setSelectedMonth(11);
+        setSelectedYear(selectedYear - 1);
+      } else {
+        setSelectedMonth(selectedMonth - 1);
+      }
+    } else {
+      if (selectedMonth === 11) {
+        setSelectedMonth(0);
+        setSelectedYear(selectedYear + 1);
+      } else {
+        setSelectedMonth(selectedMonth + 1);
+      }
+    }
+  };
+
+  const monthNames = [
+    'Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec',
+    'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'
+  ];
+
+  const dayNames = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nie'];
+
+  const getDayClassName = (day: DayData) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const isToday = day.date.getTime() === today.getTime();
+    const isCurrentMonth = day.date.getMonth() === selectedMonth;
+    const isWeekend = day.date.getDay() === 0 || day.date.getDay() === 6;
+    const isSelectable = !isWeekend && isCurrentMonth;
+
+    let baseClasses = 'w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ';
+    
+    if (!isCurrentMonth) {
+      return baseClasses + 'text-gray-300 cursor-not-allowed';
+    }
+    
+    if (isWeekend) {
+      return baseClasses + 'text-gray-400 cursor-not-allowed bg-gray-50';
+    }
+    
+    if (isToday) {
+      baseClasses += 'ring-2 ring-blue-500 ';
+    }
+    
+    if (isSelectable) {
+      baseClasses += 'cursor-pointer hover:bg-gray-100 ';
+    } else {
+      baseClasses += 'cursor-not-allowed text-gray-300 ';
+    }
+    
+    if (day.status === 'absent') {
+      return baseClasses + 'bg-red-100 text-red-700 hover:bg-red-200';
+    } else if (day.status === 'present') {
+      return baseClasses + 'bg-green-100 text-green-700 hover:bg-green-200';
+    } else {
+      return baseClasses + 'bg-gray-50 text-gray-600';
+    }
+  };
+
+  return (
+    <div className="p-6">
+      <div className="mb-6 flex justify-between items-start">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Obecności</h1>
+          <p className="text-gray-600">Zarządzaj obecnością dziecka w przedszkolu</p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleOpenModal()}
+            className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
+          >
+            <ReportProblem fontSize="small" />
+            Zgłoś nieobecność
+          </button>
+          {hasChanges && (
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              <Save fontSize="small" />
+              {isSaving ? 'Zapisywanie...' : 'Zapisz zmiany'}
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-2 mb-2">
+            <CheckCircle className="text-green-500" fontSize="small" />
+            <span className="text-sm font-medium text-gray-700">Obecności</span>
+          </div>
+          <p className="text-2xl font-bold text-green-600">{stats.present}</p>
+          <p className="text-xs text-gray-500 mt-1">dni obecności</p>
+        </div>
+
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-2 mb-2">
+            <Cancel className="text-red-500" fontSize="small" />
+            <span className="text-sm font-medium text-gray-700">Nieobecności</span>
+          </div>
+          <p className="text-2xl font-bold text-red-600">{stats.absent}</p>
+          <p className="text-xs text-gray-500 mt-1">dni nieobecności</p>
+        </div>
+
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-2 mb-2">
+            <CalendarToday className="text-blue-500" fontSize="small" />
+            <span className="text-sm font-medium text-gray-700">Razem</span>
+          </div>
+          <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
+          <p className="text-xs text-gray-500 mt-1">dni robocze</p>
+        </div>
+
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-2 mb-2">
+            <EventNote className="text-purple-500" fontSize="small" />
+            <span className="text-sm font-medium text-gray-700">Frekwencja</span>
+          </div>
+          <p className="text-2xl font-bold text-purple-600">{stats.percentage}%</p>
+          <p className="text-xs text-gray-500 mt-1">w tym miesiącu</p>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="flex justify-between items-center mb-4">
+          <button
+            onClick={() => handleMonthChange('prev')}
+            className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            ← Poprzedni
+          </button>
+          <h2 className="text-xl font-semibold text-gray-800">
+            {monthNames[selectedMonth]} {selectedYear}
+          </h2>
+          <button
+            onClick={() => handleMonthChange('next')}
+            className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            Następny →
+          </button>
+        </div>
+
+      
+        <div className="grid grid-cols-7 justify-items-center gap-2 mb-2">
+          {dayNames.map((day, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-center w-10 h-10 text-sm font-semibold text-gray-600 uppercase tracking-wide"
+            >
+              {day}
+            </div>
+          ))}
+        </div>
+
+      
+        <div className="grid grid-cols-7 justify-items-center gap-2">
+          {daysInMonth.map((day, index) => {
+            const dateKey = day.date.toISOString().split('T')[0];
+            const isHovered = hoveredDay === dateKey;
+            const hasReason = day.reason && day.status === 'absent';
+            
+            return (
+              <div
+                key={index}
+                onClick={(e) => handleDayClick(day, e)}
+                onMouseEnter={() => setHoveredDay(dateKey)}
+                onMouseLeave={() => setHoveredDay(null)}
+                className={`${getDayClassName(day)} relative`}
+                title={day.reason && day.status === 'absent' ? `Podwójne kliknięcie, aby edytować powód: ${day.reason}` : ''}
+              >
+                {day.date.getDate()}
+                {hasReason && isHovered && (
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg max-w-xs z-50 pointer-events-none shadow-lg">
+                    <div className="font-semibold mb-1">Powód nieobecności:</div>
+                    <div className="whitespace-normal">{day.reason}</div>
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                      <div className="border-4 border-transparent border-t-gray-800"></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Legenda */}
+        <div className="mt-6 flex flex-wrap gap-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
+            <span className="text-gray-600">Obecny</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
+            <span className="text-gray-600">Nieobecny</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-gray-50 border border-gray-300 rounded"></div>
+            <span className="text-gray-600">Nie zaznaczono</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-gray-100 border-2 border-blue-500 rounded"></div>
+            <span className="text-gray-600">Dzisiaj</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
+        <h3 className="font-semibold text-blue-800 mb-2">Informacje</h3>
+        <p className="text-blue-700 text-sm">
+          Kliknij na dowolny dzień roboczy w kalendarzu (również przyszły), aby zaznaczyć lub odznaczyć nieobecność, 
+          lub użyj przycisku "Zgłoś nieobecność", aby dodać wpis z powodem. Najedź kursorem na dzień z nieobecnością, 
+          aby zobaczyć podany powód.
+        </p>
+      </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-800">Zgłoś nieobecność</h2>
+              <button
+                onClick={handleCloseModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <Close />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Data nieobecności
+                </label>
+                <input
+                  type="date"
+                  value={selectedDate ? selectedDate.toISOString().split('T')[0] : ''}
+                  onChange={(e) => setSelectedDate(new Date(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Powód nieobecności <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={absenceReason}
+                  onChange={(e) => setAbsenceReason(e.target.value)}
+                  placeholder="Np. choroba, wizyta u lekarza, wyjazd rodzinny..."
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Wymagane. Podaj powód nieobecności dziecka.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleCloseModal}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Anuluj
+              </button>
+              {selectedDate && attendance[selectedDate.toISOString().split('T')[0]]?.status === 'absent' && (
+                <button
+                  onClick={handleRemoveAbsence}
+                  className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                >
+                  Usuń
+                </button>
+              )}
+              <button
+                onClick={handleSubmitAbsence}
+                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              >
+                {selectedDate && attendance[selectedDate.toISOString().split('T')[0]]?.status === 'absent' 
+                  ? 'Zaktualizuj' 
+                  : 'Zgłoś nieobecność'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+

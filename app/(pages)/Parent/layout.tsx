@@ -9,7 +9,6 @@ export default function ParentLayout({ children }: { children: ReactNode }) {
       <Topbar />
       <div className="flex flex-1 overflow-hidden min-h-0">
         <NavbarTemplate items={[]} />
-        <main className="flex-1 overflow-y-auto bg-blue-50 min-w-0">
         <NavbarParent />
         <main className="flex-1 overflow-y-auto bg-blue-50 min-w-0 ml-[100px]">
           {children}

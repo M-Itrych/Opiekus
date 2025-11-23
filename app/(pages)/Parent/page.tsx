@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ParentLayout from '@/app/components/global/Layout/ParentLayout';
 import Restaurant from '@mui/icons-material/Restaurant';
 import FreeBreakfast from '@mui/icons-material/FreeBreakfast';
 import BrunchDining from '@mui/icons-material/BrunchDining';
@@ -252,76 +253,71 @@ export default function ParentPage() {
     };
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Panel rodzica</h1>
-          <p className="text-sm text-gray-600">
-            Szybki przegląd najważniejszych informacji z dzisiejszego dnia.
-          </p>
-
-        </div>
-        <div className='flex flex-col items-center gap-2  '>
-          <button className='inline-flex items-center gap-2 rounded-lg border cursor-pointer border-sky-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors' onClick={() => {
+    <ParentLayout
+      title="Panel rodzica"
+      description="Szybki przegląd najważniejszych informacji z dzisiejszego dnia."
+      headerAction={
+        <div className='flex flex-col items-center gap-2'>
+          <button className='inline-flex items-center gap-2 rounded-lg border cursor-pointer border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors' onClick={() => {
             odswiezKodOdbioru();
           }}>
             <RefreshIcon fontSize="small" />
             Odśwież kod odbioru
           </button>
           <div className='flex items-center gap-2'>
-            <QrCodeIcon fontSize="small" />
-            <p className='text-sm text-gray-600 gap-2'>Kod odbioru: <span className='font-semibold text-gray-800 gap-2 text-xl font-bold'>{kodOdbioru ? kodOdbioru : 'Brak kodu odbioru'}</span></p>
+            <QrCodeIcon className="h-4 w-4" />
+            <p className='text-sm text-zinc-600'>Kod odbioru: <span className='text-xl font-bold text-zinc-800'>{kodOdbioru ? kodOdbioru : 'Brak kodu odbioru'}</span></p>
           </div>
         </div>
-      </div>
-
-      <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex items-center justify-between gap-4">
+      }
+    >
+      <section className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-6 flex items-center justify-between gap-4 transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-zinc-300">
         <div className="flex items-start gap-4">
-          <div className="p-3 bg-blue-50 rounded-2xl">
-            <ChildCare className="text-blue-500" fontSize="large" />
+          <div className="p-3 bg-sky-50 rounded-2xl">
+            <ChildCare className="text-sky-500" fontSize="large" />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">
+            <p className="text-xs uppercase tracking-wide text-zinc-500 font-semibold">
               Dane dziecka
             </p>
-            <h2 className="text-xl font-bold text-gray-800">
+            <h2 className="text-xl font-bold text-zinc-900">
               {childProfile.imie} {childProfile.nazwisko}
             </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Grupa: <span className="font-semibold text-gray-800">{childProfile.grupa}</span>
+            <p className="text-sm text-zinc-600 mt-1">
+              Grupa: <span className="font-semibold text-zinc-900">{childProfile.grupa}</span>
             </p>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-zinc-500 mt-2">
               Rodzice / opiekunowie: {childProfile.rodzice.join(', ')}
             </p>
           </div>
         </div>
         <button
           onClick={() => router.push('/Parent/dziecko')}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+          className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
         >
           Zobacz profil
           <ArrowForwardIosIcon fontSize="inherit" />
         </button>
       </section>
 
-      <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <section className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-zinc-300">
         <div>
-          <h2 className="text-lg font-semibold text-gray-800">Obecność dziecka</h2>
-          <p className="text-sm text-gray-600">
+          <h2 className="text-lg font-semibold text-zinc-900">Obecność dziecka</h2>
+          <p className="text-sm text-zinc-600">
             Potwierdź przybycie dziecka do placówki oraz jego odbiór w ciągu dnia.
           </p>
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
-            <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">Przybycie</p>
-              <p className="text-sm font-medium text-gray-800">
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-zinc-600">
+            <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3">
+              <p className="text-xs uppercase tracking-wide text-zinc-500 font-semibold">Przybycie</p>
+              <p className="text-sm font-medium text-zinc-900">
                 {attendanceStatus === 'arrived' || attendanceStatus === 'pickedUp'
                   ? `Potwierdzone o ${formatTime(arrivalTime)}`
                   : 'Oczekuje na potwierdzenie'}
               </p>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">Odbiór</p>
-              <p className="text-sm font-medium text-gray-800">
+            <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3">
+              <p className="text-xs uppercase tracking-wide text-zinc-500 font-semibold">Odbiór</p>
+              <p className="text-sm font-medium text-zinc-900">
                 {attendanceStatus === 'pickedUp'
                   ? `Potwierdzono odbiór o ${formatTime(pickupTime)}`
                   : 'Dziecko w placówce'}
@@ -334,7 +330,7 @@ export default function ParentPage() {
           <button
             onClick={handleConfirmArrival}
             disabled={attendanceStatus === 'arrived' || attendanceStatus === 'pickedUp'}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700 transition-colors disabled:bg-sky-300 disabled:cursor-not-allowed"
           >
             <LoginIcon fontSize="small" />
             {attendanceStatus === 'arrived' || attendanceStatus === 'pickedUp'
@@ -351,7 +347,7 @@ export default function ParentPage() {
           </button>
           <button
             onClick={handleResetAttendance}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
           >
             <RefreshIcon fontSize="small" />
             Resetuj
@@ -360,35 +356,35 @@ export default function ParentPage() {
       </section>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex flex-col">
+        <section className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-6 flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-zinc-300">
           <header className="flex items-start justify-between gap-3 mb-4">
             <div className="flex items-center gap-2">
-              <Restaurant className="text-blue-500" />
+              <Restaurant className="text-sky-500" />
               <div>
-                <h2 className="text-lg font-semibold text-gray-800">Dzisiejszy jadłospis</h2>
-                <p className="text-xs uppercase tracking-wide text-gray-500">{todayLabel}</p>
+                <h2 className="text-lg font-semibold text-zinc-900">Dzisiejszy jadłospis</h2>
+                <p className="text-xs uppercase tracking-wide text-zinc-500">{todayLabel}</p>
               </div>
             </div>
             <button
               onClick={() => router.push('/Parent/jadlospis')}
-              className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700"
+              className="inline-flex items-center gap-1 text-xs font-medium text-sky-600 hover:text-sky-700"
             >
               Zobacz całość
               <ArrowForwardIosIcon fontSize="inherit" />
             </button>
           </header>
-          <ul className="space-y-3 text-sm text-gray-700">
+          <ul className="space-y-3 text-sm text-zinc-700">
             {mealsOrder.map(({ key, label, Icon }) => {
               const meal = todaysMenu[key];
               return (
                 <li key={key} className="flex items-start gap-3">
-                  <div className="p-2 bg-blue-50 rounded-lg shrink-0">
-                    <Icon className="text-blue-500" fontSize="small" />
+                  <div className="p-2 bg-sky-50 rounded-lg shrink-0">
+                    <Icon className="text-sky-500" fontSize="small" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-800">{label}</p>
-                    <p className="text-gray-600 text-sm">{meal.title}</p>
-                    <p className="text-xs text-gray-500">{meal.description}</p>
+                    <p className="font-semibold text-zinc-900">{label}</p>
+                    <p className="text-zinc-600 text-sm">{meal.title}</p>
+                    <p className="text-xs text-zinc-500">{meal.description}</p>
                   </div>
                 </li>
               );
@@ -396,13 +392,13 @@ export default function ParentPage() {
           </ul>
         </section>
 
-        <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex flex-col">
+        <section className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-6 flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-zinc-300">
           <header className="flex items-start justify-between gap-3 mb-4">
             <div className="flex items-center gap-2">
               <MailOutlineIcon className="text-purple-500" />
               <div>
-                <h2 className="text-lg font-semibold text-gray-800">Nowe wiadomości</h2>
-                <p className="text-xs text-gray-500">
+                <h2 className="text-lg font-semibold text-zinc-900">Nowe wiadomości</h2>
+                <p className="text-xs text-zinc-500">
                   Nieprzeczytane: {unreadCount || 'brak nowych wiadomości'}
                 </p>
               </div>
@@ -420,32 +416,32 @@ export default function ParentPage() {
             {recentMessages.map((msg) => (
               <li
                 key={msg.id}
-                className="rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 shadow-sm"
+                className="rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-3 shadow-sm"
               >
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                <div className="flex items-center justify-between text-xs text-zinc-500 mb-1">
                   <span>{new Date(msg.date).toLocaleString('pl-PL')}</span>
                   {!msg.isRead && (
-                    <span className="inline-flex items-center gap-1 text-blue-600 font-medium">
+                    <span className="inline-flex items-center gap-1 text-sky-600 font-medium">
                       <MarkEmailUnreadIcon fontSize="inherit" />
                       Nowa
                     </span>
                   )}
                 </div>
-                <p className="text-sm font-semibold text-gray-800">{msg.subject}</p>
-                <p className="text-xs text-gray-600">{msg.sender}</p>
-                <p className="text-sm text-gray-600 line-clamp-2 mt-1">{msg.preview}</p>
+                <p className="text-sm font-semibold text-zinc-900">{msg.subject}</p>
+                <p className="text-xs text-zinc-600">{msg.sender}</p>
+                <p className="text-sm text-zinc-600 line-clamp-2 mt-1">{msg.preview}</p>
               </li>
             ))}
           </ul>
         </section>
 
-        <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex flex-col">
+        <section className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-6 flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-zinc-300">
           <header className="flex items-start justify-between gap-3 mb-4">
             <div className="flex items-center gap-2">
               <PaymentIcon className="text-emerald-500" />
               <div>
-                <h2 className="text-lg font-semibold text-gray-800">Saldo płatności</h2>
-                <p className="text-xs text-gray-500">Podsumowanie nadchodzących zobowiązań</p>
+                <h2 className="text-lg font-semibold text-zinc-900">Saldo płatności</h2>
+                <p className="text-xs text-zinc-500">Podsumowanie nadchodzących zobowiązań</p>
               </div>
             </div>
             <button
@@ -471,10 +467,10 @@ export default function ParentPage() {
             </div>
 
             {nearestDue && (
-              <div className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-4 py-3">
+              <div className="flex items-center justify-between rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-3">
                 <div>
-                  <p className="text-sm font-semibold text-gray-800">Najbliższa płatność</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm font-semibold text-zinc-900">Najbliższa płatność</p>
+                  <p className="text-xs text-zinc-500">
                     {nearestDue.month} • termin{' '}
                     {new Date(nearestDue.dueDate).toLocaleDateString('pl-PL', {
                       day: '2-digit',
@@ -482,7 +478,7 @@ export default function ParentPage() {
                     })}
                   </p>
                 </div>
-                <span className="text-sm font-semibold text-gray-700">
+                <span className="text-sm font-semibold text-zinc-700">
                   {nearestDue.total.toLocaleString('pl-PL', {
                     style: 'currency',
                     currency: 'PLN',
@@ -497,13 +493,13 @@ export default function ParentPage() {
                 Zaległe płatności: {overdueTotal.toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' })}
               </div>
             ) : (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-zinc-500">
                 Brak zaległości. Dziękujemy za terminowe wpłaty!
               </p>
             )}
           </div>
         </section>
       </div>
-    </div>
+    </ParentLayout>
   );
 }

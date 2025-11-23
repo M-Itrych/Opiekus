@@ -16,7 +16,7 @@ export default function HeadTeacherCard({
   footerSlot,
 }: HeadTeacherCardProps) {
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white px-5 py-5 shadow-sm transition-shadow hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white px-5 py-5 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex flex-col gap-1">
         <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
           {title}

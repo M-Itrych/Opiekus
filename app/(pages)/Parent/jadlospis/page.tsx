@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Restaurant from '@mui/icons-material/Restaurant';
+import ParentLayout from '@/app/components/global/Layout/ParentLayout';
 import FreeBreakfast from '@mui/icons-material/FreeBreakfast';
 import BrunchDining from '@mui/icons-material/BrunchDining';
 import LunchDining from '@mui/icons-material/LunchDining';
@@ -136,19 +137,14 @@ export default function JadlospisPage() {
   };
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">Jadłospis</h1>
-          <p className="text-gray-600 text-sm">
-            Sprawdź, co przygotowaliśmy dla dzieci na dzisiejszy dzień.
-          </p>
-        </div>
-
+    <ParentLayout
+      title="Jadłospis"
+      description="Sprawdź, co przygotowaliśmy dla dzieci na dzisiejszy dzień."
+      headerAction={
         <div className="flex items-center gap-2 text-sm">
           <button
             onClick={() => handleChangeDay('prev')}
-            className="px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+            className="px-3 py-2 rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 transition-colors"
           >
             ← Wczoraj
           </button>
@@ -156,45 +152,45 @@ export default function JadlospisPage() {
             type="date"
             value={selectedDate}
             onChange={(e) => handleChangeDate(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-2 rounded-lg border border-zinc-200 text-zinc-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
           <button
             onClick={() => handleChangeDay('next')}
-            className="px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+            className="px-3 py-2 rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 transition-colors"
           >
             Jutro →
           </button>
         </div>
-      </div>
-
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-5">
+      }
+    >
+      <div className="bg-white p-6 rounded-2xl border border-zinc-200 shadow-sm">
         <div className="flex items-center gap-3">
-          <Restaurant className="text-blue-500" />
+          <Restaurant className="text-sky-500" />
           <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">Jadłospis dla dnia</p>
-            <h2 className="text-lg font-semibold text-gray-800 capitalize">
+            <p className="text-xs text-zinc-500 uppercase tracking-wide">Jadłospis dla dnia</p>
+            <h2 className="text-lg font-semibold text-zinc-900 capitalize">
               {formatDateLabel(selectedDate)}
             </h2>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {mealsOrder.map(({ key, label, Icon }) => {
           const meal = menuForDay[key];
           return (
             <div
               key={key}
-              className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-3 mb-2.5">
-                <div className="p-2 bg-blue-50 rounded-lg shrink-0">
-                  <Icon className="text-blue-500" />
+                <div className="p-2 bg-sky-50 rounded-lg shrink-0">
+                  <Icon className="text-sky-500" />
                 </div>
-                <h3 className="text-base font-semibold text-gray-800">{label}</h3>
+                <h3 className="text-base font-semibold text-zinc-900">{label}</h3>
               </div>
-              <p className="text-gray-700 font-medium text-sm mb-1">{meal.title}</p>
-              <p className="text-gray-600 text-xs leading-relaxed">{meal.description}</p>
+              <p className="text-zinc-700 font-medium text-sm mb-1">{meal.title}</p>
+              <p className="text-zinc-600 text-xs leading-relaxed">{meal.description}</p>
 
               {meal.allergens && meal.allergens.length > 0 && (
                 <div className="mt-3 px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
@@ -209,9 +205,9 @@ export default function JadlospisPage() {
         })}
       </div>
 
-      <div className="mt-5 bg-blue-50 border border-blue-200 rounded-xl p-4">
-        <h3 className="text-blue-800 font-semibold mb-1">Informacje dodatkowe</h3>
-        <ul className="text-blue-700 text-xs space-y-1 list-disc list-inside">
+      <div className="bg-sky-50 border border-sky-200 rounded-2xl p-6">
+        <h3 className="text-sky-800 font-semibold mb-1">Informacje dodatkowe</h3>
+        <ul className="text-sky-700 text-xs space-y-1 list-disc list-inside">
           <li>Jadłospis może ulec zmianie w zależności od dostępności produktów.</li>
           <li>
             W przypadku alergii prosimy o kontakt z administracją przedszkola celem ustalenia
@@ -220,7 +216,7 @@ export default function JadlospisPage() {
           <li>Napojem do posiłków jest woda, a do śniadań dodatkowo herbata lub sok.</li>
         </ul>
       </div>
-    </div>
+    </ParentLayout>
   );
 }
 

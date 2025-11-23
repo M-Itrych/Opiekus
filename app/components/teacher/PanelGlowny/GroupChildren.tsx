@@ -72,7 +72,7 @@ export default function GroupChildren({ children, groupName }: GroupChildrenProp
         {filteredChildren.map((child) => (
           <div
             key={child.id}
-            className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white px-5 py-5 shadow-sm transition-shadow hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+            className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white px-5 py-5 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900"
           >
             <div className="flex items-start justify-between">
               <div className="flex flex-col gap-1">

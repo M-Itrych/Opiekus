@@ -1,5 +1,6 @@
 'use client';
 
+import ParentLayout from '@/app/components/global/Layout/ParentLayout';
 import { useMemo, useState } from 'react';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import HikingIcon from '@mui/icons-material/Hiking';
@@ -142,15 +143,10 @@ export default function OgloszeniaPage() {
   };
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">Ogłoszenia</h1>
-          <p className="text-sm text-gray-600">
-            Bądź na bieżąco z informacjami o wyjściach, spotkaniach i ważnych komunikatach
-            organizacyjnych.
-          </p>
-        </div>
+    <ParentLayout
+      title="Ogłoszenia"
+      description="Bądź na bieżąco z informacjami o wyjściach, spotkaniach i ważnych komunikatach organizacyjnych."
+      headerAction={
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700">
           <NotificationsActiveIcon className="text-blue-500" fontSize="small" />
           <span>
@@ -160,8 +156,8 @@ export default function OgloszeniaPage() {
             </strong>
           </span>
         </div>
-      </div>
-
+      }
+    >
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         <div className="grid grid-cols-[auto_1fr_auto_auto] md:grid-cols-[auto_1fr_auto_auto] items-center gap-4 px-4 py-3 bg-gray-50 text-xs md:text-sm font-semibold text-gray-600 uppercase tracking-wide">
           <span>Status</span>
@@ -319,7 +315,7 @@ export default function OgloszeniaPage() {
           })}
         </div>
       </div>
-    </div>
+    </ParentLayout>
   );
 }
 

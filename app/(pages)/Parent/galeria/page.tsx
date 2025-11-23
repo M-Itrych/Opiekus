@@ -1,5 +1,6 @@
 'use client';
 
+import ParentLayout from '@/app/components/global/Layout/ParentLayout';
 import { useMemo, useState } from 'react';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import EventIcon from '@mui/icons-material/Event';
@@ -160,14 +161,10 @@ export default function GaleriaPage() {
   };
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">Galeria</h1>
-          <p className="text-gray-600 text-sm">
-            Zobacz zdjęcia z wydarzeń w przedszkolu i wybierz interesujący Cię miesiąc oraz event.
-          </p>
-        </div>
+    <ParentLayout
+      title="Galeria"
+      description="Zobacz zdjęcia z wydarzeń w przedszkolu i wybierz interesujący Cię miesiąc oraz event."
+      headerAction={
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => handleMonthChange('prev')}
@@ -188,8 +185,8 @@ export default function GaleriaPage() {
             <NavigateNextIcon fontSize="small" />
           </button>
         </div>
-      </div>
-
+      }
+    >
       {filteredImages.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 bg-white border border-dashed border-gray-200 rounded-xl text-center">
           <p className="text-lg font-semibold text-gray-700 mb-1">
@@ -231,7 +228,7 @@ export default function GaleriaPage() {
           ))}
         </div>
       )}
-    </div>
+    </ParentLayout>
   );
 }
 

@@ -1,0 +1,431 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url = env("DATABASE_URL")
+}
+
+
+enum UserRole {
+  ADMIN
+  HEADTEACHER
+  TEACHER
+  PARENT
+}
+
+enum StaffRole {
+  NAUCZYCIEL
+  INTENDENTKA
+  SEKRETARKA
+  POMOCNIK
+}
+
+enum ConsentType {
+  IMAGE
+  DATA
+  MEDICAL
+  MARKETING
+}
+
+enum ConsentStatus {
+  ACCEPTED
+  PENDING
+  REJECTED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  PENDING
+}
+
+enum AnnouncementCategory {
+  WYJSCIE
+  SPOTKANIE
+  ORGANIZACYJNE
+}
+
+enum DocumentStatus {
+  AKTYWNY
+  ARCHIWALNY
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskCategory {
+  ADMINISTRACYJNE
+  EDUKACYJNE
+  TECHNICZNE
+  INNE
+}
+
+enum RecruitmentStatus {
+  PENDING
+  VERIFIED
+  ACCEPTED
+  REJECTED
+}
+
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+}
+
+enum GalleryStatus {
+  PUBLISHED
+  DRAFT
+  RESTRICTED
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  email         String    @unique
+  password      String
+  name          String
+  surname       String
+  phone         String?
+  role          UserRole
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  children      Child[]   @relation("ParentChildren")
+  staff         Staff?
+  messagesSent Message[] @relation("SenderMessages")
+  messagesReceived Message[] @relation("ReceiverMessages")
+  announcements Announcement[]
+  tasks         Task[]
+  reports       Report[]
+
+  @@map("users")
+}
+
+model Staff {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @unique @db.ObjectId
+  staffRole   StaffRole
+  permissions String[] // Array of permission strings
+  groupId     String?   @db.ObjectId
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id])
+  group       Group?    @relation(fields: [groupId], references: [id])
+
+  @@map("staff")
+}
+
+model Group {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  ageRange    String   // e.g., "3-4 lata", "5-6 lat"
+  maxCapacity Int
+  roomId      String?  @db.ObjectId
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  room        Room?    @relation(fields: [roomId], references: [id])
+  children    Child[]
+  staff       Staff[]
+  activities  Activity[]
+  mealPlans   MealPlan[]
+
+  @@map("groups")
+}
+
+model Room {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  capacity    Int
+  status      RoomStatus @default(AVAILABLE)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  groups      Group[]
+
+  @@map("rooms")
+}
+
+model Child {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  surname         String
+  dateOfBirth     DateTime
+  parentId        String    @db.ObjectId
+  groupId         String?   @db.ObjectId
+  hasImageConsent Boolean   @default(false)
+  hasDataConsent  Boolean   @default(false)
+  allergies       String[]  @default([])
+  specialNeeds    String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  parent          User      @relation("ParentChildren", fields: [parentId], references: [id])
+  group           Group?    @relation(fields: [groupId], references: [id])
+  attendances     Attendance[]
+  activities      Activity[]
+  pickupRecords   PickupRecord[]
+  consents        Consent[]
+  recruitmentApplication RecruitmentApplication?
+  payments        Payment[]
+
+  @@map("children")
+}
+
+model Attendance {
+  id          String          @id @default(auto()) @map("_id") @db.ObjectId
+  childId     String          @db.ObjectId
+  date        DateTime
+  status      AttendanceStatus @default(PRESENT)
+  reason      String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  child       Child           @relation(fields: [childId], references: [id])
+
+  @@index([childId, date])
+  @@map("attendances")
+}
+
+model Activity {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  groupId     String    @db.ObjectId
+  childId     String?   @db.ObjectId
+  date        DateTime
+  title       String
+  description String?
+  activities  String[]  @default([]) // Array of activity strings
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  group       Group     @relation(fields: [groupId], references: [id])
+  child       Child?    @relation(fields: [childId], references: [id])
+
+  @@map("activities")
+}
+
+model PickupRecord {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  childId         String    @db.ObjectId
+  pickupDate      DateTime
+  pickupTime      DateTime
+  authorizedPerson String
+  verificationMethod String? // "id" | "pin" | "qr"
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  child           Child     @relation(fields: [childId], references: [id])
+
+  @@map("pickup_records")
+}
+
+model Consent {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  childId     String        @db.ObjectId
+  consentType ConsentType
+  status      ConsentStatus @default(PENDING)
+  date        DateTime      @default(now())
+  expiryDate  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  child       Child         @relation(fields: [childId], references: [id])
+
+  @@map("consents")
+}
+
+model Message {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  senderId    String        @db.ObjectId
+  receiverId  String        @db.ObjectId
+  subject     String
+  body        String
+  status      MessageStatus @default(SENT)
+  isRead      Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  sender      User          @relation("SenderMessages", fields: [senderId], references: [id])
+  receiver    User          @relation("ReceiverMessages", fields: [receiverId], references: [id])
+
+  @@map("messages")
+}
+
+model Announcement {
+  id          String              @id @default(auto()) @map("_id") @db.ObjectId
+  authorId    String              @db.ObjectId
+  title       String
+  content     String
+  category    AnnouncementCategory
+  isImportant Boolean             @default(false)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  author      User                @relation(fields: [authorId], references: [id])
+  readBy      AnnouncementRead[]  @relation("AnnouncementReads")
+
+  @@map("announcements")
+}
+
+model AnnouncementRead {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  announcementId String       @db.ObjectId
+  userId         String       @db.ObjectId
+  readAt         DateTime     @default(now())
+
+  announcement   Announcement @relation("AnnouncementReads", fields: [announcementId], references: [id])
+
+  @@index([announcementId, userId])
+  @@map("announcement_reads")
+}
+
+model Document {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  fileUrl     String
+  status      DocumentStatus @default(AKTYWNY)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("documents")
+}
+
+model RecruitmentApplication {
+  id                  String            @id @default(auto()) @map("_id") @db.ObjectId
+  childId             String?           @unique @db.ObjectId
+  childName           String
+  childSurname        String
+  childAge            Int
+  parentName          String
+  parentEmail         String
+  parentPhone         String
+  applicationDate     DateTime          @default(now())
+  status              RecruitmentStatus @default(PENDING)
+  birthCertificate    Boolean           @default(false)
+  medicalExamination  Boolean           @default(false)
+  vaccinationCard     Boolean           @default(false)
+  photos              Boolean           @default(false)
+  notes               String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  child               Child?            @relation(fields: [childId], references: [id])
+
+  @@map("recruitment_applications")
+}
+
+model MealPlan {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  groupId     String?   @db.ObjectId
+  date        DateTime
+  mealType    String    // "śniadanie", "obiad", "podwieczorek"
+  name        String
+  description String?
+  allergens   String[]  @default([])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  group       Group?    @relation(fields: [groupId], references: [id])
+
+  @@map("meal_plans")
+}
+
+model Task {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  assignedToId String       @db.ObjectId
+  title       String
+  description String?
+  status      TaskStatus    @default(TODO)
+  category    TaskCategory
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  assignedTo User           @relation(fields: [assignedToId], references: [id])
+
+  @@map("tasks")
+}
+
+model Report {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  authorId    String   @db.ObjectId
+  title       String
+  content     String
+  reportType  String   // "miesięczny", "roczny", "specjalny"
+  periodStart DateTime?
+  periodEnd   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author      User     @relation(fields: [authorId], references: [id])
+
+  @@map("reports")
+}
+
+model Gallery {
+  id                    String        @id @default(auto()) @map("_id") @db.ObjectId
+  title                 String
+  date                  DateTime
+  status                GalleryStatus @default(DRAFT)
+  childrenWithConsent   Int           @default(0)
+  childrenWithoutConsent Int          @default(0)
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  photos                GalleryPhoto[]
+
+  @@map("galleries")
+}
+
+model GalleryPhoto {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  galleryId String   @db.ObjectId
+  url       String
+  caption   String?
+  createdAt DateTime @default(now())
+
+  gallery   Gallery  @relation(fields: [galleryId], references: [id])
+
+  @@map("gallery_photos")
+}
+
+model Payment {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  childId     String        @db.ObjectId
+  amount      Float
+  description String
+  dueDate     DateTime
+  paidDate    DateTime?
+  status      PaymentStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  child       Child         @relation(fields: [childId], references: [id])
+
+  @@map("payments")
+}

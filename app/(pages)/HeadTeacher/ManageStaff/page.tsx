@@ -9,7 +9,7 @@ export default function ManageStaff() {
             title="Zarządzanie kadrami"
             description="Zarządzanie i przeglądanie kadr przedszkolnych"
         >
-            <section className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <section className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">=
                 <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-zinc-900">
                         Dostępne kadry
@@ -22,8 +22,7 @@ export default function ManageStaff() {
                         </p>
                     </div>
                 </div>
-            description="Dodawanie/usuwanie nauczycieli, przydzielanie uprawnień, generowanie upoważnień do przetwarzania danych"
-        >
+            </section>
             <section className="flex flex-col gap-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                 <StaffList />
             </section>

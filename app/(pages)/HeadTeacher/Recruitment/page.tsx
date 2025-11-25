@@ -22,8 +22,7 @@ export default function Recruitment() {
                         </p>
                     </div>
                 </div>
-            description="Proces przyjęcia dziecka: weryfikacja email, rejestracja w systemie, wypełnienie formularzy online"
-        >
+            </section>
             <section className="flex flex-col gap-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                 <RecruitmentProcess />
             </section>

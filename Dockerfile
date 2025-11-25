@@ -17,6 +17,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Generate Prisma Client during build
+# Remove potential existing client to avoid conflicts
+RUN rm -rf node_modules/@prisma/client
 RUN npx prisma generate
 
 # Next.js collects completely anonymous telemetry data about general usage.

@@ -41,7 +41,7 @@ export async function POST(request: Request) {
         authorId,
         isImportant: isImportant || false,
         eventDate: eventDate ? new Date(eventDate) : null,
-        location: location || null, 
+        location: location || null,
       },
     });
     return NextResponse.json(announcement);

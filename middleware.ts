@@ -6,34 +6,42 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Paths that don't require authentication
-  if (
-    true ||
-    pathname.startsWith('/login') ||
-    pathname.startsWith('/register') ||
-    pathname.startsWith('/api/auth') ||
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/static') ||
-    pathname.startsWith('/logo') ||
-    pathname.endsWith('.ico') ||
-    pathname.endsWith('.svg') ||
-    pathname.endsWith('.png') ||
-    pathname.endsWith('.jpg') ||
-    pathname.endsWith('.jpeg') ||
-    pathname.startsWith('.svg')
-  ) {
+  const publicPaths = [
+    '/Login',
+    '/Register',
+    '/api/auth',
+    '/_next',
+    '/static',
+    '/logo',
+    '/favicon.ico',
+    '/globe.svg',
+    '/file.svg',
+    '/next.svg',
+    '/vercel.svg',
+    '/window.svg',
+  ];
+
+  // Case insensitive check for paths starting with public paths
+  const isPublicPath = publicPaths.some(path => 
+    pathname.toLowerCase().startsWith(path.toLowerCase())
+  );
+  
+  const isStaticFile = pathname.match(/\.(ico|svg|png|jpg|jpeg|css|js)$/);
+
+  if (isPublicPath || isStaticFile) {
     return NextResponse.next();
   }
 
   const token = request.cookies.get('session')?.value;
 
   if (!token) {
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(new URL('/Login', request.url));
   }
 
-  const payload = await verifyToken(token || '');
+  const payload = await verifyToken(token);
 
   if (!payload) {
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(new URL('/Login', request.url));
   }
 
   return NextResponse.next();

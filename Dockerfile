@@ -16,6 +16,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Add build argument for Prisma
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
+
 # Generate Prisma Client during build
 # Remove potential existing client to avoid conflicts
 RUN rm -rf node_modules/@prisma/client

@@ -154,6 +154,7 @@ model Group {
   staff       Staff[]
   activities  Activity[]
   mealPlans   MealPlan[]
+  announcements Announcement[]
 
   @@map("groups")
 }
@@ -281,16 +282,21 @@ model Message {
 model Announcement {
   id          String              @id @default(uuid())
   authorId    String              
+  groupId     String?
   title       String
   content     String
   category    AnnouncementCategory
   eventDate   DateTime?           
+  startTime   DateTime?
+  endTime     DateTime?
   location    String?             
+  targetGroup String?
   isImportant Boolean             @default(false)
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
 
   author      User                @relation(fields: [authorId], references: [id])
+  group       Group?              @relation(fields: [groupId], references: [id])
   readBy      AnnouncementRead[]  @relation("AnnouncementReads")
 
   @@map("announcements")

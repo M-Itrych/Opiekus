@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { PlusIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -32,6 +32,12 @@ interface EventFormData {
 	endTime: string
 	location: string
 	category: string
+	selectGroup: string | null
+}
+
+interface GroupOption {
+	id: string
+	name: string
 }
 
 export function CalendarModal({ onEventCreated }: CalendarModalProps) {
@@ -43,14 +49,66 @@ export function CalendarModal({ onEventCreated }: CalendarModalProps) {
 		startTime: "",
 		endTime: "",
 		location: "",
-		category: "inne"
+		category: "inne",
+		selectGroup: null
 	})
 	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [buttonTone, setButtonTone] = useState<"default" | "success" | "error">("default")
+	const [groups, setGroups] = useState<GroupOption[]>([])
+	const [groupsError, setGroupsError] = useState<string | null>(null)
+	const [isLoadingGroups, setIsLoadingGroups] = useState<boolean>(false)
+
+	useEffect(() => {
+		const fetchGroups = async () => {
+			setIsLoadingGroups(true)
+			try {
+				const response = await fetch("/api/groups")
+				if (!response.ok) {
+					throw new Error("Failed to fetch groups")
+				}
+				const data: GroupOption[] = await response.json()
+				setGroups(data)
+				setGroupsError(null)
+			} catch {
+				setGroups([])
+				setGroupsError("Nie udało się pobrać listy grup.")
+			} finally {
+				setIsLoadingGroups(false)
+			}
+		}
+
+		fetchGroups()
+	}, [])
+
+	const resetForm = () => {
+		setFormData({
+			title: "",
+			description: "",
+			date: "",
+			startTime: "",
+			endTime: "",
+			location: "",
+			category: "inne",
+			selectGroup: null
+		})
+		setButtonTone("default")
+		setIsSubmitting(false)
+	}
+
+	const openModal = () => {
+		resetForm()
+		setIsOpen(true)
+	}
+
+	const closeModal = () => {
+		setIsOpen(false)
+	}
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 		if (isSubmitting) return
 		setIsSubmitting(true)
+		setButtonTone("default")
 
 		const categoryMap: Record<string, string> = {
 			"festiwal": "FESTIWAL",
@@ -59,18 +117,23 @@ export function CalendarModal({ onEventCreated }: CalendarModalProps) {
 			"przedstawienie": "PRZEDSTAWIENIE",
 			"zajęcia": "ZAJECIA",
 			"inne": "INNE"
-		};
-
-		const eventDate = new Date(`${formData.date}T${formData.startTime}`);
+		}
+		const eventDate = new Date(`${formData.date}T${formData.startTime}`)
+		const endDate = formData.endTime ? new Date(`${formData.date}T${formData.endTime}`) : null
+		const selectedGroup = groups.find(group => group.id === formData.selectGroup)
 
 		const payload = {
 			title: formData.title,
 			content: formData.description || formData.title,
 			category: categoryMap[formData.category] || "INNE",
 			eventDate: eventDate.toISOString(),
+			startTime: eventDate.toISOString(),
+			endTime: endDate ? endDate.toISOString() : null,
 			location: formData.location,
+			targetGroup: selectedGroup?.name || null,
+			groupId: selectedGroup?.id || null,
 			isImportant: false
-		};
+		}
 
 		try {
 			const response = await fetch("/api/announcements", {
@@ -85,24 +148,13 @@ export function CalendarModal({ onEventCreated }: CalendarModalProps) {
 				throw new Error("Failed to create event")
 			}
 
-			const data = await response.json()
-			console.log("Wydarzenie dodane:", data)
+			await response.json()
 
-			setFormData({
-				title: "",
-				description: "",
-				date: "",
-				startTime: "",
-				endTime: "",
-				location: "",
-				category: "inne"
-			})
-			setIsOpen(false)
+			resetForm()
 			await onEventCreated?.()
-			alert("Wydarzenie zostało dodane!")
-		} catch (error) {
-			console.error("Error adding event:", error)
-			alert("Wystąpił błąd podczas dodawania wydarzenia.")
+			setButtonTone("success")
+		} catch {
+			setButtonTone("error")
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -125,10 +177,17 @@ export function CalendarModal({ onEventCreated }: CalendarModalProps) {
 		}))
 	}
 
+	const handleGroupChange = (value: string) => {
+		setFormData(prev => ({
+			...prev,
+			selectGroup: value === "none" ? null : value
+		}))
+	}
+
 	if (!isOpen) {
 		return (
 			<Button
-				onClick={() => setIsOpen(true)}
+				onClick={openModal}
 				className="bg-sky-500 text-white px-4 py-2 hover:bg-sky-600 transition-colors flex items-center gap-2 shadow-sm"
 			>
 				<PlusIcon className="h-4 w-4" />
@@ -256,6 +315,39 @@ export function CalendarModal({ onEventCreated }: CalendarModalProps) {
 										Miejsce, w którym odbędzie się wydarzenie
 									</FieldDescription>
 								</Field>
+
+								<Field>
+									<FieldLabel>Grupa / odbiorcy</FieldLabel>
+									<Select
+										value={formData.selectGroup ?? "none"}
+										onValueChange={handleGroupChange}
+										disabled={isLoadingGroups || !!groupsError}
+									>
+										<SelectTrigger className="w-full">
+											<SelectValue
+												placeholder={
+													isLoadingGroups
+														? "Ładowanie grup..."
+														: "Wybierz grupę (opcjonalnie)"
+												}
+											/>
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="none">Brak przypisania</SelectItem>
+											{groups.map(group => (
+												<SelectItem key={group.id} value={group.id}>
+													{group.name}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+									<FieldDescription>
+										Wskaż grupę lub odbiorców wydarzenia (opcjonalnie)
+									</FieldDescription>
+									{groupsError && (
+										<p className="text-sm text-red-600 mt-1">{groupsError}</p>
+									)}
+								</Field>
 							</FieldGroup>
 						</FieldSet>
 
@@ -263,13 +355,19 @@ export function CalendarModal({ onEventCreated }: CalendarModalProps) {
 							<Button
 								type="button"
 								variant="outline"
-								onClick={() => setIsOpen(false)}
+								onClick={closeModal}
 							>
 								Anuluj
 							</Button>
 							<Button
 								type="submit"
-								className="bg-sky-500 hover:bg-sky-600 text-white disabled:opacity-70"
+								className={`text-white disabled:opacity-70 ${
+									buttonTone === "success"
+										? "bg-emerald-500 hover:bg-emerald-600"
+										: buttonTone === "error"
+										? "bg-red-500 hover:bg-red-600"
+										: "bg-sky-500 hover:bg-sky-600"
+								}`}
 								disabled={isSubmitting}
 							>
 								{isSubmitting ? "Dodawanie..." : "Dodaj wydarzenie"}

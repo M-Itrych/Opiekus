@@ -36,11 +36,18 @@ interface AnnouncementResponse {
   content: string;
   category: string;
   eventDate: string | null;
+  startTime: string | null;
+  endTime: string | null;
   location: string | null;
   createdAt: string;
+  targetGroup?: string | null;
   author?: {
     name: string | null;
     surname: string | null;
+  } | null;
+  group?: {
+    id: string;
+    name: string | null;
   } | null;
 }
 
@@ -67,18 +74,27 @@ const DEFAULT_CATEGORY_CONFIG: CategoryConfig = {
 const mapAnnouncementToEvent = (announcement: AnnouncementResponse): Event => {
   const config =
     CATEGORY_CONFIG[announcement.category as keyof typeof CATEGORY_CONFIG] ?? DEFAULT_CATEGORY_CONFIG;
-  const baseDate = announcement.eventDate ?? announcement.createdAt;
-  const eventDate = baseDate ? new Date(baseDate) : new Date();
-  const participants = announcement.author
-    ? [announcement.author.name, announcement.author.surname].filter(Boolean).join(" ").trim()
-    : undefined;
+  const baseStart =
+    announcement.startTime ?? announcement.eventDate ?? announcement.createdAt;
+  const startDate = baseStart ? new Date(baseStart) : new Date();
+  const endDate = announcement.endTime ? new Date(announcement.endTime) : null;
+  const timeLabel = endDate
+    ? `${format(startDate, "HH:mm")} - ${format(endDate, "HH:mm")}`
+    : format(startDate, "HH:mm");
+  const participants =
+    announcement.group?.name?.trim() ||
+    announcement.targetGroup?.trim() ||
+    (announcement.author
+      ? [announcement.author.name, announcement.author.surname].filter(Boolean).join(" ").trim()
+      : "") ||
+    undefined;
 
   return {
     id: announcement.id,
     title: announcement.title,
     description: announcement.content,
-    date: eventDate,
-    time: format(eventDate, "HH:mm"),
+    date: startDate,
+    time: timeLabel,
     location: announcement.location ?? "Brak lokalizacji",
     category: config.label,
     participants: participants || undefined,

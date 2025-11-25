@@ -13,6 +13,12 @@ export async function GET() {
             name: true,
             surname: true,
           }
+        },
+        group: {
+          select: {
+            id: true,
+            name: true,
+          },
         }
       }
     });
@@ -26,7 +32,19 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { title, content, category, authorId, isImportant, eventDate, location } = body;
+    const {
+      title,
+      content,
+      category,
+      authorId,
+      isImportant,
+      eventDate,
+      location,
+      startTime,
+      endTime,
+      targetGroup,
+      groupId,
+    } = body;
 
     let finalAuthorId = authorId;
 
@@ -49,6 +67,10 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Brak wymaganych pól" }, { status: 400 });
     }
 
+    const baseEventDate = eventDate ? new Date(eventDate) : null;
+    const parsedStartTime = startTime ? new Date(startTime) : baseEventDate;
+    const parsedEndTime = endTime ? new Date(endTime) : null;
+
     const announcement = await prisma.announcement.create({
       data: {
         title,
@@ -56,8 +78,12 @@ export async function POST(request: Request) {
         category,
         authorId: finalAuthorId,
         isImportant: isImportant || false,
-        eventDate: eventDate ? new Date(eventDate) : null,
+        eventDate: baseEventDate,
+        startTime: parsedStartTime,
+        endTime: parsedEndTime,
         location: location || null,
+        targetGroup: targetGroup || null,
+        groupId: groupId || null,
       },
     });
     return NextResponse.json(announcement);

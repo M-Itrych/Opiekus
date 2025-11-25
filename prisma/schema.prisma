@@ -1,13 +1,12 @@
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  output   = "../node_modules/@prisma/client"
 }
 
 datasource db {
-  provider = "mongodb"
-  url = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
-
 
 enum UserRole {
   ADMIN
@@ -46,6 +45,12 @@ enum AnnouncementCategory {
   WYJSCIE
   SPOTKANIE
   ORGANIZACYJNE
+  FESTIWAL
+  WYCIECZKA
+  URODZINY
+  PRZEDSTAWIENIE
+  ZAJECIA
+  INNE
 }
 
 enum DocumentStatus {
@@ -100,7 +105,7 @@ enum PaymentStatus {
 }
 
 model User {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  id            String    @id @default(uuid())
   email         String    @unique
   password      String
   name          String
@@ -122,11 +127,11 @@ model User {
 }
 
 model Staff {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String    @unique @db.ObjectId
+  id          String    @id @default(uuid())
+  userId      String    @unique
   staffRole   StaffRole
-  permissions String[] // Array of permission strings
-  groupId     String?   @db.ObjectId
+  permissions String[] 
+  groupId     String?   
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -137,11 +142,11 @@ model Staff {
 }
 
 model Group {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(uuid())
   name        String
-  ageRange    String   // e.g., "3-4 lata", "5-6 lat"
+  ageRange    String   
   maxCapacity Int
-  roomId      String?  @db.ObjectId
+  roomId      String?  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -155,7 +160,7 @@ model Group {
 }
 
 model Room {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(uuid())
   name        String
   capacity    Int
   status      RoomStatus @default(AVAILABLE)
@@ -169,12 +174,12 @@ model Room {
 }
 
 model Child {
-  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  id              String    @id @default(uuid())
   name            String
   surname         String
   dateOfBirth     DateTime
-  parentId        String    @db.ObjectId
-  groupId         String?   @db.ObjectId
+  parentId        String    
+  groupId         String?   
   hasImageConsent Boolean   @default(false)
   hasDataConsent  Boolean   @default(false)
   allergies       String[]  @default([])
@@ -195,8 +200,8 @@ model Child {
 }
 
 model Attendance {
-  id          String          @id @default(auto()) @map("_id") @db.ObjectId
-  childId     String          @db.ObjectId
+  id          String          @id @default(uuid())
+  childId     String          
   date        DateTime
   status      AttendanceStatus @default(PRESENT)
   reason      String?
@@ -210,13 +215,13 @@ model Attendance {
 }
 
 model Activity {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  groupId     String    @db.ObjectId
-  childId     String?   @db.ObjectId
+  id          String    @id @default(uuid())
+  groupId     String    
+  childId     String?   
   date        DateTime
   title       String
   description String?
-  activities  String[]  @default([]) // Array of activity strings
+  activities  String[]  @default([]) 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -227,12 +232,12 @@ model Activity {
 }
 
 model PickupRecord {
-  id              String    @id @default(auto()) @map("_id") @db.ObjectId
-  childId         String    @db.ObjectId
+  id              String    @id @default(uuid())
+  childId         String    
   pickupDate      DateTime
   pickupTime      DateTime
   authorizedPerson String
-  verificationMethod String? // "id" | "pin" | "qr"
+  verificationMethod String? 
   notes           String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -243,8 +248,8 @@ model PickupRecord {
 }
 
 model Consent {
-  id          String        @id @default(auto()) @map("_id") @db.ObjectId
-  childId     String        @db.ObjectId
+  id          String        @id @default(uuid())
+  childId     String        
   consentType ConsentType
   status      ConsentStatus @default(PENDING)
   date        DateTime      @default(now())
@@ -258,9 +263,9 @@ model Consent {
 }
 
 model Message {
-  id          String        @id @default(auto()) @map("_id") @db.ObjectId
-  senderId    String        @db.ObjectId
-  receiverId  String        @db.ObjectId
+  id          String        @id @default(uuid())
+  senderId    String        
+  receiverId  String        
   subject     String
   body        String
   status      MessageStatus @default(SENT)
@@ -275,11 +280,13 @@ model Message {
 }
 
 model Announcement {
-  id          String              @id @default(auto()) @map("_id") @db.ObjectId
-  authorId    String              @db.ObjectId
+  id          String              @id @default(uuid())
+  authorId    String              
   title       String
   content     String
   category    AnnouncementCategory
+  eventDate   DateTime?           
+  location    String?             
   isImportant Boolean             @default(false)
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
@@ -291,9 +298,9 @@ model Announcement {
 }
 
 model AnnouncementRead {
-  id             String       @id @default(auto()) @map("_id") @db.ObjectId
-  announcementId String       @db.ObjectId
-  userId         String       @db.ObjectId
+  id             String       @id @default(uuid())
+  announcementId String       
+  userId         String       
   readAt         DateTime     @default(now())
 
   announcement   Announcement @relation("AnnouncementReads", fields: [announcementId], references: [id])
@@ -303,7 +310,7 @@ model AnnouncementRead {
 }
 
 model Document {
-  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  id          String        @id @default(uuid())
   title       String
   description String?
   fileUrl     String
@@ -315,8 +322,8 @@ model Document {
 }
 
 model RecruitmentApplication {
-  id                  String            @id @default(auto()) @map("_id") @db.ObjectId
-  childId             String?           @unique @db.ObjectId
+  id                  String            @id @default(uuid())
+  childId             String?           @unique 
   childName           String
   childSurname        String
   childAge            Int
@@ -339,10 +346,10 @@ model RecruitmentApplication {
 }
 
 model MealPlan {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  groupId     String?   @db.ObjectId
+  id          String    @id @default(uuid())
+  groupId     String?   
   date        DateTime
-  mealType    String    // "śniadanie", "obiad", "podwieczorek"
+  mealType    String    
   name        String
   description String?
   allergens   String[]  @default([])
@@ -355,8 +362,8 @@ model MealPlan {
 }
 
 model Task {
-  id          String        @id @default(auto()) @map("_id") @db.ObjectId
-  assignedToId String       @db.ObjectId
+  id          String        @id @default(uuid())
+  assignedToId String       
   title       String
   description String?
   status      TaskStatus    @default(TODO)
@@ -372,11 +379,11 @@ model Task {
 }
 
 model Report {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  authorId    String   @db.ObjectId
+  id          String   @id @default(uuid())
+  authorId    String   
   title       String
   content     String
-  reportType  String   // "miesięczny", "roczny", "specjalny"
+  reportType  String   
   periodStart DateTime?
   periodEnd   DateTime?
   createdAt   DateTime @default(now())
@@ -388,7 +395,7 @@ model Report {
 }
 
 model Gallery {
-  id                    String        @id @default(auto()) @map("_id") @db.ObjectId
+  id                    String        @id @default(uuid())
   title                 String
   date                  DateTime
   status                GalleryStatus @default(DRAFT)
@@ -403,8 +410,8 @@ model Gallery {
 }
 
 model GalleryPhoto {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  galleryId String   @db.ObjectId
+  id        String   @id @default(uuid())
+  galleryId String   
   url       String
   caption   String?
   createdAt DateTime @default(now())
@@ -415,8 +422,8 @@ model GalleryPhoto {
 }
 
 model Payment {
-  id          String        @id @default(auto()) @map("_id") @db.ObjectId
-  childId     String        @db.ObjectId
+  id          String        @id @default(uuid())
+  childId     String        
   amount      Float
   description String
   dueDate     DateTime

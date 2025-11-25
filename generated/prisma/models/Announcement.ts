@@ -30,6 +30,8 @@ export type AnnouncementMinAggregateOutputType = {
   title: string | null
   content: string | null
   category: $Enums.AnnouncementCategory | null
+  eventDate: Date | null
+  location: string | null
   isImportant: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -41,6 +43,8 @@ export type AnnouncementMaxAggregateOutputType = {
   title: string | null
   content: string | null
   category: $Enums.AnnouncementCategory | null
+  eventDate: Date | null
+  location: string | null
   isImportant: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -52,6 +56,8 @@ export type AnnouncementCountAggregateOutputType = {
   title: number
   content: number
   category: number
+  eventDate: number
+  location: number
   isImportant: number
   createdAt: number
   updatedAt: number
@@ -65,6 +71,8 @@ export type AnnouncementMinAggregateInputType = {
   title?: true
   content?: true
   category?: true
+  eventDate?: true
+  location?: true
   isImportant?: true
   createdAt?: true
   updatedAt?: true
@@ -76,6 +84,8 @@ export type AnnouncementMaxAggregateInputType = {
   title?: true
   content?: true
   category?: true
+  eventDate?: true
+  location?: true
   isImportant?: true
   createdAt?: true
   updatedAt?: true
@@ -87,6 +97,8 @@ export type AnnouncementCountAggregateInputType = {
   title?: true
   content?: true
   category?: true
+  eventDate?: true
+  location?: true
   isImportant?: true
   createdAt?: true
   updatedAt?: true
@@ -171,6 +183,8 @@ export type AnnouncementGroupByOutputType = {
   title: string
   content: string
   category: $Enums.AnnouncementCategory
+  eventDate: Date | null
+  location: string | null
   isImportant: boolean
   createdAt: Date
   updatedAt: Date
@@ -203,6 +217,8 @@ export type AnnouncementWhereInput = {
   title?: Prisma.StringFilter<"Announcement"> | string
   content?: Prisma.StringFilter<"Announcement"> | string
   category?: Prisma.EnumAnnouncementCategoryFilter<"Announcement"> | $Enums.AnnouncementCategory
+  eventDate?: Prisma.DateTimeNullableFilter<"Announcement"> | Date | string | null
+  location?: Prisma.StringNullableFilter<"Announcement"> | string | null
   isImportant?: Prisma.BoolFilter<"Announcement"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Announcement"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Announcement"> | Date | string
@@ -216,6 +232,8 @@ export type AnnouncementOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   content?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  eventDate?: Prisma.SortOrder
+  location?: Prisma.SortOrder
   isImportant?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -232,6 +250,8 @@ export type AnnouncementWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"Announcement"> | string
   content?: Prisma.StringFilter<"Announcement"> | string
   category?: Prisma.EnumAnnouncementCategoryFilter<"Announcement"> | $Enums.AnnouncementCategory
+  eventDate?: Prisma.DateTimeNullableFilter<"Announcement"> | Date | string | null
+  location?: Prisma.StringNullableFilter<"Announcement"> | string | null
   isImportant?: Prisma.BoolFilter<"Announcement"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Announcement"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Announcement"> | Date | string
@@ -245,6 +265,8 @@ export type AnnouncementOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   content?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  eventDate?: Prisma.SortOrder
+  location?: Prisma.SortOrder
   isImportant?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -262,6 +284,8 @@ export type AnnouncementScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"Announcement"> | string
   content?: Prisma.StringWithAggregatesFilter<"Announcement"> | string
   category?: Prisma.EnumAnnouncementCategoryWithAggregatesFilter<"Announcement"> | $Enums.AnnouncementCategory
+  eventDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Announcement"> | Date | string | null
+  location?: Prisma.StringNullableWithAggregatesFilter<"Announcement"> | string | null
   isImportant?: Prisma.BoolWithAggregatesFilter<"Announcement"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Announcement"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Announcement"> | Date | string
@@ -272,6 +296,8 @@ export type AnnouncementCreateInput = {
   title: string
   content: string
   category: $Enums.AnnouncementCategory
+  eventDate?: Date | string | null
+  location?: string | null
   isImportant?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -285,6 +311,8 @@ export type AnnouncementUncheckedCreateInput = {
   title: string
   content: string
   category: $Enums.AnnouncementCategory
+  eventDate?: Date | string | null
+  location?: string | null
   isImportant?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -295,6 +323,8 @@ export type AnnouncementUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.EnumAnnouncementCategoryFieldUpdateOperationsInput | $Enums.AnnouncementCategory
+  eventDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isImportant?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -307,6 +337,8 @@ export type AnnouncementUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.EnumAnnouncementCategoryFieldUpdateOperationsInput | $Enums.AnnouncementCategory
+  eventDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isImportant?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -319,6 +351,8 @@ export type AnnouncementCreateManyInput = {
   title: string
   content: string
   category: $Enums.AnnouncementCategory
+  eventDate?: Date | string | null
+  location?: string | null
   isImportant?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -328,6 +362,8 @@ export type AnnouncementUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.EnumAnnouncementCategoryFieldUpdateOperationsInput | $Enums.AnnouncementCategory
+  eventDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isImportant?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -338,6 +374,8 @@ export type AnnouncementUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.EnumAnnouncementCategoryFieldUpdateOperationsInput | $Enums.AnnouncementCategory
+  eventDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isImportant?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -359,6 +397,8 @@ export type AnnouncementCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   content?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  eventDate?: Prisma.SortOrder
+  location?: Prisma.SortOrder
   isImportant?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -370,6 +410,8 @@ export type AnnouncementMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   content?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  eventDate?: Prisma.SortOrder
+  location?: Prisma.SortOrder
   isImportant?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -381,6 +423,8 @@ export type AnnouncementMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   content?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  eventDate?: Prisma.SortOrder
+  location?: Prisma.SortOrder
   isImportant?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -456,6 +500,8 @@ export type AnnouncementCreateWithoutAuthorInput = {
   title: string
   content: string
   category: $Enums.AnnouncementCategory
+  eventDate?: Date | string | null
+  location?: string | null
   isImportant?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -467,6 +513,8 @@ export type AnnouncementUncheckedCreateWithoutAuthorInput = {
   title: string
   content: string
   category: $Enums.AnnouncementCategory
+  eventDate?: Date | string | null
+  location?: string | null
   isImportant?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -507,6 +555,8 @@ export type AnnouncementScalarWhereInput = {
   title?: Prisma.StringFilter<"Announcement"> | string
   content?: Prisma.StringFilter<"Announcement"> | string
   category?: Prisma.EnumAnnouncementCategoryFilter<"Announcement"> | $Enums.AnnouncementCategory
+  eventDate?: Prisma.DateTimeNullableFilter<"Announcement"> | Date | string | null
+  location?: Prisma.StringNullableFilter<"Announcement"> | string | null
   isImportant?: Prisma.BoolFilter<"Announcement"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Announcement"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Announcement"> | Date | string
@@ -517,6 +567,8 @@ export type AnnouncementCreateWithoutReadByInput = {
   title: string
   content: string
   category: $Enums.AnnouncementCategory
+  eventDate?: Date | string | null
+  location?: string | null
   isImportant?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -529,6 +581,8 @@ export type AnnouncementUncheckedCreateWithoutReadByInput = {
   title: string
   content: string
   category: $Enums.AnnouncementCategory
+  eventDate?: Date | string | null
+  location?: string | null
   isImportant?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -554,6 +608,8 @@ export type AnnouncementUpdateWithoutReadByInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.EnumAnnouncementCategoryFieldUpdateOperationsInput | $Enums.AnnouncementCategory
+  eventDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isImportant?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -565,6 +621,8 @@ export type AnnouncementUncheckedUpdateWithoutReadByInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.EnumAnnouncementCategoryFieldUpdateOperationsInput | $Enums.AnnouncementCategory
+  eventDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isImportant?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -575,6 +633,8 @@ export type AnnouncementCreateManyAuthorInput = {
   title: string
   content: string
   category: $Enums.AnnouncementCategory
+  eventDate?: Date | string | null
+  location?: string | null
   isImportant?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -584,6 +644,8 @@ export type AnnouncementUpdateWithoutAuthorInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.EnumAnnouncementCategoryFieldUpdateOperationsInput | $Enums.AnnouncementCategory
+  eventDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isImportant?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -594,6 +656,8 @@ export type AnnouncementUncheckedUpdateWithoutAuthorInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.EnumAnnouncementCategoryFieldUpdateOperationsInput | $Enums.AnnouncementCategory
+  eventDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isImportant?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -604,6 +668,8 @@ export type AnnouncementUncheckedUpdateManyWithoutAuthorInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.EnumAnnouncementCategoryFieldUpdateOperationsInput | $Enums.AnnouncementCategory
+  eventDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isImportant?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -646,6 +712,8 @@ export type AnnouncementSelect<ExtArgs extends runtime.Types.Extensions.Internal
   title?: boolean
   content?: boolean
   category?: boolean
+  eventDate?: boolean
+  location?: boolean
   isImportant?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -662,12 +730,14 @@ export type AnnouncementSelectScalar = {
   title?: boolean
   content?: boolean
   category?: boolean
+  eventDate?: boolean
+  location?: boolean
   isImportant?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AnnouncementOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "authorId" | "title" | "content" | "category" | "isImportant" | "createdAt" | "updatedAt", ExtArgs["result"]["announcement"]>
+export type AnnouncementOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "authorId" | "title" | "content" | "category" | "eventDate" | "location" | "isImportant" | "createdAt" | "updatedAt", ExtArgs["result"]["announcement"]>
 export type AnnouncementInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   readBy?: boolean | Prisma.Announcement$readByArgs<ExtArgs>
@@ -686,6 +756,8 @@ export type $AnnouncementPayload<ExtArgs extends runtime.Types.Extensions.Intern
     title: string
     content: string
     category: $Enums.AnnouncementCategory
+    eventDate: Date | null
+    location: string | null
     isImportant: boolean
     createdAt: Date
     updatedAt: Date
@@ -1088,6 +1160,8 @@ export interface AnnouncementFieldRefs {
   readonly title: Prisma.FieldRef<"Announcement", 'String'>
   readonly content: Prisma.FieldRef<"Announcement", 'String'>
   readonly category: Prisma.FieldRef<"Announcement", 'AnnouncementCategory'>
+  readonly eventDate: Prisma.FieldRef<"Announcement", 'DateTime'>
+  readonly location: Prisma.FieldRef<"Announcement", 'String'>
   readonly isImportant: Prisma.FieldRef<"Announcement", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Announcement", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Announcement", 'DateTime'>

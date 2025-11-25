@@ -2076,6 +2076,8 @@ export const AnnouncementScalarFieldEnum = {
   title: 'title',
   content: 'content',
   category: 'category',
+  eventDate: 'eventDate',
+  location: 'location',
   isImportant: 'isImportant',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

@@ -60,7 +60,13 @@ export type AttendanceStatus = (typeof AttendanceStatus)[keyof typeof Attendance
 export const AnnouncementCategory = {
   WYJSCIE: 'WYJSCIE',
   SPOTKANIE: 'SPOTKANIE',
-  ORGANIZACYJNE: 'ORGANIZACYJNE'
+  ORGANIZACYJNE: 'ORGANIZACYJNE',
+  FESTIWAL: 'FESTIWAL',
+  WYCIECZKA: 'WYCIECZKA',
+  URODZINY: 'URODZINY',
+  PRZEDSTAWIENIE: 'PRZEDSTAWIENIE',
+  ZAJECIA: 'ZAJECIA',
+  INNE: 'INNE'
 } as const
 
 export type AnnouncementCategory = (typeof AnnouncementCategory)[keyof typeof AnnouncementCategory]

@@ -35,7 +35,7 @@ const mockEvents: Event[] = [
     id: 1,
     title: "Spotkanie z rodzicami",
     description: "Omówienie wyników śródrocznych i planów na kolejny semestr.",
-    date: new Date(2025, 10, 11),
+    date: new Date(),
     time: "10:00",
     location: "Sala konferencyjna",
     category: "inne",
@@ -47,7 +47,7 @@ const mockEvents: Event[] = [
     id: 2,
     title: "Rada pedagogiczna",
     description: "Podsumowanie pierwszego półrocza oraz planowanie szkoleń.",
-    date: new Date(2025, 10, 11),
+    date: new Date(),
     time: "14:00",
     location: "Sala nauczycielska",
     category: "zajęcia",
@@ -59,7 +59,7 @@ const mockEvents: Event[] = [
     id: 3,
     title: "Dzień otwarty",
     description: "Prezentacja oferty szkoły dla nowych rodziców i uczniów.",
-    date: new Date(2025, 10, 11),
+    date: new Date(),
     time: "16:00",
     location: "Główny hall szkoły",
     category: "festiwal",
@@ -69,7 +69,7 @@ const mockEvents: Event[] = [
   },
 ];
 
-export default function HeadTeacher() {
+export default function Calendar() {
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [weekStart, setWeekStart] = useState<Date>(startOfWeek(new Date(), { weekStartsOn: 1 }));

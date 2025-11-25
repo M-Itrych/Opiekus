@@ -1,6 +1,5 @@
 'use client';
 
-import ParentLayout from '@/app/components/global/Layout/ParentLayout';
 import { useState, useMemo } from 'react';
 import { EventNote, CheckCircle, Cancel, CalendarToday, Save, ReportProblem, Close } from '@mui/icons-material';
 
@@ -257,10 +256,12 @@ export default function ObecnosciPage() {
   };
 
   return (
-    <ParentLayout
-      title="Obecności"
-      description="Zarządzaj obecnością dziecka w przedszkolu"
-      headerAction={
+    <div className="p-6">
+      <div className="mb-6 flex justify-between items-start">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Obecności</h1>
+          <p className="text-gray-600">Zarządzaj obecnością dziecka w przedszkolu</p>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={() => handleOpenModal()}
@@ -280,9 +281,9 @@ export default function ObecnosciPage() {
             </button>
           )}
         </div>
-      }
-    >
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white p-4 rounded-lg border border-gray-200">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle className="text-green-500" fontSize="small" />
@@ -402,7 +403,7 @@ export default function ObecnosciPage() {
         </div>
       </div>
 
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+      <div className="mt-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
         <h3 className="font-semibold text-blue-800 mb-2">Informacje</h3>
         <p className="text-blue-700 text-sm">
           Kliknij na dowolny dzień roboczy w kalendarzu (również przyszły), aby zaznaczyć lub odznaczyć nieobecność, 
@@ -481,7 +482,7 @@ export default function ObecnosciPage() {
           </div>
         </div>
       )}
-    </ParentLayout>
+    </div>
   );
 }
 

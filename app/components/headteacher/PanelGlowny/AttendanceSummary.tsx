@@ -138,7 +138,7 @@ export default function AttendanceSummary({
           {selectedStats.map(({ label, value, color, accent }) => (
             <div
               key={label}
-              className={`flex flex-col gap-2 rounded-xl p-4 transition-all duration-300 hover:shadow-md hover:-translate-y-1 ${color}`}
+              className={`flex flex-col gap-2 rounded-xl p-4 transition-all duration-300 hover:shadow-md ${color}`}
             >
               <span className="text-sm font-medium uppercase tracking-wide text-zinc-500">
                 {label}

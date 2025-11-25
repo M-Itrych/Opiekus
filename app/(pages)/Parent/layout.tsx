@@ -1,10 +1,19 @@
 import type { ReactNode } from 'react';
-import ParentLayout from '../../components/global/Layout/ParentLayout';
+import Topbar from '../../components/global/NavBar/parenttopbar';
+import NavbarTemplate from '../../components/global/NavBar/navbar_template';
+import NavbarParent from '@/app/components/global/NavBar/variants/navbar_parent';
 
-export default function ParentLayoutWrapper({ children }: { children: ReactNode }) {
+export default function ParentLayout({ children }: { children: ReactNode }) {
   return (
-    <ParentLayout>
-      {children}
-    </ParentLayout>
+    <div className="h-screen flex flex-col bg-blue-50 overflow-hidden">
+      <Topbar />
+      <div className="flex flex-1 overflow-hidden min-h-0">
+        <NavbarTemplate items={[]} />
+        <NavbarParent />
+        <main className="flex-1 overflow-y-auto bg-blue-50 min-w-0 ml-[100px]">
+          {children}
+        </main>
+      </div>
+    </div>
   );
 }

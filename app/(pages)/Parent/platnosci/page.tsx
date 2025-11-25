@@ -1,6 +1,5 @@
  'use client';
 
-import ParentLayout from '@/app/components/global/Layout/ParentLayout';
 import { useMemo, useState } from 'react';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import PaymentIcon from '@mui/icons-material/Payment';
@@ -233,10 +232,14 @@ export default function PlatnosciPage() {
   };
 
   return (
-    <ParentLayout
-      title="Płatności"
-      description="Zarządzaj czesnym, sprawdzaj nadchodzące zobowiązania oraz historię opłat za przedszkole."
-      headerAction={
+    <div className="p-4 md:p-6 space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-gray-800">Płatności</h1>
+          <p className="text-sm text-gray-600">
+            Zarządzaj czesnym, sprawdzaj nadchodzące zobowiązania oraz historię opłat za przedszkole.
+          </p>
+        </div>
         <div className="flex flex-wrap gap-3">
           <div className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-700">
             <AccountBalanceWalletIcon fontSize="small" />
@@ -258,8 +261,8 @@ export default function PlatnosciPage() {
             </div>
           )}
         </div>
-      }
-    >
+      </div>
+
       <section className="bg-white border border-gray-200 rounded-xl shadow-sm">
         <header className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <div className="flex items-center gap-2">
@@ -515,7 +518,7 @@ export default function PlatnosciPage() {
           </table>
         </div>
       </section>
-    </ParentLayout>
+    </div>
   );
 }
 

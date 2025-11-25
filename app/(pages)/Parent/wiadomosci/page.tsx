@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
-import ParentLayout from '@/app/components/global/Layout/ParentLayout';
 import SendIcon from '@mui/icons-material/Send';
 import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread';
 import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
@@ -177,33 +176,35 @@ export default function WiadomosciPage() {
   };
 
   return (
-    <ParentLayout
-      title="Wiadomości"
-      description="Skontaktuj się z nauczycielami lub przeglądaj otrzymane wiadomości z przedszkola."
-      headerAction={
+    <div className="p-4 md:p-6 min-h-[80vh] flex flex-col">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-xl font-bold text-gray-800">Wiadomości</h1>
+          <p className="text-sm text-gray-600">
+            Skontaktuj się z nauczycielami lub przeglądaj otrzymane wiadomości z przedszkola.
+          </p>
+        </div>
         <div className="flex flex-wrap gap-2 items-center">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-700">
-            <MailOutlineIcon className="text-sky-500" fontSize="small" />
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700">
+            <MailOutlineIcon className="text-blue-500" fontSize="small" />
             Nieprzeczytane:{' '}
-            <strong className={unreadCount ? 'text-sky-600' : 'text-emerald-600'}>
+            <strong className={unreadCount ? 'text-blue-600' : 'text-emerald-600'}>
               {unreadCount}
             </strong>
           </div>
           <button
             onClick={() => setActiveSection('compose')}
-            className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
           >
             <SendIcon fontSize="small" />
             Nowa wiadomość
           </button>
         </div>
-      }
-    >
-      <div className="min-h-[80vh] flex flex-col">
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[380px_minmax(0,1fr)] gap-6">
-        <div className="bg-white border border-zinc-200 rounded-2xl shadow-sm overflow-hidden flex flex-col min-h-[60vh]">
-          <div className="px-4 py-3 border-b border-zinc-100 flex items-center justify-between">
+      <div className="grid grid-cols-1 lg:grid-cols-[380px_minmax(0,1fr)] gap-4">
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col min-h-[60vh]">
+          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
               <button
                 onClick={() => {
@@ -214,8 +215,8 @@ export default function WiadomosciPage() {
                 }}
                 className={`rounded-md px-3 py-1.5 ${
                   activeSection === 'inbox'
-                    ? 'bg-sky-100 text-sky-700'
-                    : 'text-zinc-600 hover:bg-zinc-100'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
                 Odbiorcze
@@ -230,20 +231,20 @@ export default function WiadomosciPage() {
                 className={`rounded-md px-3 py-1.5 ${
                   activeSection === 'sent'
                     ? 'bg-purple-100 text-purple-700'
-                    : 'text-zinc-600 hover:bg-zinc-100'
+                    : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
                 Wysłane
               </button>
             </div>
             {activeSection === 'inbox' && (
-              <div className="flex items-center gap-2 text-xs text-zinc-500">
+              <div className="flex items-center gap-2 text-xs text-gray-500">
                 <button
                   onClick={() => setFilter('all')}
                   className={`rounded-md px-2 py-1 border ${
                     filter === 'all'
-                      ? 'border-sky-300 bg-sky-50 text-sky-600'
-                      : 'border-zinc-200 hover:bg-zinc-50'
+                      ? 'border-blue-300 bg-blue-50 text-blue-600'
+                      : 'border-gray-200 hover:bg-gray-50'
                   }`}
                 >
                   Wszystkie
@@ -252,8 +253,8 @@ export default function WiadomosciPage() {
                   onClick={() => setFilter('unread')}
                   className={`rounded-md px-2 py-1 border ${
                     filter === 'unread'
-                      ? 'border-sky-300 bg-sky-50 text-sky-600'
-                      : 'border-zinc-200 hover:bg-zinc-50'
+                      ? 'border-blue-300 bg-blue-50 text-blue-600'
+                      : 'border-gray-200 hover:bg-gray-50'
                   }`}
                 >
                   Nieprzeczytane
@@ -261,10 +262,10 @@ export default function WiadomosciPage() {
               </div>
             )}
           </div>
-          <div className="divide-y divide-zinc-100 flex-1 overflow-y-auto">
+          <div className="divide-y divide-gray-100 flex-1 overflow-y-auto">
             {activeSection === 'inbox' ? (
               filteredMessages.length === 0 ? (
-                <div className="p-6 text-sm text-zinc-500 text-center">
+                <div className="p-6 text-sm text-gray-500 text-center">
                   Brak wiadomości w tej sekcji.
                 </div>
               ) : (
@@ -273,10 +274,10 @@ export default function WiadomosciPage() {
                     key={msg.id}
                     onClick={() => handleSelectMessage(msg.id)}
                     className={`w-full text-left px-4 py-3 flex flex-col gap-1 transition-colors ${
-                      selectedMessageId === msg.id ? 'bg-sky-50' : 'hover:bg-zinc-50'
+                      selectedMessageId === msg.id ? 'bg-blue-50' : 'hover:bg-gray-50'
                     }`}
                   >
-                    <div className="flex items-center justify-between text-xs text-zinc-500">
+                    <div className="flex items-center justify-between text-xs text-gray-500">
                       <span>
                         {new Date(msg.date).toLocaleDateString('pl-PL', {
                           day: '2-digit',
@@ -291,19 +292,19 @@ export default function WiadomosciPage() {
                           Odczytane
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-sky-600">
+                        <span className="inline-flex items-center gap-1 text-blue-600">
                           <MarkEmailUnreadIcon fontSize="inherit" />
                           Nowa
                         </span>
                       )}
                     </div>
-                    <p className="text-sm font-semibold text-zinc-900">{msg.subject}</p>
-                    <p className="text-xs text-zinc-500 line-clamp-2">{msg.preview}</p>
+                    <p className="text-sm font-semibold text-gray-800">{msg.subject}</p>
+                    <p className="text-xs text-gray-500 line-clamp-2">{msg.preview}</p>
                   </button>
                 ))
               )
             ) : sentMessages.length === 0 ? (
-              <div className="p-6 text-sm text-zinc-500 text-center">Brak wysłanych wiadomości.</div>
+              <div className="p-6 text-sm text-gray-500 text-center">Brak wysłanych wiadomości.</div>
             ) : (
               sentMessages.map((msg) => (
                 <button
@@ -313,10 +314,10 @@ export default function WiadomosciPage() {
                     setSelectedMessageId(null);
                   }}
                   className={`w-full text-left px-4 py-3 flex flex-col gap-1 transition-colors ${
-                    selectedSentId === msg.id ? 'bg-purple-50' : 'hover:bg-zinc-50'
+                    selectedSentId === msg.id ? 'bg-purple-50' : 'hover:bg-gray-50'
                   }`}
                 >
-                  <div className="flex items-center justify-between text-xs text-zinc-500">
+                  <div className="flex items-center justify-between text-xs text-gray-500">
                     <span>
                       {new Date(msg.date).toLocaleDateString('pl-PL', {
                         day: '2-digit',
@@ -330,28 +331,28 @@ export default function WiadomosciPage() {
                       Wysłano
                     </span>
                   </div>
-                  <p className="text-sm font-semibold text-zinc-900">{msg.subject}</p>
-                  <p className="text-xs text-zinc-500">Do: {msg.recipients.join(', ')}</p>
-                  <p className="text-xs text-zinc-500 line-clamp-2">{msg.preview}</p>
+                  <p className="text-sm font-semibold text-gray-800">{msg.subject}</p>
+                  <p className="text-xs text-gray-500">Do: {msg.recipients.join(', ')}</p>
+                  <p className="text-xs text-gray-500 line-clamp-2">{msg.preview}</p>
                 </button>
               ))
             )}
           </div>
         </div>
 
-        <div className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-6 min-h-[60vh] flex flex-col">
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 min-h-[60vh] flex flex-col">
           {activeSection === 'compose' ? (
             <div className="space-y-5">
               <div>
-                <h2 className="text-lg font-semibold text-zinc-900 mb-1">Nowa wiadomość</h2>
-                <p className="text-sm text-zinc-500">
+                <h2 className="text-lg font-semibold text-gray-800 mb-1">Nowa wiadomość</h2>
+                <p className="text-sm text-gray-500">
                   Wybierz nauczycieli, wpisz temat i treść wiadomości. Wiadomość trafi do wskazanych
                   adresatów.
                 </p>
               </div>
 
               <div className="space-y-3">
-                <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                   Odbiorcy
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -360,8 +361,8 @@ export default function WiadomosciPage() {
                       key={teacher.id}
                       className={`flex items-start gap-2 rounded-lg border px-3 py-2 text-sm shadow-sm ${
                         selectedTeachers.includes(teacher.id)
-                          ? 'border-sky-300 bg-sky-50'
-                          : 'border-zinc-200 bg-white hover:bg-zinc-50'
+                          ? 'border-blue-300 bg-blue-50'
+                          : 'border-gray-200 bg-white hover:bg-gray-50'
                       }`}
                     >
                       <input
@@ -371,11 +372,11 @@ export default function WiadomosciPage() {
                         className="mt-1"
                       />
                       <div>
-                        <p className="font-semibold text-zinc-900 flex items-center gap-1">
-                          <PersonIcon fontSize="small" className="text-sky-500" />
+                        <p className="font-semibold text-gray-800 flex items-center gap-1">
+                          <PersonIcon fontSize="small" className="text-blue-500" />
                           {teacher.name}
                         </p>
-                        <p className="text-xs text-zinc-500">{teacher.subject}</p>
+                        <p className="text-xs text-gray-500">{teacher.subject}</p>
                       </div>
                     </label>
                   ))}
@@ -383,7 +384,7 @@ export default function WiadomosciPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                   Temat
                 </label>
                 <input
@@ -391,12 +392,12 @@ export default function WiadomosciPage() {
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder="Wpisz temat wiadomości..."
-                  className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100"
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                   Treść wiadomości
                 </label>
                 <textarea
@@ -404,21 +405,21 @@ export default function WiadomosciPage() {
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="Napisz swoją wiadomość do nauczycieli..."
-                  className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100 resize-none"
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 resize-none"
                 />
               </div>
 
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={handleSendMessage}
-                  className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700 transition-colors"
+                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
                 >
                   <SendIcon fontSize="small" />
                   Wyślij wiadomość
                 </button>
                 <button
                   onClick={() => setActiveSection('inbox')}
-                  className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
                 >
                   Anuluj
                 </button>
@@ -430,9 +431,9 @@ export default function WiadomosciPage() {
                 const sent = sentMessages.find((msg) => msg.id === selectedSentId);
                 if (!sent) {
                   return (
-                    <div className="flex flex-1 flex-col items-center justify-center text-center text-zinc-500">
-                      <MailOutlineIcon fontSize="large" className="text-sky-400 mb-2" />
-                      <p>Wybierz wiadomość ze skrzynki „Wysłane", aby zobaczyć szczegóły.</p>
+                    <div className="flex flex-1 flex-col items-center justify-center text-center text-gray-500">
+                      <MailOutlineIcon fontSize="large" className="text-blue-400 mb-2" />
+                      <p>Wybierz wiadomość ze skrzynki „Wysłane”, aby zobaczyć szczegóły.</p>
                     </div>
                   );
                 }
@@ -440,14 +441,14 @@ export default function WiadomosciPage() {
                   <div className="flex flex-col flex-1 space-y-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <h2 className="text-lg font-semibold text-zinc-900">{sent.subject}</h2>
-                        <p className="text-sm text-zinc-500">
+                        <h2 className="text-lg font-semibold text-gray-800">{sent.subject}</h2>
+                        <p className="text-sm text-gray-500">
                           Odbiorcy:{' '}
-                          <span className="text-zinc-700 font-medium">
+                          <span className="text-gray-700 font-medium">
                             {sent.recipients.join(', ')}
                           </span>
                         </p>
-                        <p className="text-xs text-zinc-400">
+                        <p className="text-xs text-gray-400">
                           {new Date(sent.date).toLocaleString('pl-PL', {
                             day: '2-digit',
                             month: '2-digit',
@@ -468,19 +469,19 @@ export default function WiadomosciPage() {
                           );
                           setActiveSection('compose');
                         }}
-                        className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
+                        className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
                       >
                         <ReplyIcon fontSize="small" />
                         Wyślij ponownie
                       </button>
                     </div>
-                    <div className="rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-3 text-sm text-zinc-700 whitespace-pre-wrap leading-relaxed flex-1">
+                    <div className="rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed flex-1">
                       {sent.body}
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => setActiveSection('compose')}
-                        className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-700 transition-colors"
+                        className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition-colors"
                       >
                         <ChatBubbleOutlineIcon fontSize="small" />
                         Napisz nową wiadomość
@@ -490,21 +491,21 @@ export default function WiadomosciPage() {
                 );
               })()
             ) : (
-              <div className="flex flex-1 flex-col items-center justify-center text-center text-zinc-500">
-                <MailOutlineIcon fontSize="large" className="text-sky-400 mb-2" />
-                <p>Wybierz wiadomość ze skrzynki „Wysłane", aby zobaczyć szczegóły.</p>
+              <div className="flex flex-1 flex-col items-center justify-center text-center text-gray-500">
+                <MailOutlineIcon fontSize="large" className="text-blue-400 mb-2" />
+                <p>Wybierz wiadomość ze skrzynki „Wysłane”, aby zobaczyć szczegóły.</p>
               </div>
             )
           ) : selectedMessage ? (
             <div className="space-y-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-lg font-semibold text-zinc-900">{selectedMessage.subject}</h2>
-                  <p className="text-sm text-zinc-500">
+                  <h2 className="text-lg font-semibold text-gray-800">{selectedMessage.subject}</h2>
+                  <p className="text-sm text-gray-500">
                     {selectedMessage.senderRole === 'nauczyciel' ? 'Nauczyciel' : 'Administracja'}:{' '}
-                    <span className="text-zinc-700 font-medium">{selectedMessage.sender}</span>
+                    <span className="text-gray-700 font-medium">{selectedMessage.sender}</span>
                   </p>
-                  <p className="text-xs text-zinc-400">
+                  <p className="text-xs text-gray-400">
                     {new Date(selectedMessage.date).toLocaleString('pl-PL', {
                       day: '2-digit',
                       month: '2-digit',
@@ -516,19 +517,19 @@ export default function WiadomosciPage() {
                 </div>
                 <button
                   onClick={() => setActiveSection('compose')}
-                  className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
                 >
                   <ReplyIcon fontSize="small" />
                   Odpowiedz
                 </button>
               </div>
-              <div className="rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-3 text-sm text-zinc-700 whitespace-pre-wrap leading-relaxed">
+              <div className="rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
                 {selectedMessage.body}
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => selectedMessage && handleToggleRead(selectedMessage.id)}
-                  className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
                 >
                   {selectedMessage.isRead ? (
                     <>
@@ -544,7 +545,7 @@ export default function WiadomosciPage() {
                 </button>
                 <button
                   onClick={() => setActiveSection('compose')}
-                  className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-700 transition-colors"
+                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition-colors"
                 >
                   <ChatBubbleOutlineIcon fontSize="small" />
                   Napisz nową wiadomość
@@ -552,15 +553,14 @@ export default function WiadomosciPage() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-center text-zinc-500">
-              <MailOutlineIcon fontSize="large" className="text-sky-400 mb-2" />
+            <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+              <MailOutlineIcon fontSize="large" className="text-blue-400 mb-2" />
               <p>Wybierz wiadomość ze skrzynki, aby zobaczyć szczegóły.</p>
             </div>
           )}
         </div>
       </div>
-      </div>
-    </ParentLayout>
+    </div>
   );
 }
 

@@ -28,8 +28,24 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { title, content, category, authorId, isImportant, eventDate, location } = body;
 
+    let finalAuthorId = authorId;
+
+    if (!finalAuthorId) {
+        const user = await prisma.user.findFirst({
+            where: { role: 'HEADTEACHER' }
+        });
+        if (user) {
+            finalAuthorId = user.id;
+        } else {
+            const anyUser = await prisma.user.findFirst();
+            if (anyUser) {
+                finalAuthorId = anyUser.id;
+            }
+        }
+    }
+
     // walidacja
-    if (!title || !content || !category || !authorId) {
+    if (!title || !content || !category || !finalAuthorId) {
         return NextResponse.json({ error: "Brak wymaganych pól" }, { status: 400 });
     }
 
@@ -38,7 +54,7 @@ export async function POST(request: Request) {
         title,
         content,
         category,
-        authorId,
+        authorId: finalAuthorId,
         isImportant: isImportant || false,
         eventDate: eventDate ? new Date(eventDate) : null,
         location: location || null,

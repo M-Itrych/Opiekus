@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { format, addDays, startOfWeek, isSameDay } from "date-fns";
 import { pl } from "date-fns/locale";
 import {
@@ -18,7 +18,7 @@ import { CalendarModal } from "@/app/components/headteacher/calendar/CalendarMod
 import HeadTeacherLayout from "@/app/components/global/Layout/HeadTeacherLayout";
 
 interface Event {
-  id: number;
+  id: string;
   title: string;
   description: string;
   date: Date;
@@ -30,49 +30,92 @@ interface Event {
   icon: React.ElementType;
 }
 
-const mockEvents: Event[] = [
-  {
-    id: 1,
-    title: "Spotkanie z rodzicami",
-    description: "Omówienie wyników śródrocznych i planów na kolejny semestr.",
-    date: new Date(),
-    time: "10:00",
-    location: "Sala konferencyjna",
-    category: "inne",
-    participants: "Rodzice i nauczyciele",
-    color: "border-blue-300",
-    icon: Users,
-  },
-  {
-    id: 2,
-    title: "Rada pedagogiczna",
-    description: "Podsumowanie pierwszego półrocza oraz planowanie szkoleń.",
-    date: new Date(),
-    time: "14:00",
-    location: "Sala nauczycielska",
-    category: "zajęcia",
-    participants: "Wszyscy nauczyciele",
-    color: "border-indigo-300",
-    icon: BookOpen,
-  },
-  {
-    id: 3,
-    title: "Dzień otwarty",
-    description: "Prezentacja oferty szkoły dla nowych rodziców i uczniów.",
-    date: new Date(),
-    time: "16:00",
-    location: "Główny hall szkoły",
-    category: "festiwal",
-    participants: "Wszyscy zainteresowani",
-    color: "border-orange-300",
-    icon: PartyPopper,
-  },
-];
+interface AnnouncementResponse {
+  id: string;
+  title: string;
+  content: string;
+  category: string;
+  eventDate: string | null;
+  location: string | null;
+  createdAt: string;
+  author?: {
+    name: string | null;
+    surname: string | null;
+  } | null;
+}
+
+type CategoryConfig = {
+  label: Event["category"];
+  color: string;
+  icon: React.ElementType;
+};
+
+const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
+  FESTIWAL: { label: "festiwal", color: "border-orange-300", icon: PartyPopper },
+  WYCIECZKA: { label: "wycieczka", color: "border-emerald-300", icon: MapPin },
+  URODZINY: { label: "urodziny", color: "border-pink-300", icon: PartyPopper },
+  PRZEDSTAWIENIE: { label: "przedstawienie", color: "border-purple-300", icon: BookOpen },
+  ZAJECIA: { label: "zajęcia", color: "border-indigo-300", icon: BookOpen },
+};
+
+const DEFAULT_CATEGORY_CONFIG: CategoryConfig = {
+  label: "inne",
+  color: "border-zinc-200",
+  icon: CalendarIcon,
+};
+
+const mapAnnouncementToEvent = (announcement: AnnouncementResponse): Event => {
+  const config =
+    CATEGORY_CONFIG[announcement.category as keyof typeof CATEGORY_CONFIG] ?? DEFAULT_CATEGORY_CONFIG;
+  const baseDate = announcement.eventDate ?? announcement.createdAt;
+  const eventDate = baseDate ? new Date(baseDate) : new Date();
+  const participants = announcement.author
+    ? [announcement.author.name, announcement.author.surname].filter(Boolean).join(" ").trim()
+    : undefined;
+
+  return {
+    id: announcement.id,
+    title: announcement.title,
+    description: announcement.content,
+    date: eventDate,
+    time: format(eventDate, "HH:mm"),
+    location: announcement.location ?? "Brak lokalizacji",
+    category: config.label,
+    participants: participants || undefined,
+    color: config.color,
+    icon: config.icon,
+  };
+};
 
 export default function Calendar() {
-
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [weekStart, setWeekStart] = useState<Date>(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoadingEvents, setIsLoadingEvents] = useState<boolean>(true);
+  const [eventsError, setEventsError] = useState<string | null>(null);
+
+  const fetchEvents = useCallback(async () => {
+    try {
+      setEventsError(null);
+      setIsLoadingEvents(true);
+      const response = await fetch("/api/announcements", { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error("Failed to fetch events");
+      }
+      const data: AnnouncementResponse[] = await response.json();
+      setEvents(data.map(mapAnnouncementToEvent));
+    } catch (error) {
+      console.error("Error fetching calendar events:", error);
+      setEvents([]);
+      setEventsError("Nie udało się pobrać wydarzeń. Spróbuj ponownie później.");
+    } finally {
+      setIsLoadingEvents(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
   const getDaysOfWeek = () => {
     const days = [];
@@ -83,7 +126,7 @@ export default function Calendar() {
   };
 
   const getEventsForDate = (date: Date) => {
-    return mockEvents.filter((event) => isSameDay(event.date, date));
+    return events.filter((event) => isSameDay(event.date, date));
   };
 
   const selectedDateEvents = getEventsForDate(selectedDate);
@@ -102,7 +145,7 @@ export default function Calendar() {
       description="Plan wydarzeń przedszkolnych"
       headerAction={
         <div className="flex items-center gap-2">
-          <CalendarModal />
+          <CalendarModal onEventCreated={fetchEvents} />
           <Button
             onClick={() => {
               setSelectedDate(new Date());
@@ -193,7 +236,17 @@ export default function Calendar() {
               )}
             </div>
 
-            {selectedDateEvents.length === 0 ? (
+            {eventsError ? (
+              <section className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-red-200 bg-red-50 p-6 text-center shadow-sm">
+                <h3 className="text-lg font-semibold text-red-800">Błąd ładowania wydarzeń</h3>
+                <p className="text-sm text-red-700">{eventsError}</p>
+              </section>
+            ) : isLoadingEvents ? (
+              <section className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-zinc-200 bg-white p-12 shadow-sm">
+                <div className="h-16 w-16 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
+                <p className="text-sm text-zinc-500">Ładuję wydarzenia...</p>
+              </section>
+            ) : selectedDateEvents.length === 0 ? (
               <section className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-zinc-200 bg-white p-12 shadow-sm">
                 <CalendarIcon className="h-16 w-16 text-zinc-300" />
                 <div className="text-center">

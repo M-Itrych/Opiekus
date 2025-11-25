@@ -20,6 +20,10 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 
+interface CalendarModalProps {
+	onEventCreated?: () => void | Promise<void>
+}
+
 interface EventFormData {
 	title: string
 	description: string
@@ -30,7 +34,7 @@ interface EventFormData {
 	category: string
 }
 
-export function CalendarModal() {
+export function CalendarModal({ onEventCreated }: CalendarModalProps) {
 	const [isOpen, setIsOpen] = useState(false)
 	const [formData, setFormData] = useState<EventFormData>({
 		title: "",
@@ -41,22 +45,67 @@ export function CalendarModal() {
 		location: "",
 		category: "inne"
 	})
+	const [isSubmitting, setIsSubmitting] = useState(false)
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
-		
-		console.log("Dane wydarzenia:", formData)
-		
-		setFormData({
-			title: "",
-			description: "",
-			date: "",
-			startTime: "",
-			endTime: "",
-			location: "",
-			category: "inne"
-		})
-		setIsOpen(false)
+		if (isSubmitting) return
+		setIsSubmitting(true)
+
+		const categoryMap: Record<string, string> = {
+			"festiwal": "FESTIWAL",
+			"wycieczka": "WYCIECZKA",
+			"urodziny": "URODZINY",
+			"przedstawienie": "PRZEDSTAWIENIE",
+			"zajęcia": "ZAJECIA",
+			"inne": "INNE"
+		};
+
+		const eventDate = new Date(`${formData.date}T${formData.startTime}`);
+
+		const payload = {
+			title: formData.title,
+			content: formData.description || formData.title,
+			category: categoryMap[formData.category] || "INNE",
+			eventDate: eventDate.toISOString(),
+			location: formData.location,
+			isImportant: false
+		};
+
+		try {
+			const response = await fetch("/api/announcements", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(payload)
+			})
+
+			if (!response.ok) {
+				throw new Error("Failed to create event")
+			}
+
+			const data = await response.json()
+			console.log("Wydarzenie dodane:", data)
+
+			setFormData({
+				title: "",
+				description: "",
+				date: "",
+				startTime: "",
+				endTime: "",
+				location: "",
+				category: "inne"
+			})
+			setIsOpen(false)
+			await onEventCreated?.()
+			alert("Wydarzenie zostało dodane!")
+		} catch (error) {
+			console.error("Error adding event:", error)
+			alert("Wystąpił błąd podczas dodawania wydarzenia.")
+		} finally {
+			setIsSubmitting(false)
+		}
 	}
 
 	const handleInputChange = (
@@ -220,9 +269,10 @@ export function CalendarModal() {
 							</Button>
 							<Button
 								type="submit"
-								className="bg-sky-500 hover:bg-sky-600 text-white"
+								className="bg-sky-500 hover:bg-sky-600 text-white disabled:opacity-70"
+								disabled={isSubmitting}
 							>
-								Dodaj wydarzenie
+								{isSubmitting ? "Dodawanie..." : "Dodaj wydarzenie"}
 							</Button>
 						</div>
 					</form>

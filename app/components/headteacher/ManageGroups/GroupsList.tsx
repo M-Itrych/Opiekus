@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Users, Plus, Edit, Trash2 } from "lucide-react";
+import { Search, Users, Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import { GroupModal } from "./GroupModal";
 
 interface Group {
   id: string;
@@ -15,40 +16,51 @@ interface Group {
   room: string;
 }
 
-const mockGroups: Group[] = [
-  {
-    id: "1",
-    name: "Grupa Starszaków",
-    ageRange: "5-6 lat",
-    childrenCount: 20,
-    maxCapacity: 25,
-    teacherName: "Anna Kowalska",
-    room: "Sala 1",
-  },
-  {
-    id: "2",
-    name: "Grupa Średniaków",
-    ageRange: "4-5 lat",
-    childrenCount: 18,
-    maxCapacity: 25,
-    teacherName: "Maria Nowak",
-    room: "Sala 2",
-  },
-  {
-    id: "3",
-    name: "Grupa Maluchów",
-    ageRange: "3-4 lata",
-    childrenCount: 15,
-    maxCapacity: 20,
-    teacherName: "Katarzyna Wiśniewska",
-    room: "Sala 3",
-  },
-];
-
 export default function GroupsList() {
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredGroups = mockGroups.filter((group) =>
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+
+  const fetchGroups = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/groups");
+      if (!response.ok) {
+        throw new Error("Nie udało się pobrać grup");
+      }
+      const data = await response.json();
+      setGroups(data);
+    } catch (err) {
+      console.error(err);
+      setError("Wystąpił błąd podczas ładowania grup.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
+  const handleCreate = () => {
+    setSelectedGroupId(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (id: string) => {
+    setSelectedGroupId(id);
+    setIsModalOpen(true);
+  };
+
+  const handleSuccess = () => {
+    fetchGroups();
+  };
+
+  const filteredGroups = groups.filter((group) =>
     group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     group.teacherName.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -60,8 +72,36 @@ export default function GroupsList() {
     return "text-sky-500";
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Czy na pewno chcesz usunąć tę grupę?")) return;
+    
+    try {
+      const response = await fetch(`/api/groups/${id}`, {
+        method: "DELETE",
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        alert(data.error || "Błąd usuwania");
+        return;
+      }
+      
+      fetchGroups(); // Odśwież listę
+    } catch (error) {
+      console.error("Error deleting group:", error);
+      alert("Wystąpił błąd");
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6">
+      <GroupModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        groupId={selectedGroupId}
+        onSuccess={handleSuccess}
+      />
+
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
@@ -71,7 +111,7 @@ export default function GroupsList() {
             Zarządzanie grupami: żłobek (0-3 lata, 8-12 dzieci), przedszkole (3-6 lat, 15-25 dzieci)
           </p>
         </div>
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2" onClick={handleCreate}>
           <Plus className="h-4 w-4" />
           Dodaj grupę
         </Button>
@@ -88,62 +128,76 @@ export default function GroupsList() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredGroups.map((group) => (
-          <div
-            key={group.id}
-            className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-sky-100 p-2 dark:bg-sky-900/30">
-                  <Users className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+      {loading ? (
+        <div className="flex justify-center py-10">
+          <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+        </div>
+      ) : error ? (
+        <div className="text-center text-red-500 py-10">{error}</div>
+      ) : filteredGroups.length === 0 ? (
+        <div className="text-center text-zinc-500 py-10">Brak grup spełniających kryteria.</div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredGroups.map((group) => (
+            <div
+              key={group.id}
+              className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-lg bg-sky-100 p-2 dark:bg-sky-900/30">
+                    <Users className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">
+                      {group.name}
+                    </h4>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      {group.ageRange}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">
-                    {group.name}
-                  </h4>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    {group.ageRange}
-                  </p>
+              </div>
+
+              <div className="flex flex-col gap-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-600 dark:text-zinc-400">Dzieci:</span>
+                  <span className={`font-semibold ${getCapacityColor(group.childrenCount, group.maxCapacity)}`}>
+                    {group.childrenCount}/{group.maxCapacity}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-600 dark:text-zinc-400">Nauczyciel:</span>
+                  <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                    {group.teacherName}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-600 dark:text-zinc-400">Sala:</span>
+                  <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                    {group.room}
+                  </span>
                 </div>
               </div>
-            </div>
 
-            <div className="flex flex-col gap-2 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-zinc-600 dark:text-zinc-400">Dzieci:</span>
-                <span className={`font-semibold ${getCapacityColor(group.childrenCount, group.maxCapacity)}`}>
-                  {group.childrenCount}/{group.maxCapacity}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-zinc-600 dark:text-zinc-400">Nauczyciel:</span>
-                <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                  {group.teacherName}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-zinc-600 dark:text-zinc-400">Sala:</span>
-                <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                  {group.room}
-                </span>
+              <div className="flex gap-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(group.id)}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edytuj
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-sky-600 hover:text-sky-700"
+                  onClick={() => handleDelete(group.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
-
-            <div className="flex gap-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
-              <Button variant="outline" size="sm" className="flex-1">
-                <Edit className="h-4 w-4 mr-2" />
-                Edytuj
-              </Button>
-              <Button variant="outline" size="sm" className="text-sky-600 hover:text-sky-700">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
-

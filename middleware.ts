@@ -10,6 +10,7 @@ export async function middleware(request: NextRequest) {
     '/Login',
     '/Register',
     '/api/auth',
+    '/api/uploadthing',  // Required for UploadThing callbacks
     '/_next',
     '/static',
     '/logo',

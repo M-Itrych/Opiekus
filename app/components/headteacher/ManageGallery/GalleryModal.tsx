@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2, X, Trash2, Image as ImageIcon, Edit2, ZoomIn, Upload } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing";
+import Image from "next/image";
 
 interface GalleryModalProps {
   galleryId?: string | null;
@@ -326,7 +327,7 @@ export function GalleryModal({ galleryId, isOpen, onClose, onSuccess }: GalleryM
           onClick={() => setSelectedImage(null)}
         >
           <div className="relative max-w-7xl max-h-full">
-            <img
+            <Image
               src={selectedImage}
               alt="Powiększone zdjęcie"
               className="max-w-full max-h-[90vh] object-contain rounded-lg"
@@ -534,7 +535,7 @@ export function GalleryModal({ galleryId, isOpen, onClose, onSuccess }: GalleryM
                                 className="group relative border dark:border-zinc-700 rounded-lg overflow-hidden bg-zinc-50 dark:bg-zinc-800 hover:shadow-md transition-shadow"
                               >
                                 <div className="relative aspect-video bg-zinc-200 dark:bg-zinc-900">
-                                  <img
+                                  <Image
                                     src={photo.url}
                                     alt={photo.caption || "Zdjęcie"}
                                     className="w-full h-full object-cover cursor-pointer"
@@ -623,7 +624,7 @@ export function GalleryModal({ galleryId, isOpen, onClose, onSuccess }: GalleryM
                                 className="group relative border dark:border-zinc-700 rounded-lg overflow-hidden bg-zinc-50 dark:bg-zinc-800 hover:shadow-md transition-shadow"
                               >
                                 <div className="relative aspect-video bg-zinc-200 dark:bg-zinc-900">
-                                  <img
+                                  <Image
                                     src={photo.url}
                                     alt={photo.caption || "Zdjęcie"}
                                     className="w-full h-full object-cover cursor-pointer"

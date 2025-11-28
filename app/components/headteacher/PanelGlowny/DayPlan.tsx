@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import Link from "next/link";
 import HeadTeacherCard from "./HeadTeacherCard";
 import { Button } from "@/components/ui/button";
 
@@ -20,12 +21,12 @@ export default function DayPlan({ upcomingEvents }: { upcomingEvents: { title: s
                 variant="outline"
                 className="flex items-center justify-between gap-2 px-4"
             >
-                <a href="/HeadTeacher/calendar" className="flex items-center gap-2">
+                <Link href="/HeadTeacher/Calendar" className="flex items-center gap-2">
                     <span className="text-sm text-black hover:text-sky-500">
                         Przejdz do kalendarza
                     </span>
                     <ChevronRight className="ml-2 h-4 w-4" />
-                </a>
+                </Link>
             </Button>
         </div>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">

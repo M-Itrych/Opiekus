@@ -71,6 +71,12 @@ enum TaskCategory {
   INNE
 }
 
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
 enum RecruitmentStatus {
   PENDING
   VERIFIED
@@ -373,6 +379,7 @@ model Task {
   description String?
   status      TaskStatus    @default(TODO)
   category    TaskCategory
+  priority    TaskPriority  @default(MEDIUM)
   dueDate     DateTime?
   completedAt DateTime?
   createdAt   DateTime      @default(now())

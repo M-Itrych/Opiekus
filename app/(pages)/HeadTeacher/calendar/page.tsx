@@ -71,6 +71,12 @@ const DEFAULT_CATEGORY_CONFIG: CategoryConfig = {
   icon: CalendarIcon,
 };
 
+const AUDIENCE_LABELS: Record<string, string> = {
+  ALL: "Wszyscy",
+  TEACHERS: "Nauczyciele",
+  PARENTS: "Rodzice",
+};
+
 const mapAnnouncementToEvent = (announcement: AnnouncementResponse): Event => {
   const config =
     CATEGORY_CONFIG[announcement.category as keyof typeof CATEGORY_CONFIG] ?? DEFAULT_CATEGORY_CONFIG;
@@ -81,9 +87,12 @@ const mapAnnouncementToEvent = (announcement: AnnouncementResponse): Event => {
   const timeLabel = endDate
     ? `${format(startDate, "HH:mm")} - ${format(endDate, "HH:mm")}`
     : format(startDate, "HH:mm");
+  const audienceLabel = announcement.targetGroup
+    ? AUDIENCE_LABELS[announcement.targetGroup] || announcement.targetGroup
+    : null;
   const participants =
     announcement.group?.name?.trim() ||
-    announcement.targetGroup?.trim() ||
+    audienceLabel ||
     (announcement.author
       ? [announcement.author.name, announcement.author.surname].filter(Boolean).join(" ").trim()
       : "") ||

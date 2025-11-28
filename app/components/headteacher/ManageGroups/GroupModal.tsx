@@ -48,21 +48,19 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
   const [activeTab, setActiveTab] = useState("details");
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  
-  // Form Data
+
   const [name, setName] = useState("");
   const [ageRange, setAgeRange] = useState("");
   const [maxCapacity, setMaxCapacity] = useState("25");
   const [roomId, setRoomId] = useState<string | null>(null);
 
-  // Lists
+
   const [groupChildren, setGroupChildren] = useState<Child[]>([]);
   const [groupStaff, setGroupStaff] = useState<Staff[]>([]);
   const [availableTeachers, setAvailableTeachers] = useState<Staff[]>([]);
   const [unassignedChildren, setUnassignedChildren] = useState<Child[]>([]);
   const [allGroups, setAllGroups] = useState<{id: string, name: string}[]>([]);
 
-  // Selection for adding
   const [selectedChildToAdd, setSelectedChildToAdd] = useState<string>("");
   const [selectedTeacherToAdd, setSelectedTeacherToAdd] = useState<string>("");
 
@@ -91,7 +89,7 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
       const [teachersRes, childrenRes, groupsRes] = await Promise.all([
         fetch("/api/staff/teachers"),
         fetch("/api/children/unassigned"),
-        fetch("/api/groups") // Need to know other groups for moving children potentially
+        fetch("/api/groups")
       ]);
       
       if (teachersRes.ok) setAvailableTeachers(await teachersRes.json());
@@ -145,13 +143,12 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
       if (!response.ok) throw new Error("Failed to save");
 
       if (!groupId) {
-        // If creating new group, close and refresh
+    
         onSuccess();
         onClose();
       } else {
-        // If updating, just refresh details
         fetchGroupDetails(groupId);
-        onSuccess(); // Refresh list in background
+        onSuccess();
       }
     } catch (error) {
       console.error(error);
@@ -172,7 +169,7 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
 
       if (response.ok) {
         fetchGroupDetails(groupId);
-        fetchAuxiliaryData(); // Refresh unassigned list
+        fetchAuxiliaryData();
         setSelectedChildToAdd("");
       }
     } catch (error) {
@@ -256,7 +253,6 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b dark:border-zinc-800">
           <div>
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
@@ -271,7 +267,6 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
           </Button>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
           {isLoading ? (
             <div className="flex justify-center py-10">
@@ -279,7 +274,6 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Custom Tabs */}
               <div className="flex space-x-1 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
                 <button
                   onClick={() => setActiveTab("details")}
@@ -315,7 +309,6 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
                 </button>
               </div>
 
-              {/* Tab Content: Details */}
               {activeTab === "details" && (
                 <div className="space-y-4">
                   <div className="grid gap-2">
@@ -354,7 +347,6 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
                 </div>
               )}
 
-              {/* Tab Content: Children */}
               {activeTab === "children" && (
                 <div className="space-y-4">
                   <div className="flex gap-2">
@@ -417,7 +409,6 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
                 </div>
               )}
 
-              {/* Tab Content: Staff */}
               {activeTab === "staff" && (
                 <div className="space-y-4">
                   <div className="flex gap-2">

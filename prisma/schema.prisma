@@ -71,6 +71,12 @@ enum TaskCategory {
   INNE
 }
 
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
 enum RecruitmentStatus {
   PENDING
   VERIFIED
@@ -380,18 +386,19 @@ model MealPlan {
 }
 
 model Task {
-  id           String       @id @default(uuid())
-  assignedToId String
-  title        String
-  description  String?
-  status       TaskStatus   @default(TODO)
-  category     TaskCategory
-  dueDate      DateTime?
-  completedAt  DateTime?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id          String        @id @default(uuid())
+  assignedToId String       
+  title       String
+  description String?
+  status      TaskStatus    @default(TODO)
+  category    TaskCategory
+  priority    TaskPriority  @default(MEDIUM)
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
-  assignedTo User @relation(fields: [assignedToId], references: [id])
+  assignedTo User           @relation(fields: [assignedToId], references: [id])
 
   @@map("tasks")
 }

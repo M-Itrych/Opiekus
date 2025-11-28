@@ -24,6 +24,8 @@ interface CalendarModalProps {
 	onEventCreated?: () => void | Promise<void>
 }
 
+type AudienceOption = "ALL" | "TEACHERS" | "PARENTS"
+
 interface EventFormData {
 	title: string
 	description: string
@@ -33,6 +35,7 @@ interface EventFormData {
 	location: string
 	category: string
 	selectGroup: string | null
+	audience: AudienceOption
 }
 
 interface GroupOption {
@@ -50,7 +53,8 @@ export function CalendarModal({ onEventCreated }: CalendarModalProps) {
 		endTime: "",
 		location: "",
 		category: "inne",
-		selectGroup: null
+		selectGroup: null,
+		audience: "ALL"
 	})
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [buttonTone, setButtonTone] = useState<"default" | "success" | "error">("default")
@@ -89,7 +93,8 @@ export function CalendarModal({ onEventCreated }: CalendarModalProps) {
 			endTime: "",
 			location: "",
 			category: "inne",
-			selectGroup: null
+			selectGroup: null,
+			audience: "ALL"
 		})
 		setButtonTone("default")
 		setIsSubmitting(false)
@@ -130,7 +135,8 @@ export function CalendarModal({ onEventCreated }: CalendarModalProps) {
 			startTime: eventDate.toISOString(),
 			endTime: endDate ? endDate.toISOString() : null,
 			location: formData.location,
-			targetGroup: selectedGroup?.name || null,
+			audience: formData.audience,
+			targetGroup: formData.audience,
 			groupId: selectedGroup?.id || null,
 			isImportant: false
 		}
@@ -181,6 +187,13 @@ export function CalendarModal({ onEventCreated }: CalendarModalProps) {
 		setFormData(prev => ({
 			...prev,
 			selectGroup: value === "none" ? null : value
+		}))
+	}
+
+	const handleAudienceChange = (value: AudienceOption) => {
+		setFormData(prev => ({
+			...prev,
+			audience: value
 		}))
 	}
 
@@ -347,6 +360,23 @@ export function CalendarModal({ onEventCreated }: CalendarModalProps) {
 									{groupsError && (
 										<p className="text-sm text-red-600 mt-1">{groupsError}</p>
 									)}
+								</Field>
+
+								<Field>
+									<FieldLabel>Odbiorcy ogłoszenia</FieldLabel>
+									<Select value={formData.audience} onValueChange={value => handleAudienceChange(value as AudienceOption)}>
+										<SelectTrigger className="w-full">
+											<SelectValue placeholder="Wybierz odbiorców" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="ALL">Wszyscy</SelectItem>
+											<SelectItem value="TEACHERS">Tylko nauczyciele</SelectItem>
+											<SelectItem value="PARENTS">Tylko rodzice</SelectItem>
+										</SelectContent>
+									</Select>
+									<FieldDescription>
+										Określ kto zobaczy to ogłoszenie
+									</FieldDescription>
 								</Field>
 							</FieldGroup>
 						</FieldSet>

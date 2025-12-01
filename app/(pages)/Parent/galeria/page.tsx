@@ -7,8 +7,9 @@ import EventIcon from "@mui/icons-material/Event";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import Image from "next/image";
-import { Loader2, Image as ImageIcon, ZoomIn } from "lucide-react";
+import { Loader2, Image as ImageIcon, ZoomIn, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
 
 interface GalleryPhoto {
   id: string;
@@ -174,7 +175,7 @@ export default function GaleriaPage() {
               className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white"
               onClick={() => setSelectedImage(null)}
             >
-              <ImageIcon className="h-6 w-6" />
+              <X className="h-5 w-5" />
             </Button>
           </div>
         </div>

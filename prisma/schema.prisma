@@ -184,9 +184,9 @@ model Room {
 
 model Child {
   id              String   @id @default(uuid())
+  age             Int
   name            String
   surname         String
-  dateOfBirth     DateTime
   parentId        String
   groupId         String?
   hasImageConsent Boolean  @default(false)
@@ -352,6 +352,9 @@ model RecruitmentApplication {
   parentName         String
   parentEmail        String
   parentPhone        String
+  parent2Name        String?
+  parent2Email       String?
+  parent2Phone       String?
   applicationDate    DateTime          @default(now())
   status             RecruitmentStatus @default(PENDING)
   birthCertificate   Boolean           @default(false)

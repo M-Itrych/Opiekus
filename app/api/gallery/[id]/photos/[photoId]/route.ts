@@ -6,7 +6,7 @@ import { deleteFileFromUploadThing } from "@/lib/uploadthing-server";
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string; photoId: string } }
+  { params }: { params: Promise<{ id: string; photoId: string }> }
 ) {
   try {
     const cookieStore = await cookies();
@@ -105,7 +105,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string; photoId: string } }
+  { params }: { params: Promise<{ id: string; photoId: string }> }
 ) {
   try {
     const cookieStore = await cookies();

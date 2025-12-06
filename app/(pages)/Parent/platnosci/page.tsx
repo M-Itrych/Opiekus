@@ -1,6 +1,6 @@
- 'use client';
+'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import PaymentIcon from '@mui/icons-material/Payment';
 import HistoryIcon from '@mui/icons-material/History';
@@ -8,228 +8,126 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import { Loader2 } from 'lucide-react';
 
-type PaymentStatus = 'pending' | 'overdue';
-
-type ChargeType = 'przedszkole' | 'posilki' | 'dodatkowe';
-
-interface ChargeItem {
+interface ApiPayment {
   id: string;
-  type: ChargeType;
-  label: string;
+  childId: string;
   amount: number;
+  description: string;
+  dueDate: string;
+  paidDate: string | null;
+  status: 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
+  createdAt: string;
+  child: {
+    id: string;
+    name: string;
+    surname: string;
+  };
 }
-
-interface UpcomingPayment {
-  id: string;
-  month: string;
-  dueDate: string; // ISO date
-  charges: ChargeItem[];
-  status: PaymentStatus;
-  notes?: string;
-}
-
-interface PaymentHistoryItem {
-  id: string;
-  month: string;
-  charges: ChargeItem[];
-  paymentDate: string; 
-  method: 'Przelew online' | 'Gotówka' | 'Przelew tradycyjny';
-  reference: string;
-}
-
-const upcomingSeed: UpcomingPayment[] = [
-  {
-    id: 'up-2025-02',
-    month: 'Luty 2025',
-    dueDate: '2025-02-10',
-    charges: [
-      { id: 'c1', type: 'przedszkole', label: 'Czesne podstawowe', amount: 480 },
-      { id: 'c2', type: 'posilki', label: 'Wyżywienie (4 posiłki)', amount: 130 },
-      { id: 'c3', type: 'dodatkowe', label: 'Warsztaty muzyczne', amount: 40 },
-    ],
-    status: 'pending',
-    notes: 'Standardowe czesne + zajęcia dodatkowe',
-  },
-  {
-    id: 'up-2025-03',
-    month: 'Marzec 2025',
-    dueDate: '2025-03-10',
-    charges: [
-      { id: 'c1', type: 'przedszkole', label: 'Czesne podstawowe', amount: 480 },
-      { id: 'c2', type: 'posilki', label: 'Wyżywienie (4 posiłki)', amount: 130 },
-      { id: 'c3', type: 'dodatkowe', label: 'Zajęcia sportowe', amount: 30 },
-    ],
-    status: 'pending',
-    notes: 'Standardowe czesne',
-  },
-  {
-    id: 'up-2025-01',
-    month: 'Styczeń 2025',
-    dueDate: '2025-01-10',
-    charges: [
-      { id: 'c1', type: 'przedszkole', label: 'Czesne podstawowe', amount: 480 },
-      { id: 'c2', type: 'posilki', label: 'Wyżywienie (4 posiłki)', amount: 120 },
-      { id: 'c3', type: 'dodatkowe', label: 'Materiał plastyczny', amount: 20 },
-    ],
-    status: 'overdue',
-    notes: 'Prosimy o pilne uregulowanie należności za styczeń',
-  },
-];
-
-const historySeed: PaymentHistoryItem[] = [
-  {
-    id: 'hist-2024-12',
-    month: 'Grudzień 2024',
-    charges: [
-      { id: 'c1', type: 'przedszkole', label: 'Czesne podstawowe', amount: 480 },
-      { id: 'c2', type: 'posilki', label: 'Wyżywienie (4 posiłki)', amount: 120 },
-      { id: 'c3', type: 'dodatkowe', label: 'Teatrzyk mikołajkowy', amount: 20 },
-    ],
-    paymentDate: '2024-12-08T14:20:00',
-    method: 'Przelew online',
-    reference: 'OP-2024-12-001',
-  },
-  {
-    id: 'hist-2024-11',
-    month: 'Listopad 2024',
-    charges: [
-      { id: 'c1', type: 'przedszkole', label: 'Czesne podstawowe', amount: 480 },
-      { id: 'c2', type: 'posilki', label: 'Wyżywienie (4 posiłki)', amount: 120 },
-      { id: 'c3', type: 'dodatkowe', label: 'Basen', amount: 20 },
-    ],
-    paymentDate: '2024-11-10T09:30:00',
-    method: 'Przelew tradycyjny',
-    reference: 'OP-2024-11-005',
-  },
-  {
-    id: 'hist-2024-10',
-    month: 'Październik 2024',
-    charges: [
-      { id: 'c1', type: 'przedszkole', label: 'Czesne podstawowe', amount: 480 },
-      { id: 'c2', type: 'posilki', label: 'Wyżywienie (4 posiłki)', amount: 110 },
-      { id: 'c3', type: 'dodatkowe', label: 'Dzień dyni – warsztaty', amount: 20 },
-    ],
-    paymentDate: '2024-10-09T16:05:00',
-    method: 'Gotówka',
-    reference: 'KASA/2024/087',
-  },
-];
 
 export default function PlatnosciPage() {
-  const [upcomingPayments, setUpcomingPayments] = useState<UpcomingPayment[]>(upcomingSeed);
-  const [history, setHistory] = useState<PaymentHistoryItem[]>(historySeed);
+  const [payments, setPayments] = useState<ApiPayment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
-  const [selectedChargeMap, setSelectedChargeMap] = useState<Record<string, string[]>>(() =>
-    upcomingSeed.reduce<Record<string, string[]>>((acc, payment) => {
-      acc[payment.id] = payment.charges.map((charge) => charge.id);
-      return acc;
-    }, {})
-  );
+
+  const fetchPayments = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const res = await fetch('/api/payments');
+      if (!res.ok) throw new Error('Błąd pobierania płatności');
+      
+      const data: ApiPayment[] = await res.json();
+      setPayments(data);
+    } catch (err) {
+      console.error(err);
+      setError('Nie udało się pobrać płatności');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPayments();
+  }, [fetchPayments]);
+
+  const { upcomingPayments, paidPayments } = useMemo(() => {
+    const upcoming = payments.filter(
+      (p) => p.status === 'PENDING' || p.status === 'OVERDUE'
+    );
+    const paid = payments.filter((p) => p.status === 'PAID');
+    return { upcomingPayments: upcoming, paidPayments: paid };
+  }, [payments]);
 
   const totalOutstanding = useMemo(
-    () =>
-      upcomingPayments.reduce(
-        (sum, item) =>
-          sum + item.charges.reduce((chargeSum, charge) => chargeSum + charge.amount, 0),
-        0
-      ),
+    () => upcomingPayments.reduce((sum, item) => sum + item.amount, 0),
     [upcomingPayments]
   );
 
   const nearestDue = useMemo(() => {
     if (upcomingPayments.length === 0) return null;
-    return [...upcomingPayments].sort((a, b) => (a.dueDate > b.dueDate ? 1 : -1))[0];
+    return [...upcomingPayments].sort(
+      (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+    )[0];
   }, [upcomingPayments]);
 
-  const toggleChargeSelection = (payment: UpcomingPayment, chargeId: string) => {
-    setSelectedChargeMap((prev) => {
-      const current = prev[payment.id] ?? payment.charges.map((charge) => charge.id);
-      const updated = current.includes(chargeId)
-        ? current.filter((id) => id !== chargeId)
-        : [...current, chargeId];
-      return { ...prev, [payment.id]: updated };
-    });
-  };
-
-  const toggleAllCharges = (payment: UpcomingPayment, selectAll: boolean) => {
-    setSelectedChargeMap((prev) => ({
-      ...prev,
-      [payment.id]: selectAll ? payment.charges.map((charge) => charge.id) : [],
-    }));
-  };
-
-  const handlePay = (payment: UpcomingPayment) => {
+  const handlePay = async (payment: ApiPayment) => {
     if (isProcessing) return;
 
-    const selectedIds =
-      selectedChargeMap[payment.id] ?? payment.charges.map((charge) => charge.id);
-
-    if (selectedIds.length === 0) {
-      alert('Wybierz przynajmniej jedną pozycję do opłacenia.');
-      return;
-    }
-
-    const chargesToPay = payment.charges.filter((charge) => selectedIds.includes(charge.id));
-    if (chargesToPay.length === 0) {
-      alert('Nie wybrano żadnych pozycji do opłacenia.');
-      return;
-    }
-
-    const remainingCharges = payment.charges.filter(
-      (charge) => !selectedIds.includes(charge.id)
-    );
-
     setIsProcessing(payment.id);
-    setTimeout(() => {
-      setUpcomingPayments((prev) =>
-        prev
-          .map((item) =>
-            item.id === payment.id
-              ? remainingCharges.length === 0
-                ? null
-                : {
-                    ...item,
-                    charges: remainingCharges,
-                  }
-              : item
-          )
-          .filter(Boolean) as UpcomingPayment[]
-      );
-      setHistory((prev) => [
-        {
-          id: `hist-${payment.id}-${Date.now()}`,
-          month: payment.month,
-          charges: chargesToPay,
-          paymentDate: new Date().toISOString(),
-          method: 'Przelew online',
-          reference: `OP-${payment.id.toUpperCase()}`,
-        },
-        ...prev,
-      ]);
-      setSelectedChargeMap((prev) => {
-        const updated = { ...prev };
-        if (remainingCharges.length === 0) {
-          delete updated[payment.id];
-        } else {
-          updated[payment.id] = remainingCharges.map((charge) => charge.id);
-        }
-        return updated;
+    try {
+      const res = await fetch(`/api/payments/${payment.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'PAID' }),
       });
-      setIsProcessing(null);
-      const amountPaid = chargesToPay.reduce((sum, charge) => sum + charge.amount, 0);
+
+      if (!res.ok) throw new Error('Błąd przetwarzania płatności');
+
+      await fetchPayments();
       alert(
-        `Opłata za ${payment.month} (${chargesToPay
-          .map((charge) => charge.label)
-          .join(', ')}) została zarejestrowana. Kwota: ${amountPaid.toLocaleString('pl-PL', {
+        `Opłata została zarejestrowana. Kwota: ${payment.amount.toLocaleString('pl-PL', {
           style: 'currency',
           currency: 'PLN',
-        })}.`
+        })}`
       );
-    }, 1000);
+    } catch (err) {
+      console.error(err);
+      alert('Wystąpił błąd podczas przetwarzania płatności');
+    } finally {
+      setIsProcessing(null);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="p-4 md:p-6 min-h-[60vh] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-gray-500">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <p>Ładowanie płatności...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 md:p-6 min-h-[60vh] flex items-center justify-center">
+        <div className="text-center text-red-600">
+          <p>{error}</p>
+          <button
+            onClick={fetchPayments}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Spróbuj ponownie
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -279,11 +177,11 @@ export default function PlatnosciPage() {
           <table className="w-full min-w-[720px] text-sm text-left">
             <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
               <tr>
-                <th className="px-5 py-3">Miesiąc</th>
+                <th className="px-5 py-3">Dziecko</th>
+                <th className="px-5 py-3">Opis</th>
                 <th className="px-5 py-3">Termin płatności</th>
-                <th className="px-5 py-3">Skład opłaty</th>
+                <th className="px-5 py-3">Kwota</th>
                 <th className="px-5 py-3">Status</th>
-                <th className="px-5 py-3">Uwagi</th>
                 <th className="px-5 py-3 text-right">Akcje</th>
               </tr>
             </thead>
@@ -297,7 +195,10 @@ export default function PlatnosciPage() {
               ) : (
                 upcomingPayments.map((payment) => (
                   <tr key={payment.id} className="hover:bg-gray-50/70 transition-colors">
-                    <td className="px-5 py-4 font-medium text-gray-800">{payment.month}</td>
+                    <td className="px-5 py-4 font-medium text-gray-800">
+                      {payment.child.name} {payment.child.surname}
+                    </td>
+                    <td className="px-5 py-4 text-gray-700">{payment.description}</td>
                     <td className="px-5 py-4 text-gray-600">
                       {new Date(payment.dueDate).toLocaleDateString('pl-PL', {
                         day: '2-digit',
@@ -305,96 +206,21 @@ export default function PlatnosciPage() {
                         year: 'numeric',
                       })}
                     </td>
-                    <td className="px-5 py-4 text-gray-700 text-sm">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>Wybierz pozycje do opłacenia</span>
-                          <button
-                            onClick={() =>
-                              toggleAllCharges(
-                                payment,
-                                !(
-                                  (selectedChargeMap[payment.id] ??
-                                    payment.charges.map((charge) => charge.id)
-                                  ).length === payment.charges.length
-                                )
-                              )
-                            }
-                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700"
-                          >
-                            {(
-                              selectedChargeMap[payment.id] ??
-                              payment.charges.map((charge) => charge.id)
-                            ).length === payment.charges.length ? (
-                              <>
-                                <CheckBoxIcon fontSize="inherit" />
-                                Odznacz wszystkie
-                              </>
-                            ) : (
-                              <>
-                                <CheckBoxOutlineBlankIcon fontSize="inherit" />
-                                Zaznacz wszystkie
-                              </>
-                            )}
-                          </button>
-                        </div>
-                        <ul className="space-y-1">
-                          {payment.charges.map((charge) => {
-                            const selectedIds =
-                              selectedChargeMap[payment.id] ??
-                              payment.charges.map((item) => item.id);
-                            const isSelected = selectedIds.includes(charge.id);
-                            return (
-                              <li
-                                key={charge.id}
-                                className="flex items-center justify-between gap-4 rounded-lg border border-gray-100 bg-white px-3 py-2"
-                              >
-                                <label className="flex items-center gap-2 font-medium text-gray-800">
-                                  <input
-                                    type="checkbox"
-                                    checked={isSelected}
-                                    onChange={() => toggleChargeSelection(payment, charge.id)}
-                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                                  />
-                                  {charge.label}
-                                </label>
-                                <span className="text-gray-600">
-                                  {charge.amount.toLocaleString('pl-PL', {
-                                    style: 'currency',
-                                    currency: 'PLN',
-                                  })}
-                                </span>
-                              </li>
-                            );
-                          })}
-                          <li className="border-t border-gray-100 pt-1 flex items-center justify-between text-sm font-semibold text-gray-900">
-                            <span>Łącznie</span>
-                            <span>
-                              {(
-                                selectedChargeMap[payment.id] ??
-                                payment.charges.map((charge) => charge.id)
-                              )
-                                .map(
-                                  (chargeId) =>
-                                    payment.charges.find((charge) => charge.id === chargeId)
-                                      ?.amount ?? 0
-                                )
-                                .reduce((sum, value) => sum + value, 0)
-                                .toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' })}
-                            </span>
-                          </li>
-                        </ul>
-                      </div>
+                    <td className="px-5 py-4 font-semibold text-gray-900">
+                      {payment.amount.toLocaleString('pl-PL', {
+                        style: 'currency',
+                        currency: 'PLN',
+                      })}
                     </td>
                     <td className="px-5 py-4">
                       <span
                         className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                          payment.status === 'pending'
+                          payment.status === 'PENDING'
                             ? 'border border-blue-200 bg-blue-50 text-blue-600'
                             : 'border border-amber-200 bg-amber-50 text-amber-600'
                         }`}
                       >
-                        {payment.status === 'pending' ? (
+                        {payment.status === 'PENDING' ? (
                           <>
                             <HourglassBottomIcon fontSize="inherit" />
                             Oczekujące
@@ -407,35 +233,20 @@ export default function PlatnosciPage() {
                         )}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-gray-500 text-sm">
-                      {payment.notes ?? '—'}
-                    </td>
                     <td className="px-5 py-4 text-right">
-                      {(() => {
-                        const selectedIds =
-                          selectedChargeMap[payment.id] ??
-                          payment.charges.map((charge) => charge.id);
-                        const selectedTotal = payment.charges
-                          .filter((charge) => selectedIds.includes(charge.id))
-                          .reduce((sum, charge) => sum + charge.amount, 0);
-                        return (
-                          <button
-                            onClick={() => handlePay(payment)}
-                            disabled={isProcessing === payment.id || selectedTotal === 0}
-                            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors disabled:cursor-not-allowed disabled:bg-blue-300"
-                          >
-                            <CheckCircleIcon fontSize="small" />
-                            {isProcessing === payment.id
-                              ? 'Przetwarzanie...'
-                              : selectedTotal > 0
-                              ? `Zapłać ${selectedTotal.toLocaleString('pl-PL', {
-                                  style: 'currency',
-                                  currency: 'PLN',
-                                })}`
-                              : 'Wybierz pozycje'}
-                          </button>
-                        );
-                      })()}
+                      <button
+                        onClick={() => handlePay(payment)}
+                        disabled={isProcessing === payment.id}
+                        className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors disabled:cursor-not-allowed disabled:bg-blue-300"
+                      >
+                        <CheckCircleIcon fontSize="small" />
+                        {isProcessing === payment.id
+                          ? 'Przetwarzanie...'
+                          : `Zapłać ${payment.amount.toLocaleString('pl-PL', {
+                              style: 'currency',
+                              currency: 'PLN',
+                            })}`}
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -451,7 +262,7 @@ export default function PlatnosciPage() {
           <div>
             <h2 className="text-lg font-semibold text-gray-800">Historia płatności</h2>
             <p className="text-xs text-gray-500">
-              Zobacz ostatnie transakcje wraz z numerem referencyjnym oraz formą płatności.
+              Zobacz ostatnie transakcje wraz z datą opłacenia.
             </p>
           </div>
         </header>
@@ -459,58 +270,50 @@ export default function PlatnosciPage() {
           <table className="w-full min-w-[720px] text-sm text-left">
             <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
               <tr>
-                <th className="px-5 py-3">Miesiąc</th>
+                <th className="px-5 py-3">Dziecko</th>
+                <th className="px-5 py-3">Opis</th>
                 <th className="px-5 py-3">Data płatności</th>
-                <th className="px-5 py-3">Skład opłaty</th>
-                <th className="px-5 py-3">Metoda</th>
-                <th className="px-5 py-3">Numer ref.</th>
+                <th className="px-5 py-3">Kwota</th>
+                <th className="px-5 py-3">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {history.length === 0 ? (
+              {paidPayments.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-5 py-6 text-center text-gray-500 text-sm">
                     Brak zarejestrowanych płatności.
                   </td>
                 </tr>
               ) : (
-                history.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50/70 transition-colors">
-                    <td className="px-5 py-4 font-medium text-gray-800">{item.month}</td>
+                paidPayments.map((payment) => (
+                  <tr key={payment.id} className="hover:bg-gray-50/70 transition-colors">
+                    <td className="px-5 py-4 font-medium text-gray-800">
+                      {payment.child.name} {payment.child.surname}
+                    </td>
+                    <td className="px-5 py-4 text-gray-700">{payment.description}</td>
                     <td className="px-5 py-4 text-gray-600">
-                      {new Date(item.paymentDate).toLocaleString('pl-PL', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
+                      {payment.paidDate
+                        ? new Date(payment.paidDate).toLocaleString('pl-PL', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })
+                        : '-'}
+                    </td>
+                    <td className="px-5 py-4 font-semibold text-gray-900">
+                      {payment.amount.toLocaleString('pl-PL', {
+                        style: 'currency',
+                        currency: 'PLN',
                       })}
                     </td>
-                    <td className="px-5 py-4 text-gray-700 text-sm">
-                      <ul className="space-y-1">
-                        {item.charges.map((charge) => (
-                          <li key={charge.id} className="flex items-center justify-between gap-4">
-                            <span className="font-medium text-gray-800">{charge.label}</span>
-                            <span className="text-gray-600">
-                              {charge.amount.toLocaleString('pl-PL', {
-                                style: 'currency',
-                                currency: 'PLN',
-                              })}
-                            </span>
-                          </li>
-                        ))}
-                        <li className="border-t border-gray-100 pt-1 flex items-center justify-between text-sm font-semibold text-gray-900">
-                          <span>Łącznie</span>
-                          <span>
-                            {item.charges
-                              .reduce((sum, charge) => sum + charge.amount, 0)
-                              .toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' })}
-                          </span>
-                        </li>
-                      </ul>
+                    <td className="px-5 py-4">
+                      <span className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-emerald-200 bg-emerald-50 text-emerald-600">
+                        <CheckCircleIcon fontSize="inherit" />
+                        Opłacone
+                      </span>
                     </td>
-                    <td className="px-5 py-4 text-gray-600">{item.method}</td>
-                    <td className="px-5 py-4 text-gray-500">{item.reference}</td>
                   </tr>
                 ))
               )}
@@ -521,4 +324,3 @@ export default function PlatnosciPage() {
     </div>
   );
 }
-

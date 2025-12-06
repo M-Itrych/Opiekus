@@ -4,7 +4,8 @@ import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/session";
 
 async function getAuthUser() {
-  const token = cookies().get("session")?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
   if (!token) return null;
   return await verifyToken(token);
 }
@@ -17,8 +18,9 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const sessionId = session.id as string;
     const user = await prisma.user.findUnique({
-      where: { id: session.id },
+      where: { id: sessionId },
       select: {
         id: true,
         role: true,
@@ -45,7 +47,7 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    let teacherChildren = [];
+    let teacherChildren: Array<{ id: string; name: string; surname: string; groupId: string | null }> = [];
 
     if (user.role === "TEACHER" && user.staff?.groupId) {
       teacherChildren = await prisma.child.findMany({
@@ -80,6 +82,13 @@ export async function GET() {
               },
             })
           : [],
+    } as {
+      id: string;
+      role: string;
+      name: string;
+      surname: string;
+      email: string;
+      children: Array<{ id: string; name: string; surname: string; groupId: string | null }>;
     });
   } catch (error) {
     console.error("Session API error:", error);

@@ -13,11 +13,7 @@ const mockChildren = [
     hasDataConsent: true,
     allergies: ["Orzechy"],
     specialNeeds: undefined,
-    pickupAuthorized: [
-      { name: "Anna Kowalska", id: "p1", relation: "Mama" },
-      { name: "Piotr Kowalski", id: "p2", relation: "Tata" },
-      { name: "Maria Nowak", id: "p3", relation: "Babcia" },
-    ],
+    pickupAuthorized: ["Anna Kowalska", "Piotr Kowalski", "Maria Nowak"],
   },
   {
     id: "2",
@@ -28,10 +24,7 @@ const mockChildren = [
     hasDataConsent: true,
     allergies: [],
     specialNeeds: undefined,
-    pickupAuthorized: [
-      { name: "Katarzyna Nowak", id: "p4", relation: "Mama" },
-      { name: "Tomasz Nowak", id: "p5", relation: "Tata" },
-    ],
+    pickupAuthorized: ["Katarzyna Nowak", "Tomasz Nowak"],
   },
   {
     id: "3",
@@ -42,9 +35,7 @@ const mockChildren = [
     hasDataConsent: true,
     allergies: ["Laktoza"],
     specialNeeds: "Wymaga dodatkowej uwagi podczas zajęć",
-    pickupAuthorized: [
-      { name: "Ewa Wiśniewska", id: "p6", relation: "Mama" },
-    ],
+    pickupAuthorized: ["Ewa Wiśniewska"],
   },
   {
     id: "4",
@@ -55,11 +46,7 @@ const mockChildren = [
     hasDataConsent: true,
     allergies: [],
     specialNeeds: undefined,
-    pickupAuthorized: [
-      { name: "Agnieszka Wójcik", id: "p7", relation: "Mama" },
-      { name: "Robert Wójcik", id: "p8", relation: "Tata" },
-      { name: "Janina Kowalczyk", id: "p9", relation: "Babcia" },
-    ],
+    pickupAuthorized: ["Agnieszka Wójcik", "Robert Wójcik", "Janina Kowalczyk"],
   },
   {
     id: "5",
@@ -70,9 +57,7 @@ const mockChildren = [
     hasDataConsent: false,
     allergies: ["Jajka"],
     specialNeeds: undefined,
-    pickupAuthorized: [
-      { name: "Magdalena Kowalczyk", id: "p10", relation: "Mama" },
-    ],
+    pickupAuthorized: ["Magdalena Kowalczyk"],
   },
 ];
 

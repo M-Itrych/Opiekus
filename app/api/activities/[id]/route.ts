@@ -45,19 +45,20 @@ function normalizeChildId(value: unknown) {
   return undefined;
 }
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const user = await getSessionUser();
   if (!user) return NextResponse.json({ error: "Nieautoryzowany dostęp" }, { status: 401 });
   if (!["TEACHER", "HEADTEACHER"].includes(user.role)) {
     return NextResponse.json({ error: "Brak dostępu" }, { status: 403 });
   }
 
+  const { id } = await params;
   const payload = await req.json();
   const { title, description, date, activities: activitiesList } = payload;
   const hasChildId = Object.prototype.hasOwnProperty.call(payload, "childId");
   const normalizedChildId = hasChildId ? normalizeChildId(payload.childId) : undefined;
 
-  const existing = await prisma.activity.findUnique({ where: { id: params.id } });
+  const existing = await prisma.activity.findUnique({ where: { id } });
   if (!existing) return NextResponse.json({ error: "Aktywność nie znaleziona" }, { status: 404 });
 
   let teacherGroupId: string | null = null;
@@ -81,7 +82,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     : existing.childId;
 
   const updated = await prisma.activity.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       title: title || existing.title,
       description: description ?? existing.description,
@@ -98,14 +99,15 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   return NextResponse.json(updated);
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const user = await getSessionUser();
   if (!user) return NextResponse.json({ error: "Nieautoryzowany dostęp" }, { status: 401 });
   if (!["TEACHER", "HEADTEACHER"].includes(user.role)) {
     return NextResponse.json({ error: "Brak dostępu" }, { status: 403 });
   }
 
-  const existing = await prisma.activity.findUnique({ where: { id: params.id } });
+  const { id } = await params;
+  const existing = await prisma.activity.findUnique({ where: { id } });
   if (!existing) return NextResponse.json({ error: "Aktywność nie znaleziona" }, { status: 404 });
 
   if (user.role === "TEACHER") {
@@ -115,7 +117,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     }
   }
 
-  await prisma.activity.delete({ where: { id: params.id } });
+  await prisma.activity.delete({ where: { id } });
 
   return NextResponse.json({ success: true });
 }

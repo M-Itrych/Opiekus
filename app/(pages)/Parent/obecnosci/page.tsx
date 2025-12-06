@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { EventNote, CheckCircle, Cancel, CalendarToday, Save, ReportProblem, Close } from '@mui/icons-material';
+import { Loader2 } from 'lucide-react';
 
 type DayStatus = 'present' | 'absent' | 'pending';
 
 interface AttendanceData {
+  id?: string;
   status: DayStatus;
   reason?: string;
 }
@@ -14,6 +16,26 @@ interface DayData {
   date: Date;
   status: DayStatus;
   reason?: string;
+  id?: string;
+}
+
+interface ApiAttendance {
+  id: string;
+  childId: string;
+  date: string;
+  status: 'PRESENT' | 'ABSENT' | 'PENDING';
+  reason: string | null;
+  child: {
+    id: string;
+    name: string;
+    surname: string;
+  };
+}
+
+interface Child {
+  id: string;
+  name: string;
+  surname: string;
 }
 
 export default function ObecnosciPage() {
@@ -26,8 +48,124 @@ export default function ObecnosciPage() {
   const [absenceReason, setAbsenceReason] = useState('');
   const [hoveredDay, setHoveredDay] = useState<string | null>(null);
 
-  const [attendance, setAttendance] = useState<{ [key: string]: AttendanceData }>({
-  });
+  const [attendance, setAttendance] = useState<{ [key: string]: AttendanceData }>({});
+  const [children, setChildren] = useState<Child[]>([]);
+  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchChildren = useCallback(async () => {
+    try {
+      const res = await fetch('/api/children/unassigned');
+      // If this doesn't return proper children, we'll use the attendance data
+    } catch (err) {
+      console.error('Error fetching children:', err);
+    }
+  }, []);
+
+  const fetchAttendance = useCallback(async () => {
+    if (!selectedChildId) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+
+      const startDate = new Date(selectedYear, selectedMonth, 1);
+      const endDate = new Date(selectedYear, selectedMonth + 1, 0);
+      
+      const res = await fetch(
+        `/api/attendances?childId=${selectedChildId}&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
+      );
+      
+      if (!res.ok) throw new Error('Błąd pobierania obecności');
+      
+      const data: ApiAttendance[] = await res.json();
+      
+      const attendanceMap: { [key: string]: AttendanceData } = {};
+      data.forEach((item) => {
+        const dateKey = new Date(item.date).toISOString().split('T')[0];
+        attendanceMap[dateKey] = {
+          id: item.id,
+          status: item.status.toLowerCase() as DayStatus,
+          reason: item.reason || undefined,
+        };
+      });
+      
+      setAttendance(attendanceMap);
+      setHasChanges(false);
+    } catch (err) {
+      console.error(err);
+      setError('Nie udało się pobrać danych obecności');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedChildId, selectedMonth, selectedYear]);
+
+  const fetchAllAttendances = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const startDate = new Date(selectedYear, selectedMonth, 1);
+      const endDate = new Date(selectedYear, selectedMonth + 1, 0);
+      
+      const res = await fetch(
+        `/api/attendances?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
+      );
+      
+      if (!res.ok) throw new Error('Błąd pobierania obecności');
+      
+      const data: ApiAttendance[] = await res.json();
+      
+      // Extract unique children from attendance data
+      const uniqueChildren: { [key: string]: Child } = {};
+      data.forEach((item) => {
+        if (!uniqueChildren[item.child.id]) {
+          uniqueChildren[item.child.id] = item.child;
+        }
+      });
+      
+      const childList = Object.values(uniqueChildren);
+      setChildren(childList);
+      
+      if (childList.length > 0 && !selectedChildId) {
+        setSelectedChildId(childList[0].id);
+      }
+      
+      // Build attendance map for selected child
+      if (selectedChildId) {
+        const attendanceMap: { [key: string]: AttendanceData } = {};
+        data
+          .filter((item) => item.childId === selectedChildId)
+          .forEach((item) => {
+            const dateKey = new Date(item.date).toISOString().split('T')[0];
+            attendanceMap[dateKey] = {
+              id: item.id,
+              status: item.status.toLowerCase() as DayStatus,
+              reason: item.reason || undefined,
+            };
+          });
+        setAttendance(attendanceMap);
+      }
+      
+      setHasChanges(false);
+    } catch (err) {
+      console.error(err);
+      setError('Nie udało się pobrać danych obecności');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedMonth, selectedYear, selectedChildId]);
+
+  useEffect(() => {
+    fetchAllAttendances();
+  }, [fetchAllAttendances]);
+
+  useEffect(() => {
+    if (selectedChildId) {
+      fetchAttendance();
+    }
+  }, [selectedChildId, fetchAttendance]);
 
   const daysInMonth = useMemo(() => {
     const year = selectedYear;
@@ -56,7 +194,8 @@ export default function ObecnosciPage() {
       days.push({
         date,
         status: date > new Date() ? 'pending' : status,
-        reason: attendanceData?.reason
+        reason: attendanceData?.reason,
+        id: attendanceData?.id
       });
     }
 
@@ -121,6 +260,7 @@ export default function ObecnosciPage() {
       return {
         ...prev,
         [dateKey]: {
+          ...prev[dateKey],
           status: newStatus,
           reason: prev[dateKey]?.reason || ''
         }
@@ -159,6 +299,7 @@ export default function ObecnosciPage() {
     setAttendance(prev => ({
       ...prev,
       [dateKey]: {
+        ...prev[dateKey],
         status: 'absent',
         reason: absenceReason.trim()
       }
@@ -185,12 +326,38 @@ export default function ObecnosciPage() {
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
+    if (!selectedChildId) {
+      alert('Nie wybrano dziecka');
+      return;
+    }
 
-    setIsSaving(false);
-    setHasChanges(false);
-    alert('Zmiany zostały zapisane!');
+    setIsSaving(true);
+    try {
+      // Save all attendance changes
+      for (const [dateKey, data] of Object.entries(attendance)) {
+        if (data.status === 'absent') {
+          await fetch('/api/attendances', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              childId: selectedChildId,
+              date: dateKey,
+              status: 'ABSENT',
+              reason: data.reason || '',
+            }),
+          });
+        }
+      }
+
+      setHasChanges(false);
+      alert('Zmiany zostały zapisane!');
+      fetchAttendance();
+    } catch (err) {
+      console.error(err);
+      alert('Wystąpił błąd podczas zapisywania');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleMonthChange = (direction: 'prev' | 'next') => {
@@ -255,12 +422,52 @@ export default function ObecnosciPage() {
     }
   };
 
+  if (loading && children.length === 0) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-3 text-gray-500">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <p>Ładowanie danych obecności...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && children.length === 0) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[60vh]">
+        <div className="text-center text-red-600">
+          <p>{error}</p>
+          <button
+            onClick={fetchAllAttendances}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Spróbuj ponownie
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
       <div className="mb-6 flex justify-between items-start">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Obecności</h1>
           <p className="text-gray-600">Zarządzaj obecnością dziecka w przedszkolu</p>
+          {children.length > 1 && (
+            <select
+              value={selectedChildId || ''}
+              onChange={(e) => setSelectedChildId(e.target.value)}
+              className="mt-2 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {children.map((child) => (
+                <option key={child.id} value={child.id}>
+                  {child.name} {child.surname}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
         <div className="flex gap-2">
           <button
@@ -485,4 +692,3 @@ export default function ObecnosciPage() {
     </div>
   );
 }
-

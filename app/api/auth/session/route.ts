@@ -3,10 +3,21 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/session";
 
-async function getAuthUser() {
-  const token = cookies().get("session")?.value;
+interface SessionPayload {
+  id: string;
+  email: string;
+  role: string;
+  name: string;
+  surname: string;
+}
+
+async function getAuthUser(): Promise<SessionPayload | null> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
   if (!token) return null;
-  return await verifyToken(token);
+  const payload = await verifyToken(token);
+  if (!payload) return null;
+  return payload as unknown as SessionPayload;
 }
 
 export async function GET() {
@@ -19,12 +30,7 @@ export async function GET() {
 
     const user = await prisma.user.findUnique({
       where: { id: session.id },
-      select: {
-        id: true,
-        role: true,
-        name: true,
-        surname: true,
-        email: true,
+      include: {
         children: {
           select: {
             id: true,
@@ -45,7 +51,7 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    let teacherChildren = [];
+    let teacherChildren: { id: string; name: string; surname: string; groupId: string | null }[] = [];
 
     if (user.role === "TEACHER" && user.staff?.groupId) {
       teacherChildren = await prisma.child.findMany({

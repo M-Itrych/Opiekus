@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,13 +17,32 @@ interface NavbarTemplateItem {
 
 interface NavbarTemplateProps {
     items: NavbarTemplateItem[];
-    userName?: string;
 }
 
-
-export default function NavbarTemplate({ items, userName = "Użytkownik" }: NavbarTemplateProps) {
+export default function NavbarTemplate({ items }: NavbarTemplateProps) {
     const pathname = usePathname();
     const [isHovered, setIsHovered] = useState(false);
+    const [userName, setUserName] = useState<string>("Użytkownik");
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await fetch("/api/auth/session");
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.name && data.surname) {
+                        setUserName(`${data.name} ${data.surname}`);
+                    } else if (data.email) {
+                        setUserName(data.email);
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
+
+        fetchUserData();
+    }, []);
         
         const router = useRouter();
         const signOut = () => {
@@ -132,14 +151,13 @@ export default function NavbarTemplate({ items, userName = "Użytkownik" }: Navb
                             >
                                 <span className="text-xs text-slate-500 font-medium">Zalogowany jako</span>
                                 <span className="text-sm font-semibold text-slate-800 truncate">{userName}</span>
-                                <span className="text-sm font-semibold text-slate-800 truncate">{pathname.split("/")[1]}</span>
                             </motion.div>
                         )}
                     </AnimatePresence>
                 </div>
 
                 <button 
-                    className="flex items-center justify-center group-hover:justify-start gap-2 p-3 rounded-xl hover:bg-red-50 hover:text-red-600 text-slate-600 w-full transition-all duration-300 ease-in-out overflow-visible transform hover:scale-[1.02] active:scale-[0.98] relative min-h-[48px] group/logout"
+                    className="flex items-center justify-center group-hover:justify-start gap-2 p-3 rounded-xl hover:bg-sky-50 hover:text-sky-600 text-slate-600 w-full transition-all duration-300 ease-in-out overflow-visible transform hover:scale-[1.02] active:scale-[0.98] relative min-h-[48px] group/logout"
                     onClick={() => {
                         signOut();
                     }}
@@ -162,10 +180,7 @@ export default function NavbarTemplate({ items, userName = "Użytkownik" }: Navb
                                     duration: 0.25, 
                                     ease: "easeOut",
                                 }}
-                                className="absolute left-14 text-sm whitespace-nowrap overflow-hidden font-semibold text-red-600"
-                                onClick={() => {
-                                    signOut();
-                                }}
+                                className="absolute left-14 text-sm whitespace-nowrap overflow-hidden font-semibold text-sky-600 cursor-pointer"
                             >
                                 Wyloguj
                             </motion.span>

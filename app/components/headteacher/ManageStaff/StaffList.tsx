@@ -470,8 +470,15 @@ export default function StaffList() {
       setLoading(true);
       setError(null);
       
-      // Sync existing TEACHER/HEADTEACHER users to Staff table first
-      await fetch("/api/staff/sync", { method: "POST" });
+      // Sync existing TEACHER users to Staff table first (ignore errors - non-critical)
+      try {
+        const syncResponse = await fetch("/api/staff/sync", { method: "POST" });
+        if (!syncResponse.ok) {
+          console.warn("Staff sync failed:", syncResponse.status);
+        }
+      } catch (syncErr) {
+        console.warn("Staff sync error:", syncErr);
+      }
       
       const response = await fetch("/api/staff", { cache: "no-store" });
       if (!response.ok) throw new Error("Błąd pobierania danych");

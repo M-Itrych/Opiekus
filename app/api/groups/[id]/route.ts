@@ -81,16 +81,21 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { name, ageRange, maxCapacity, roomId } = body;
+    const { name, ageRange, maxCapacity, roomId, breakfastPrice, lunchPrice, snackPrice } = body;
+
+    const updateData: Record<string, unknown> = {};
+    
+    if (name !== undefined) updateData.name = name;
+    if (ageRange !== undefined) updateData.ageRange = ageRange;
+    if (maxCapacity !== undefined) updateData.maxCapacity = parseInt(maxCapacity);
+    if (roomId !== undefined) updateData.roomId = roomId;
+    if (breakfastPrice !== undefined) updateData.breakfastPrice = parseFloat(breakfastPrice);
+    if (lunchPrice !== undefined) updateData.lunchPrice = parseFloat(lunchPrice);
+    if (snackPrice !== undefined) updateData.snackPrice = parseFloat(snackPrice);
 
     const updatedGroup = await prisma.group.update({
       where: { id },
-      data: {
-        name,
-        ageRange,
-        maxCapacity: maxCapacity ? parseInt(maxCapacity) : undefined,
-        roomId,
-      },
+      data: updateData,
     });
 
     return NextResponse.json(updatedGroup);

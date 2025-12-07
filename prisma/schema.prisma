@@ -45,21 +45,24 @@ model Staff {
 }
 
 model Group {
-  id            String         @id @default(uuid())
-  name          String
-  ageRange      String
-  maxCapacity   Int
-  roomId        String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  activities    Activity[]
-  announcements Announcement[]
-  children      Child[]
-  galleries     Gallery[]
-  room          Room?          @relation(fields: [roomId], references: [id])
-  mealPlans     MealPlan[]
-  staff         Staff[]
-  documents     DocumentGroup[]
+  id             String         @id @default(uuid())
+  name           String
+  ageRange       String
+  maxCapacity    Int
+  roomId         String?
+  breakfastPrice Float          @default(5.0)
+  lunchPrice     Float          @default(12.0)
+  snackPrice     Float          @default(4.0)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  activities     Activity[]
+  announcements  Announcement[]
+  children       Child[]
+  galleries      Gallery[]
+  room           Room?          @relation(fields: [roomId], references: [id])
+  mealPlans      MealPlan[]
+  staff          Staff[]
+  documents      DocumentGroup[]
 
   @@map("groups")
 }
@@ -87,6 +90,7 @@ model Child {
   hasDataConsent         Boolean                 @default(false)
   allergies              String[]                @default([])
   specialNeeds           String?
+  diet                   DietType                @default(STANDARD)
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
   age                    Int
@@ -99,6 +103,7 @@ model Child {
   pickupRecords          PickupRecord[]
   recruitmentApplication RecruitmentApplication?
   authorizedPersons      AuthorizedPerson[]
+  mealCancellations      MealCancellation[]
 
   @@index([parentId])
   @@index([groupId])
@@ -280,12 +285,14 @@ model MealPlan {
   name        String
   description String?
   allergens   String[] @default([])
+  diet        DietType @default(STANDARD)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   group       Group?   @relation(fields: [groupId], references: [id])
 
   @@index([groupId])
   @@index([date])
+  @@index([diet])
   @@map("meal_plans")
 }
 
@@ -519,6 +526,15 @@ enum TrainingCategory {
   INNE
 }
 
+enum DietType {
+  STANDARD
+  VEGETARIAN
+  VEGAN
+  GLUTEN_FREE
+  LACTOSE_FREE
+  CUSTOM
+}
+
 model AuthorizedPerson {
   id           String   @id @default(uuid())
   childId      String
@@ -534,4 +550,21 @@ model AuthorizedPerson {
 
   @@index([childId])
   @@map("authorized_persons")
+}
+
+model MealCancellation {
+  id        String   @id @default(uuid())
+  childId   String
+  date      DateTime
+  mealType  String
+  reason    String?
+  refunded  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  child     Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, date, mealType])
+  @@index([childId])
+  @@index([date])
+  @@map("meal_cancellations")
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
-import { X, Utensils, Coffee, Cookie, Loader2, Trash2, AlertTriangle } from "lucide-react";
+import { X, Utensils, Coffee, Cookie, Loader2, Trash2, AlertTriangle, Leaf, Wheat, Milk, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ interface MealPlan {
 	name: string;
 	description: string | null;
 	allergens: string[];
+	diet?: string;
 	groupId: string | null;
 	group?: {
 		id: string;
@@ -49,14 +50,25 @@ const COMMON_ALLERGENS = [
 	"Sezam",
 ];
 
+const DIET_TYPES = [
+	{ value: "STANDARD", label: "Standardowa", icon: Sparkles, color: "border-zinc-300 bg-zinc-50 text-zinc-700" },
+	{ value: "VEGETARIAN", label: "Wegetariańska", icon: Leaf, color: "border-green-300 bg-green-50 text-green-700" },
+	{ value: "VEGAN", label: "Wegańska", icon: Leaf, color: "border-emerald-300 bg-emerald-50 text-emerald-700" },
+	{ value: "GLUTEN_FREE", label: "Bezglutenowa", icon: Wheat, color: "border-amber-300 bg-amber-50 text-amber-700" },
+	{ value: "LACTOSE_FREE", label: "Bez laktozy", icon: Milk, color: "border-blue-300 bg-blue-50 text-blue-700" },
+	{ value: "CUSTOM", label: "Inna", icon: Sparkles, color: "border-purple-300 bg-purple-50 text-purple-700" },
+];
+
 export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalProps) {
 	const [mealType, setMealType] = useState("LUNCH");
 	const [name, setName] = useState("");
 	const [description, setDescription] = useState("");
 	const [allergens, setAllergens] = useState<string[]>([]);
+	const [diet, setDiet] = useState("STANDARD");
 	const [isSaving, setIsSaving] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [warning, setWarning] = useState<string | null>(null);
 
 	const isEditMode = !!meal;
 
@@ -66,13 +78,16 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 			setName(meal.name);
 			setDescription(meal.description || "");
 			setAllergens(meal.allergens || []);
+			setDiet(meal.diet || "STANDARD");
 		} else {
 			setMealType("LUNCH");
 			setName("");
 			setDescription("");
 			setAllergens([]);
+			setDiet("STANDARD");
 		}
 		setError(null);
+		setWarning(null);
 	}, [meal, isOpen]);
 
 	const toggleAllergen = (allergen: string) => {
@@ -94,6 +109,7 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 
 		setIsSaving(true);
 		setError(null);
+		setWarning(null);
 
 		try {
 			const payload = {
@@ -102,6 +118,7 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 				name: name.trim(),
 				description: description.trim() || null,
 				allergens,
+				diet,
 			};
 
 			const url = isEditMode ? `/api/menu/${meal.id}` : "/api/menu";
@@ -113,8 +130,16 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 				body: JSON.stringify(payload),
 			});
 
+			const data = await response.json();
+
+			// Check for diet conflict warning
+			if (data.warning && data.dietsInGroup) {
+				setWarning(data.warning);
+				setIsSaving(false);
+				return;
+			}
+
 			if (!response.ok) {
-				const data = await response.json();
 				throw new Error(data.error || "Wystąpił błąd");
 			}
 
@@ -180,6 +205,16 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 							</div>
 						)}
 
+						{warning && (
+							<div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300">
+								<AlertTriangle className="h-4 w-4 shrink-0" />
+								<div>
+									<p>{warning}</p>
+									<p className="text-xs mt-1">Kliknij ponownie aby zapisać mimo ostrzeżenia.</p>
+								</div>
+							</div>
+						)}
+
 						<div className="space-y-2">
 							<Label>Typ posiłku</Label>
 							<div className="grid grid-cols-3 gap-2">
@@ -196,6 +231,27 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 									>
 										<Icon className="h-5 w-5" />
 										<span className="text-sm font-medium">{label}</span>
+									</button>
+								))}
+							</div>
+						</div>
+
+						<div className="space-y-2">
+							<Label>Dieta</Label>
+							<div className="grid grid-cols-3 gap-2">
+								{DIET_TYPES.map(({ value, label, icon: Icon, color }) => (
+									<button
+										key={value}
+										type="button"
+										onClick={() => setDiet(value)}
+										className={`flex items-center gap-2 p-2 rounded-lg border-2 transition-all text-left ${
+											diet === value
+												? color + " border-2"
+												: "border-zinc-200 hover:border-zinc-300 text-zinc-600"
+										}`}
+									>
+										<Icon className="h-4 w-4 shrink-0" />
+										<span className="text-xs font-medium">{label}</span>
 									</button>
 								))}
 							</div>

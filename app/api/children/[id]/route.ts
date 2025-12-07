@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/session";
+import { DietType } from "@prisma/client";
 
 interface SessionPayload {
   id: string;
@@ -10,6 +11,8 @@ interface SessionPayload {
   name: string;
   surname: string;
 }
+
+const VALID_DIET_TYPES: DietType[] = ["STANDARD", "VEGETARIAN", "VEGAN", "GLUTEN_FREE", "LACTOSE_FREE", "CUSTOM"];
 
 async function getSessionUser(): Promise<SessionPayload | null> {
   const cookieStore = await cookies();
@@ -137,7 +140,8 @@ export async function PATCH(
       hasImageConsent, 
       hasDataConsent, 
       allergies, 
-      specialNeeds 
+      specialNeeds,
+      diet
     } = body;
 
     const updateData: Record<string, unknown> = {};
@@ -154,6 +158,10 @@ export async function PATCH(
       if (hasDataConsent !== undefined) updateData.hasDataConsent = hasDataConsent;
       if (allergies !== undefined) updateData.allergies = allergies;
       if (specialNeeds !== undefined) updateData.specialNeeds = specialNeeds || null;
+      // Parents can update diet
+      if (diet !== undefined && VALID_DIET_TYPES.includes(diet)) {
+        updateData.diet = diet;
+      }
     } else if (payload.role === "HEADTEACHER" || payload.role === "ADMIN") {
       if (name !== undefined) updateData.name = name.trim();
       if (surname !== undefined) updateData.surname = surname.trim();
@@ -163,6 +171,9 @@ export async function PATCH(
       if (hasDataConsent !== undefined) updateData.hasDataConsent = hasDataConsent;
       if (allergies !== undefined) updateData.allergies = allergies;
       if (specialNeeds !== undefined) updateData.specialNeeds = specialNeeds || null;
+      if (diet !== undefined && VALID_DIET_TYPES.includes(diet)) {
+        updateData.diet = diet;
+      }
     } else {
       return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
     }

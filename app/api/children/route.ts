@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/session";
+import { DietType } from "@prisma/client";
 
 interface SessionPayload {
   id: string;
@@ -10,6 +11,8 @@ interface SessionPayload {
   name: string;
   surname: string;
 }
+
+const VALID_DIET_TYPES: DietType[] = ["STANDARD", "VEGETARIAN", "VEGAN", "GLUTEN_FREE", "LACTOSE_FREE", "CUSTOM"];
 
 async function getSessionUser(): Promise<SessionPayload | null> {
   const cookieStore = await cookies();
@@ -113,6 +116,7 @@ export async function POST(req: Request) {
       hasDataConsent,
       allergies,
       specialNeeds,
+      diet,
     } = body;
     let { parentId, groupId } = body;
 
@@ -173,6 +177,7 @@ export async function POST(req: Request) {
         hasDataConsent: hasDataConsent ?? false,
         allergies: allergies || [],
         specialNeeds: specialNeeds || null,
+        diet: diet && VALID_DIET_TYPES.includes(diet) ? diet : "STANDARD",
       },
       include: {
         parent: {

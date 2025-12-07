@@ -7,6 +7,382 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id               String         @id @default(uuid())
+  email            String         @unique
+  password         String
+  name             String
+  surname          String
+  phone            String?
+  role             UserRole
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  announcements    Announcement[]
+  children         Child[]        @relation("ParentChildren")
+  messagesReceived Message[]      @relation("ReceiverMessages")
+  messagesSent     Message[]      @relation("SenderMessages")
+  reports          Report[]
+  staff            Staff?
+  tasks            Task[]
+
+  @@map("users")
+}
+
+model Staff {
+  id          String    @id @default(uuid())
+  userId      String    @unique
+  staffRole   StaffRole
+  permissions String[]
+  groupId     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  group       Group?    @relation(fields: [groupId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@index([groupId])
+  @@index([staffRole])
+  @@map("staff")
+}
+
+model Group {
+  id            String         @id @default(uuid())
+  name          String
+  ageRange      String
+  maxCapacity   Int
+  roomId        String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  activities    Activity[]
+  announcements Announcement[]
+  children      Child[]
+  galleries     Gallery[]
+  room          Room?          @relation(fields: [roomId], references: [id])
+  mealPlans     MealPlan[]
+  staff         Staff[]
+
+  @@map("groups")
+}
+
+model Room {
+  id          String     @id @default(uuid())
+  name        String
+  capacity    Int
+  status      RoomStatus @default(AVAILABLE)
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  groups      Group[]
+
+  @@map("rooms")
+}
+
+model Child {
+  id                     String                  @id @default(uuid())
+  name                   String
+  surname                String
+  parentId               String
+  groupId                String?
+  hasImageConsent        Boolean                 @default(false)
+  hasDataConsent         Boolean                 @default(false)
+  allergies              String[]                @default([])
+  specialNeeds           String?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  age                    Int
+  activities             Activity[]
+  attendances            Attendance[]
+  group                  Group?                  @relation(fields: [groupId], references: [id])
+  parent                 User                    @relation("ParentChildren", fields: [parentId], references: [id])
+  consents               Consent[]
+  payments               Payment[]
+  pickupRecords          PickupRecord[]
+  recruitmentApplication RecruitmentApplication?
+
+  @@index([parentId])
+  @@index([groupId])
+  @@map("children")
+}
+
+model Attendance {
+  id        String           @id @default(uuid())
+  childId   String
+  date      DateTime
+  status    AttendanceStatus @default(PRESENT)
+  reason    String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  child     Child            @relation(fields: [childId], references: [id])
+
+  @@index([childId, date])
+  @@map("attendances")
+}
+
+model Activity {
+  id          String   @id @default(uuid())
+  groupId     String
+  childId     String?
+  date        DateTime
+  title       String
+  description String?
+  activities  String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  child       Child?   @relation(fields: [childId], references: [id])
+  group       Group    @relation(fields: [groupId], references: [id])
+
+  @@index([groupId])
+  @@index([childId])
+  @@index([date])
+  @@map("activities")
+}
+
+model PickupRecord {
+  id                 String   @id @default(uuid())
+  childId            String
+  pickupDate         DateTime
+  pickupTime         DateTime
+  authorizedPerson   String
+  verificationMethod String?
+  notes              String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  child              Child    @relation(fields: [childId], references: [id])
+
+  @@map("pickup_records")
+}
+
+model Consent {
+  id          String        @id @default(uuid())
+  childId     String
+  consentType ConsentType
+  status      ConsentStatus @default(PENDING)
+  date        DateTime      @default(now())
+  expiryDate  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  child       Child         @relation(fields: [childId], references: [id])
+
+  @@map("consents")
+}
+
+model Message {
+  id         String        @id @default(uuid())
+  senderId   String
+  receiverId String
+  subject    String
+  body       String
+  status     MessageStatus @default(SENT)
+  isRead     Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  receiver   User          @relation("ReceiverMessages", fields: [receiverId], references: [id])
+  sender     User          @relation("SenderMessages", fields: [senderId], references: [id])
+
+  @@map("messages")
+}
+
+model Announcement {
+  id          String               @id @default(uuid())
+  authorId    String
+  title       String
+  content     String
+  category    AnnouncementCategory
+  eventDate   DateTime?
+  location    String?
+  isImportant Boolean              @default(false)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  endTime     DateTime?
+  startTime   DateTime?
+  targetGroup String?
+  groupId     String?
+  readBy      AnnouncementRead[]   @relation("AnnouncementReads")
+  author      User                 @relation(fields: [authorId], references: [id])
+  group       Group?               @relation(fields: [groupId], references: [id])
+
+  @@index([groupId])
+  @@index([authorId])
+  @@index([eventDate])
+  @@map("announcements")
+}
+
+model AnnouncementRead {
+  id             String       @id @default(uuid())
+  announcementId String
+  userId         String
+  readAt         DateTime     @default(now())
+  announcement   Announcement @relation("AnnouncementReads", fields: [announcementId], references: [id])
+
+  @@index([announcementId, userId])
+  @@map("announcement_reads")
+}
+
+model Document {
+  id          String         @id @default(uuid())
+  title       String
+  description String?
+  fileUrl     String
+  status      DocumentStatus @default(AKTYWNY)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@map("documents")
+}
+
+model RecruitmentApplication {
+  id                 String            @id @default(uuid())
+  childId            String?           @unique
+  childName          String
+  childSurname       String
+  childAge           Int
+  parentName         String
+  parentEmail        String
+  parentPhone        String
+  applicationDate    DateTime          @default(now())
+  status             RecruitmentStatus @default(PENDING)
+  birthCertificate   Boolean           @default(false)
+  medicalExamination Boolean           @default(false)
+  vaccinationCard    Boolean           @default(false)
+  photos             Boolean           @default(false)
+  notes              String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  parent2Email       String?
+  parent2Name        String?
+  parent2Phone       String?
+  child              Child?            @relation(fields: [childId], references: [id])
+
+  @@map("recruitment_applications")
+}
+
+model MealPlan {
+  id          String   @id @default(uuid())
+  groupId     String?
+  date        DateTime
+  mealType    String
+  name        String
+  description String?
+  allergens   String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  group       Group?   @relation(fields: [groupId], references: [id])
+
+  @@index([groupId])
+  @@index([date])
+  @@map("meal_plans")
+}
+
+model Task {
+  id           String       @id @default(uuid())
+  assignedToId String
+  title        String
+  description  String?
+  status       TaskStatus   @default(TODO)
+  category     TaskCategory
+  dueDate      DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  priority     TaskPriority @default(MEDIUM)
+  assignedTo   User         @relation(fields: [assignedToId], references: [id])
+
+  @@map("tasks")
+}
+
+model Report {
+  id          String    @id @default(uuid())
+  authorId    String
+  title       String
+  content     String
+  reportType  String
+  periodStart DateTime?
+  periodEnd   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  author      User      @relation(fields: [authorId], references: [id])
+
+  @@map("reports")
+}
+
+model Gallery {
+  id                     String         @id @default(uuid())
+  title                  String
+  date                   DateTime
+  status                 GalleryStatus  @default(DRAFT)
+  childrenWithConsent    Int            @default(0)
+  childrenWithoutConsent Int            @default(0)
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  groupId                String?
+  group                  Group?         @relation(fields: [groupId], references: [id])
+  photos                 GalleryPhoto[]
+
+  @@index([groupId])
+  @@index([status])
+  @@index([date])
+  @@map("galleries")
+}
+
+model GalleryPhoto {
+  id        String   @id @default(uuid())
+  galleryId String
+  url       String
+  caption   String?
+  createdAt DateTime @default(now())
+  gallery   Gallery  @relation(fields: [galleryId], references: [id])
+
+  @@map("gallery_photos")
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  childId     String
+  amount      Float
+  description String
+  dueDate     DateTime
+  paidDate    DateTime?
+  status      PaymentStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  child       Child         @relation(fields: [childId], references: [id])
+
+  @@map("payments")
+}
+
+model Training {
+  id          String             @id @default(uuid())
+  title       String
+  description String?
+  content     String
+  category    TrainingCategory
+  status      TrainingStatus     @default(DRAFT)
+  duration    Int                @default(30)
+  isRequired  Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  progress    TrainingProgress[]
+
+  @@index([status])
+  @@index([category])
+  @@map("trainings")
+}
+
+model TrainingProgress {
+  id          String    @id @default(uuid())
+  trainingId  String
+  userId      String
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  score       Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  training    Training  @relation(fields: [trainingId], references: [id])
+
+  @@unique([trainingId, userId])
+  @@index([userId])
+  @@map("training_progress")
+}
+
 enum UserRole {
   ADMIN
   HEADTEACHER
@@ -109,363 +485,18 @@ enum PaymentStatus {
   CANCELLED
 }
 
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String
-  surname   String
-  phone     String?
-  role      UserRole
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  children         Child[]        @relation("ParentChildren")
-  staff            Staff?
-  messagesSent     Message[]      @relation("SenderMessages")
-  messagesReceived Message[]      @relation("ReceiverMessages")
-  announcements    Announcement[]
-  tasks            Task[]
-  reports          Report[]
-
-  @@map("users")
+enum TrainingStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
 }
 
-model Staff {
-  id          String    @id @default(uuid())
-  userId      String    @unique
-  staffRole   StaffRole
-  permissions String[]
-  groupId     String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  user  User   @relation(fields: [userId], references: [id])
-  group Group? @relation(fields: [groupId], references: [id])
-
-  @@index([groupId])
-  @@index([staffRole])
-  @@map("staff")
-}
-
-model Group {
-  id          String   @id @default(uuid())
-  name        String
-  ageRange    String
-  maxCapacity Int
-  roomId      String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  room          Room?          @relation(fields: [roomId], references: [id])
-  children      Child[]
-  staff         Staff[]
-  activities    Activity[]
-  mealPlans     MealPlan[]
-  announcements Announcement[]
-  galleries     Gallery[]
-
-  @@map("groups")
-}
-
-model Room {
-  id          String     @id @default(uuid())
-  name        String
-  capacity    Int
-  status      RoomStatus @default(AVAILABLE)
-  description String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
-  groups Group[]
-
-  @@map("rooms")
-}
-
-model Child {
-  id              String   @id @default(uuid())
-  age             Int
-  name            String
-  surname         String
-  parentId        String
-  groupId         String?
-  hasImageConsent Boolean  @default(false)
-  hasDataConsent  Boolean  @default(false)
-  allergies       String[] @default([])
-  specialNeeds    String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  parent                 User                    @relation("ParentChildren", fields: [parentId], references: [id])
-  group                  Group?                  @relation(fields: [groupId], references: [id])
-  attendances            Attendance[]
-  activities             Activity[]
-  pickupRecords          PickupRecord[]
-  consents               Consent[]
-  recruitmentApplication RecruitmentApplication?
-  payments               Payment[]
-
-  @@index([parentId])
-  @@index([groupId])
-  @@map("children")
-}
-
-model Attendance {
-  id        String           @id @default(uuid())
-  childId   String
-  date      DateTime
-  status    AttendanceStatus @default(PRESENT)
-  reason    String?
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
-
-  child Child @relation(fields: [childId], references: [id])
-
-  @@index([childId, date])
-  @@map("attendances")
-}
-
-model Activity {
-  id          String   @id @default(uuid())
-  groupId     String
-  childId     String?
-  date        DateTime
-  title       String
-  description String?
-  activities  String[] @default([])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  group Group  @relation(fields: [groupId], references: [id])
-  child Child? @relation(fields: [childId], references: [id])
-
-  @@index([groupId])
-  @@index([childId])
-  @@index([date])
-  @@map("activities")
-}
-
-model PickupRecord {
-  id                 String   @id @default(uuid())
-  childId            String
-  pickupDate         DateTime
-  pickupTime         DateTime
-  authorizedPerson   String
-  verificationMethod String?
-  notes              String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-
-  child Child @relation(fields: [childId], references: [id])
-
-  @@map("pickup_records")
-}
-
-model Consent {
-  id          String        @id @default(uuid())
-  childId     String
-  consentType ConsentType
-  status      ConsentStatus @default(PENDING)
-  date        DateTime      @default(now())
-  expiryDate  DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-
-  child Child @relation(fields: [childId], references: [id])
-
-  @@map("consents")
-}
-
-model Message {
-  id         String        @id @default(uuid())
-  senderId   String
-  receiverId String
-  subject    String
-  body       String
-  status     MessageStatus @default(SENT)
-  isRead     Boolean       @default(false)
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-
-  sender   User @relation("SenderMessages", fields: [senderId], references: [id])
-  receiver User @relation("ReceiverMessages", fields: [receiverId], references: [id])
-
-  @@map("messages")
-}
-
-model Announcement {
-  id          String               @id @default(uuid())
-  authorId    String
-  groupId     String?
-  title       String
-  content     String
-  category    AnnouncementCategory
-  eventDate   DateTime?
-  startTime   DateTime?
-  endTime     DateTime?
-  location    String?
-  targetGroup String?
-  isImportant Boolean              @default(false)
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
-
-  author User               @relation(fields: [authorId], references: [id])
-  group  Group?             @relation(fields: [groupId], references: [id])
-  readBy AnnouncementRead[] @relation("AnnouncementReads")
-
-  @@index([groupId])
-  @@index([authorId])
-  @@index([eventDate])
-  @@map("announcements")
-}
-
-model AnnouncementRead {
-  id             String   @id @default(uuid())
-  announcementId String
-  userId         String
-  readAt         DateTime @default(now())
-
-  announcement Announcement @relation("AnnouncementReads", fields: [announcementId], references: [id])
-
-  @@index([announcementId, userId])
-  @@map("announcement_reads")
-}
-
-model Document {
-  id          String         @id @default(uuid())
-  title       String
-  description String?
-  fileUrl     String
-  status      DocumentStatus @default(AKTYWNY)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-
-  @@map("documents")
-}
-
-model RecruitmentApplication {
-  id                 String            @id @default(uuid())
-  childId            String?           @unique
-  childName          String
-  childSurname       String
-  childAge           Int
-  parentName         String
-  parentEmail        String
-  parentPhone        String
-  parent2Name        String?
-  parent2Email       String?
-  parent2Phone       String?
-  applicationDate    DateTime          @default(now())
-  status             RecruitmentStatus @default(PENDING)
-  birthCertificate   Boolean           @default(false)
-  medicalExamination Boolean           @default(false)
-  vaccinationCard    Boolean           @default(false)
-  photos             Boolean           @default(false)
-  notes              String?
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
-
-  child Child? @relation(fields: [childId], references: [id])
-
-  @@map("recruitment_applications")
-}
-
-model MealPlan {
-  id          String   @id @default(uuid())
-  groupId     String?
-  date        DateTime
-  mealType    String
-  name        String
-  description String?
-  allergens   String[] @default([])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  group Group? @relation(fields: [groupId], references: [id])
-
-  @@index([groupId])
-  @@index([date])
-  @@map("meal_plans")
-}
-
-model Task {
-  id          String        @id @default(uuid())
-  assignedToId String       
-  title       String
-  description String?
-  status      TaskStatus    @default(TODO)
-  category    TaskCategory
-  priority    TaskPriority  @default(MEDIUM)
-  dueDate     DateTime?
-  completedAt DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-
-  assignedTo User           @relation(fields: [assignedToId], references: [id])
-
-  @@map("tasks")
-}
-
-model Report {
-  id          String    @id @default(uuid())
-  authorId    String
-  title       String
-  content     String
-  reportType  String
-  periodStart DateTime?
-  periodEnd   DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  author User @relation(fields: [authorId], references: [id])
-
-  @@map("reports")
-}
-
-model Gallery {
-  id                     String        @id @default(uuid())
-  title                  String
-  date                   DateTime
-  status                 GalleryStatus @default(DRAFT)
-  groupId                String?
-  childrenWithConsent    Int           @default(0)
-  childrenWithoutConsent Int           @default(0)
-  createdAt              DateTime      @default(now())
-  updatedAt              DateTime      @updatedAt
-
-  group  Group?         @relation(fields: [groupId], references: [id])
-  photos GalleryPhoto[]
-
-  @@index([groupId])
-  @@index([status])
-  @@index([date])
-  @@map("galleries")
-}
-
-model GalleryPhoto {
-  id        String   @id @default(uuid())
-  galleryId String
-  url       String
-  caption   String?
-  createdAt DateTime @default(now())
-
-  gallery Gallery @relation(fields: [galleryId], references: [id])
-
-  @@map("gallery_photos")
-}
-
-model Payment {
-  id          String        @id @default(uuid())
-  childId     String
-  amount      Float
-  description String
-  dueDate     DateTime
-  paidDate    DateTime?
-  status      PaymentStatus @default(PENDING)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-
-  child Child @relation(fields: [childId], references: [id])
-
-  @@map("payments")
+enum TrainingCategory {
+  BHP
+  PIERWSZA_POMOC
+  PEDAGOGIKA
+  PSYCHOLOGIA
+  ROZWOJ_ZAWODOWY
+  PRAWO
+  INNE
 }

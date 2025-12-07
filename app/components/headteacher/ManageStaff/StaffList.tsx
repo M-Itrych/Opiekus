@@ -10,7 +10,6 @@ import {
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
@@ -37,7 +36,11 @@ import {
   Trash2,
   ChevronDown,
   X,
+  CheckCircle2,
+  Copy,
+  Check,
 } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 type StaffRoleValue = "NAUCZYCIEL" | "INTENDENTKA" | "SEKRETARKA" | "POMOCNIK";
 
@@ -69,6 +72,14 @@ interface StaffFormState {
   staffRole: StaffRoleValue;
   groupId: string;
   permissions: string[];
+}
+
+interface CreatedStaffResult {
+  name: string;
+  surname: string;
+  email: string;
+  generatedPassword: string;
+  staffRole: StaffRoleValue;
 }
 
 const STAFF_ROLE_LABELS: Record<StaffRoleValue, string> = {
@@ -116,6 +127,8 @@ function StaffModal({
   initialData,
   submitting,
   error,
+  createdResult,
+  onCloseResult,
 }: {
   mode: "create" | "edit";
   open: boolean;
@@ -125,8 +138,11 @@ function StaffModal({
   initialData?: StaffMember | null;
   submitting: boolean;
   error: string | null;
+  createdResult?: CreatedStaffResult | null;
+  onCloseResult?: () => void;
 }) {
   const [formState, setFormState] = useState<StaffFormState>(defaultFormState);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -167,11 +183,112 @@ function StaffModal({
     }));
   };
 
+  const copyToClipboard = async (text: string, field: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
   if (!open) return null;
+
+  // Show success screen with generated credentials
+  if (createdResult) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div className="w-full max-w-xl rounded-2xl bg-white shadow-2xl">
+          <div className="flex items-center justify-between border-b px-6 py-4">
+            <div>
+              <h3 className="text-xl font-semibold text-green-600 flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5" />
+                Pracownik utworzony!
+              </h3>
+              <p className="text-sm text-zinc-500">
+                Zapisz dane logowania i przekaż je pracownikowi.
+              </p>
+            </div>
+            <button
+              aria-label="Zamknij"
+              onClick={onCloseResult}
+              className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="space-y-4 px-6 py-6">
+            <div className="border rounded-lg p-4 bg-green-50 border-green-200">
+              <h4 className="flex items-center gap-2 text-sm font-medium text-green-700 mb-2">
+                <User className="h-4 w-4" />
+                Dane pracownika
+              </h4>
+              <p className="font-semibold text-zinc-900">
+                {createdResult.name} {createdResult.surname}
+              </p>
+              <p className="text-sm text-zinc-600">
+                {STAFF_ROLE_LABELS[createdResult.staffRole]}
+              </p>
+            </div>
+
+            <div className="border rounded-lg p-4 space-y-3">
+              <h4 className="flex items-center gap-2 text-sm font-medium text-zinc-700">
+                <Mail className="h-4 w-4" />
+                Dane logowania
+              </h4>
+              
+              <div>
+                <Label className="text-xs text-zinc-500">Email</Label>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 bg-zinc-100 px-3 py-2 rounded text-sm">
+                    {createdResult.email}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => copyToClipboard(createdResult.email, 'email')}
+                  >
+                    {copiedField === 'email' ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-xs text-zinc-500">Hasło (tymczasowe)</Label>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 bg-amber-100 px-3 py-2 rounded text-sm font-mono">
+                    {createdResult.generatedPassword}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => copyToClipboard(createdResult.generatedPassword, 'password')}
+                  >
+                    {copiedField === 'password' ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <p className="text-sm text-amber-800">
+                ⚠️ <strong>Ważne:</strong> Zapisz te dane logowania i przekaż je pracownikowi. 
+                Hasło jest generowane automatycznie i nie będzie już wyświetlane.
+              </p>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <Button onClick={onCloseResult} className="bg-sky-600 hover:bg-sky-500 text-white">
+                Zamknij
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl">
+      <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between border-b px-6 py-4">
           <div>
             <h3 className="text-xl font-semibold text-zinc-900">
@@ -179,7 +296,7 @@ function StaffModal({
             </h3>
             <p className="text-sm text-zinc-500">
               {mode === "create"
-                ? "Uzupełnij dane, aby dodać nowego członka personelu."
+                ? "Uzupełnij dane, aby dodać nowego członka personelu. Hasło zostanie wygenerowane automatycznie."
                 : "Zaktualizuj szczegóły pracownika lub przypisz go do innej grupy."}
             </p>
           </div>
@@ -192,7 +309,7 @@ function StaffModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 px-6 py-6">
+        <form onSubmit={handleSubmit} className="space-y-4 px-6 py-6 overflow-y-auto">
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="text-sm font-medium text-zinc-700">Imię</label>
@@ -235,20 +352,6 @@ function StaffModal({
               />
             </div>
           </div>
-
-          {mode === "create" && (
-            <div>
-              <label className="text-sm font-medium text-zinc-700">Hasło startowe</label>
-              <Input
-                type="password"
-                name="password"
-                value={formState.password}
-                onChange={handleChange}
-                placeholder="Min. 6 znaków"
-                required
-              />
-            </div>
-          )}
 
           {mode === "edit" && (
             <div>
@@ -334,12 +437,12 @@ function StaffModal({
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <div className="flex items-center justify-end gap-3">
+          <div className="flex items-center justify-end gap-3 pt-2">
             <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>
               Anuluj
             </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Zapisywanie..." : "Zapisz"}
+            <Button type="submit" disabled={submitting} className="bg-sky-600 hover:bg-sky-500 text-white">
+              {submitting ? "Zapisywanie..." : mode === "create" ? "Utwórz pracownika" : "Zapisz zmiany"}
             </Button>
           </div>
         </form>
@@ -360,6 +463,7 @@ export default function StaffList() {
   const [modalError, setModalError] = useState<string | null>(null);
   const [modalSubmitting, setModalSubmitting] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
+  const [createdResult, setCreatedResult] = useState<CreatedStaffResult | null>(null);
 
   const fetchStaff = useCallback(async () => {
     try {
@@ -414,6 +518,7 @@ export default function StaffList() {
     setModalMode("create");
     setSelectedStaff(null);
     setModalError(null);
+    setCreatedResult(null);
     setModalOpen(true);
   };
 
@@ -425,13 +530,6 @@ export default function StaffList() {
   };
 
   const handleSaveStaff = async (state: StaffFormState, staffId?: string) => {
-    if (modalMode === "create") {
-      if (!state.password.trim()) {
-        setModalError("Hasło jest wymagane.");
-        return;
-      }
-    }
-
     const payload: Record<string, unknown> = {
       name: state.name.trim(),
       surname: state.surname.trim(),
@@ -442,9 +540,8 @@ export default function StaffList() {
       groupId: state.groupId || null,
     };
 
-    if (modalMode === "create") {
-      payload.password = state.password.trim();
-    } else if (state.password.trim()) {
+    // For edit mode, only include password if provided
+    if (modalMode === "edit" && state.password.trim()) {
       payload.password = state.password.trim();
     }
 
@@ -466,7 +563,21 @@ export default function StaffList() {
         throw new Error(data.error || "Operacja nie powiodła się");
       }
 
-      setModalOpen(false);
+      const data = await response.json();
+
+      if (modalMode === "create" && data.generatedPassword) {
+        // Show success screen with credentials
+        setCreatedResult({
+          name: state.name.trim(),
+          surname: state.surname.trim(),
+          email: state.email.trim(),
+          generatedPassword: data.generatedPassword,
+          staffRole: state.staffRole,
+        });
+      } else {
+        setModalOpen(false);
+      }
+
       await fetchStaff();
     } catch (err) {
       console.error(err);
@@ -474,6 +585,11 @@ export default function StaffList() {
     } finally {
       setModalSubmitting(false);
     }
+  };
+
+  const handleCloseResult = () => {
+    setCreatedResult(null);
+    setModalOpen(false);
   };
 
   const handleDeleteStaff = async (member: StaffMember) => {
@@ -654,6 +770,8 @@ export default function StaffList() {
         initialData={selectedStaff ?? undefined}
         submitting={modalSubmitting}
         error={modalError}
+        createdResult={createdResult}
+        onCloseResult={handleCloseResult}
       />
     </div>
   );

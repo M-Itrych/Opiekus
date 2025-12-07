@@ -4,6 +4,11 @@ import { cookies } from "next/headers";
 import { verifyToken, hashPassword } from "@/lib/session";
 import { StaffRole, UserRole } from "@prisma/client";
 import { serializeStaff, STAFF_ROLE_TO_USER_ROLE, StaffWithRelations } from "./utils";
+import crypto from "crypto";
+
+function generatePassword(): string {
+	return crypto.randomBytes(6).toString("base64").slice(0, 10);
+}
 
 async function authorize() {
   const cookieStore = await cookies();
@@ -111,9 +116,9 @@ export async function POST(request: Request) {
       userRole,
     } = body;
 
-    if (!name || !surname || !email || !password || !staffRole) {
+    if (!name || !surname || !email || !staffRole) {
       return NextResponse.json(
-        { error: "Wymagane pola: imię, nazwisko, email, hasło, rola" },
+        { error: "Wymagane pola: imię, nazwisko, email, rola" },
         { status: 400 }
       );
     }
@@ -131,7 +136,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const hashedPassword = await hashPassword(password);
+    // Generate password if not provided
+    const generatedPassword = password?.trim() || generatePassword();
+    const hashedPassword = await hashPassword(generatedPassword);
     const normalizedPermissions = normalizePermissions(permissions);
     const resolvedUserRole = resolveUserRole(
       normalizedStaffRole,
@@ -164,7 +171,11 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(serializeStaff(staff as StaffWithRelations), { status: 201 });
+    // Return staff data with generated password (only shown once)
+    return NextResponse.json({
+      ...serializeStaff(staff as StaffWithRelations),
+      generatedPassword: generatedPassword,
+    }, { status: 201 });
   } catch (err) {
     console.error("Error creating staff member:", err);
     return NextResponse.json(

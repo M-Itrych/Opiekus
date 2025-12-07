@@ -36,6 +36,7 @@ const categoryLabels: Record<string, string> = {
   PSYCHOLOGIA: "Psychologia",
   ROZWOJ_ZAWODOWY: "Rozwój zawodowy",
   PRAWO: "Prawo oświatowe",
+  CYBERBEZPIECZENSTWO: "Cyberbezpieczeństwo",
   INNE: "Inne",
 };
 
@@ -46,6 +47,7 @@ const categoryColors: Record<string, string> = {
   PSYCHOLOGIA: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
   ROZWOJ_ZAWODOWY: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
   PRAWO: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  CYBERBEZPIECZENSTWO: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400",
   INNE: "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400",
 };
 

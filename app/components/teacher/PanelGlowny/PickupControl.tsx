@@ -33,9 +33,12 @@ interface ApiPickupRecord {
 }
 
 interface AuthorizedPerson {
-  name: string;
   id: string;
+  name: string;
+  surname: string;
   relation: string;
+  phone: string | null;
+  idNumber: string | null;
 }
 
 interface Child {
@@ -52,6 +55,7 @@ interface Child {
 export default function PickupControl() {
   const [children, setChildren] = useState<Child[]>([]);
   const [pickupRecords, setPickupRecords] = useState<Record<string, PickupRecord>>({});
+  const [authorizedPersonsMap, setAuthorizedPersonsMap] = useState<Record<string, AuthorizedPerson[]>>({});
   const [verificationCode, setVerificationCode] = useState("");
   const [selectedChild, setSelectedChild] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,8 +67,21 @@ export default function PickupControl() {
       if (!res.ok) throw new Error("Failed to fetch children");
       const data = await res.json();
       setChildren(data);
+      return data;
     } catch (err) {
       console.error("Error fetching children:", err);
+      return [];
+    }
+  }, []);
+
+  const fetchAuthorizedPersonsForChild = useCallback(async (childId: string) => {
+    try {
+      const res = await fetch(`/api/children/${childId}/authorized-persons`);
+      if (!res.ok) return [];
+      return await res.json();
+    } catch (err) {
+      console.error("Error fetching authorized persons:", err);
+      return [];
     }
   }, []);
 
@@ -101,15 +118,27 @@ export default function PickupControl() {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([fetchChildren(), fetchTodayPickups()]);
+      const [childrenData] = await Promise.all([fetchChildren(), fetchTodayPickups()]);
+      
+      // Fetch authorized persons for all children
+      const personsMap: Record<string, AuthorizedPerson[]> = {};
+      await Promise.all(
+        childrenData.map(async (child: Child) => {
+          const persons = await fetchAuthorizedPersonsForChild(child.id);
+          personsMap[child.id] = persons;
+        })
+      );
+      setAuthorizedPersonsMap(personsMap);
+      
       setLoading(false);
     };
     loadData();
-  }, [fetchChildren, fetchTodayPickups]);
+  }, [fetchChildren, fetchTodayPickups, fetchAuthorizedPersonsForChild]);
 
-  const getAuthorizedPersons = (child: Child): AuthorizedPerson[] => {
-    // Get parent as authorized person
-    const persons: AuthorizedPerson[] = [];
+  const getAuthorizedPersons = (child: Child): { id: string; name: string; relation: string }[] => {
+    const persons: { id: string; name: string; relation: string }[] = [];
+    
+    // Add parent as authorized person
     if (child.parent) {
       persons.push({
         id: child.parent.id,
@@ -117,6 +146,17 @@ export default function PickupControl() {
         relation: "Rodzic",
       });
     }
+    
+    // Add authorized persons from the database
+    const dbPersons = authorizedPersonsMap[child.id] || [];
+    dbPersons.forEach((person) => {
+      persons.push({
+        id: person.id,
+        name: `${person.name} ${person.surname}`,
+        relation: person.relation,
+      });
+    });
+    
     return persons;
   };
 

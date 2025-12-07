@@ -68,13 +68,18 @@ export async function GET(req: Request) {
     });
 
     // Transform to include user's progress status
-    const trainingsWithProgress = trainings.map((training) => ({
-      ...training,
-      userProgress: includeProgress && training.progress?.length > 0 
-        ? training.progress[0] 
-        : null,
-      progress: undefined, // Remove the array to clean up response
-    }));
+    const trainingsWithProgress = trainings.map((training) => {
+      const trainingWithProgress = training as typeof training & { 
+        progress?: { id: string; startedAt: Date; completedAt: Date | null; score: number | null }[] 
+      };
+      return {
+        ...training,
+        userProgress: includeProgress && trainingWithProgress.progress && trainingWithProgress.progress.length > 0 
+          ? trainingWithProgress.progress[0] 
+          : null,
+        progress: undefined, // Remove the array to clean up response
+      };
+    });
 
     return NextResponse.json(trainingsWithProgress);
   } catch (error) {

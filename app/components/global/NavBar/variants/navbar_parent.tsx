@@ -5,6 +5,8 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import MessageIcon from '@mui/icons-material/Message';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PaymentIcon from '@mui/icons-material/Payment';
+import PeopleIcon from '@mui/icons-material/People';
+import GavelIcon from '@mui/icons-material/Gavel';
 
 export default function NavbarParent() {
     return (
@@ -18,6 +20,16 @@ export default function NavbarParent() {
                 icon: <MessageIcon />,
                 text: "Wiadomości",
                 href: "/Parent/wiadomosci",
+            },
+            {
+                icon: <PeopleIcon />,
+                text: "Odbiór",
+                href: "/Parent/odbior",
+            },
+            {
+                icon: <GavelIcon />,
+                text: "Zgody",
+                href: "/Parent/zgody",
             },
             {
                 icon: <PaymentIcon />,

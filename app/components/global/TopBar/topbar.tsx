@@ -26,7 +26,7 @@ export default function Topbar() {
         },
         {
             label: "Kalendarz",
-            href: "/HeadTeacher/calendar",
+            href: "/HeadTeacher/Calendar",
             Icon: CalendarMonthOutlined,
         },
         {   

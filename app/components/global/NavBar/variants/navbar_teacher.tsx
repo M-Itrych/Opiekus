@@ -7,6 +7,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import SchoolIcon from '@mui/icons-material/School';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 
 export default function NavbarTeacher() {
 	return (
@@ -31,6 +32,11 @@ export default function NavbarTeacher() {
 					icon: <RestaurantMenuIcon />,
 					text: "Jadłospis",
 					href: "/Teacher/Menu",
+				},
+				{
+					icon: <AssignmentIcon />,
+					text: "Zadania",
+					href: "/Teacher/Tasks",
 				},
 				{
 					icon: <MessageIcon />,

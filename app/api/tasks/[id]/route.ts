@@ -66,48 +66,88 @@ async function resolveParams(context: ParamsPromise) {
 export async function PATCH(req: Request, context: ParamsPromise) {
   try {
     const user = await getSessionUser();
-    const authError = ensureManager(user);
-    if (authError) return authError;
+    if (!user) {
+      return NextResponse.json({ error: "Nieautoryzowany dostęp" }, { status: 401 });
+    }
 
     const { id } = await resolveParams(context);
     const payload = await req.json();
 
+    const isManager = ["HEADTEACHER", "ADMIN"].includes(user.role);
+    const isTeacher = user.role === "TEACHER";
+
+    if (!isManager && !isTeacher) {
+      return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
+    }
+
     const updateData: Prisma.TaskUpdateInput = {};
 
-    if (typeof payload.title === "string" && payload.title.trim()) {
-      updateData.title = payload.title.trim();
-    }
-    if (typeof payload.description === "string" && payload.description.trim()) {
-      updateData.description = payload.description.trim();
-    }
-    if (payload.dueDate) {
-      const due = new Date(payload.dueDate);
-      if (Number.isNaN(due.getTime())) {
-        return NextResponse.json({ error: "Nieprawidłowa data" }, { status: 400 });
-      }
-      updateData.dueDate = due;
-    }
-    if (payload.assignedToId) {
-      updateData.assignedTo = { connect: { id: payload.assignedToId } };
-    }
-    const normalizedPriority = normalizePriority(payload.priority);
-    if (normalizedPriority) {
-      updateData.priority = normalizedPriority;
-    }
-    const normalizedStatus = normalizeStatus(payload.status);
-    if (normalizedStatus) {
-      updateData.status = normalizedStatus;
-    }
-    const normalizedCategory = normalizeCategory(payload.category);
-    if (normalizedCategory) {
-      updateData.category = normalizedCategory;
-    }
+    if (isTeacher) {
+      const task = await prisma.task.findUnique({
+        where: { id },
+        select: { assignedToId: true },
+      });
 
-    if (!Object.keys(updateData).length) {
-      return NextResponse.json(
-        { error: "Brak danych do aktualizacji" },
-        { status: 400 }
-      );
+      if (!task) {
+        return NextResponse.json({ error: "Zadanie nie istnieje" }, { status: 404 });
+      }
+
+      if (task.assignedToId !== user.id) {
+        return NextResponse.json(
+          { error: "Możesz edytować tylko przypisane do siebie zadania" },
+          { status: 403 }
+        );
+      }
+
+      // Teachers can only update status
+      const normalizedStatus = normalizeStatus(payload.status);
+      if (normalizedStatus) {
+        updateData.status = normalizedStatus;
+      }
+
+      if (!Object.keys(updateData).length) {
+        return NextResponse.json(
+          { error: "Możesz aktualizować tylko status zadania" },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Manager logic - full update allowed
+      if (typeof payload.title === "string" && payload.title.trim()) {
+        updateData.title = payload.title.trim();
+      }
+      if (typeof payload.description === "string" && payload.description.trim()) {
+        updateData.description = payload.description.trim();
+      }
+      if (payload.dueDate) {
+        const due = new Date(payload.dueDate);
+        if (Number.isNaN(due.getTime())) {
+          return NextResponse.json({ error: "Nieprawidłowa data" }, { status: 400 });
+        }
+        updateData.dueDate = due;
+      }
+      if (payload.assignedToId) {
+        updateData.assignedTo = { connect: { id: payload.assignedToId } };
+      }
+      const normalizedPriority = normalizePriority(payload.priority);
+      if (normalizedPriority) {
+        updateData.priority = normalizedPriority;
+      }
+      const normalizedStatus = normalizeStatus(payload.status);
+      if (normalizedStatus) {
+        updateData.status = normalizedStatus;
+      }
+      const normalizedCategory = normalizeCategory(payload.category);
+      if (normalizedCategory) {
+        updateData.category = normalizedCategory;
+      }
+
+      if (!Object.keys(updateData).length) {
+        return NextResponse.json(
+          { error: "Brak danych do aktualizacji" },
+          { status: 400 }
+        );
+      }
     }
 
     const updated = await prisma.task.update({

@@ -503,29 +503,6 @@ enum TrainingCategory {
   INNE
 }
 
-enum WhistleblowerStatus {
-  NEW
-  IN_REVIEW
-  RESOLVED
-  DISMISSED
-}
-
-model WhistleblowerReport {
-  id          String              @id @default(uuid())
-  title       String
-  content     String
-  category    String?
-  isAnonymous Boolean             @default(false)
-  reporterEmail String?
-  status      WhistleblowerStatus @default(NEW)
-  resolution  String?
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
-
-  @@index([status])
-  @@map("whistleblower_reports")
-}
-
 model AuthorizedPerson {
   id           String   @id @default(uuid())
   childId      String

@@ -21,6 +21,7 @@ export async function GET() {
     const teachers = await prisma.staff.findMany({
       where: {
         staffRole: "NAUCZYCIEL",
+        groupId: null,
       },
       include: {
         user: {

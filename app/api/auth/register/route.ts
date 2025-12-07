@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword } from '@/lib/session';
+import { UserRole, StaffRole } from '@prisma/client';
+
+// Map UserRole to StaffRole for staff creation (only TEACHER)
+const USER_ROLE_TO_STAFF_ROLE: Partial<Record<UserRole, StaffRole>> = {
+  TEACHER: 'NAUCZYCIEL',
+};
 
 export async function POST(request: Request) {
   try {
@@ -45,6 +51,19 @@ export async function POST(request: Request) {
         phone: phone || null,
       },
     });
+
+    // Create Staff entry for TEACHER and HEADTEACHER roles
+    const staffRole = USER_ROLE_TO_STAFF_ROLE[role as UserRole];
+    if (staffRole) {
+      await prisma.staff.create({
+        data: {
+          userId: user.id,
+          staffRole: staffRole,
+          permissions: [],
+          groupId: null,
+        },
+      });
+    }
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;

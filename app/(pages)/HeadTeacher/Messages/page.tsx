@@ -1,18 +1,15 @@
 "use client";
 
 import HeadTeacherLayout from "@/app/components/global/Layout/HeadTeacherLayout";
+import MessagesInbox from "@/app/components/headteacher/Messages/MessagesInbox";
 
 export default function Messages() {
     return (    
         <HeadTeacherLayout
+            title="Wiadomości"
+            description="Komunikacja z rodzicami i pracownikami"
         >
-            <section className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-zinc-900">
-                        Wiadomości
-                    </h2>
-                </div>
-            </section>
+            <MessagesInbox />
         </HeadTeacherLayout>
     )
 }

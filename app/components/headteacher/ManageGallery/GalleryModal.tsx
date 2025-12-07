@@ -371,7 +371,7 @@ export function GalleryModal({ galleryId, isOpen, onClose, onSuccess }: GalleryM
                 <div className="flex space-x-1 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
                   <button
                     onClick={() => setActiveTab("details")}
-                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
                       activeTab === "details"
                         ? "bg-white dark:bg-zinc-700 shadow text-zinc-900 dark:text-zinc-100"
                         : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400"
@@ -381,7 +381,7 @@ export function GalleryModal({ galleryId, isOpen, onClose, onSuccess }: GalleryM
                   </button>
                   <button
                     onClick={() => setActiveTab("photos")}
-                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
                       activeTab === "photos"
                         ? "bg-white dark:bg-zinc-700 shadow text-zinc-900 dark:text-zinc-100"
                         : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400"
@@ -470,7 +470,7 @@ export function GalleryModal({ galleryId, isOpen, onClose, onSuccess }: GalleryM
                     </div>
 
                     <div className="pt-4 flex justify-end border-t dark:border-zinc-800 mt-4">
-                      <Button onClick={handleSaveDetails} disabled={isSaving}>
+                      <Button onClick={handleSaveDetails} disabled={isSaving} className="bg-sky-500 hover:bg-sky-600 text-white">
                         {isSaving ? "Zapisywanie..." : "Zapisz zmiany"}
                       </Button>
                     </div>

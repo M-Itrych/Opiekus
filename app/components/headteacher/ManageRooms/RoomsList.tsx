@@ -249,7 +249,7 @@ export default function RoomsList() {
             Rezerwacja sal, harmonogram wykorzystania, konserwacja i wyposażenie
           </p>
         </div>
-        <Button className="flex items-center gap-2" onClick={openCreateModal}>
+        <Button className="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white" onClick={openCreateModal}>
           <Plus className="h-4 w-4" />
           Dodaj salę
         </Button>
@@ -373,7 +373,7 @@ export default function RoomsList() {
               <button
                 type="button"
                 onClick={closeModal}
-                className="rounded-full p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800"
+                className="rounded-full p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 cursor-pointer"
                 aria-label="Zamknij formularz"
               >
                 <X className="h-5 w-5" />
@@ -455,7 +455,7 @@ export default function RoomsList() {
                 <Button type="button" variant="outline" onClick={closeModal}>
                   Anuluj
                 </Button>
-                <Button type="submit" disabled={formLoading}>
+                <Button type="submit" disabled={formLoading} className="bg-sky-500 hover:bg-sky-600 text-white">
                   {formLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {editingRoom ? "Zapisz zmiany" : "Dodaj salę"}
                 </Button>

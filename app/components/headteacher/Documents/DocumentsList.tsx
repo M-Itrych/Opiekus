@@ -319,15 +319,15 @@ export default function DocumentsList() {
 				<div className="flex items-center justify-between">
 					<div>
 						<h3 className="text-lg font-semibold text-zinc-900">Zarządzanie dokumentami</h3>
-						<p className="mt-1 text-sm text-zinc-500">
-							Dodawanie, edycja i archiwizacja dokumentów.
-						</p>
-					</div>
-					<Button className="flex items-center gap-2" onClick={() => openModal()}>
-						<Plus className="h-4 w-4" />
-						Nowy dokument
-					</Button>
-				</div>
+            <p className="mt-1 text-sm text-zinc-500">
+              Dodawanie, edycja i archiwizacja dokumentów.
+            </p>
+          </div>
+          <Button className="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white" onClick={() => openModal()}>
+            <Plus className="h-4 w-4" />
+            Nowy dokument
+          </Button>
+        </div>
 
 				<div className="mt-4 flex flex-wrap gap-4">
 					<div className="relative flex-1 min-w-[200px]">
@@ -465,7 +465,7 @@ export default function DocumentsList() {
 							<button
 								aria-label="Zamknij"
 								onClick={closeModal}
-								className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100"
+								className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100 cursor-pointer"
 							>
 								<X className="h-5 w-5" />
 							</button>
@@ -582,14 +582,14 @@ export default function DocumentsList() {
 								<p className="text-sm text-red-600">{formError}</p>
 							)}
 
-							<div className="flex items-center justify-end gap-3">
-								<Button type="button" variant="outline" onClick={closeModal} disabled={submitting}>
-									Anuluj
-								</Button>
-								<Button type="submit" disabled={submitting}>
-									{submitting ? "Zapisywanie..." : editingId ? "Zapisz zmiany" : "Dodaj dokument"}
-								</Button>
-							</div>
+              <div className="flex items-center justify-end gap-3">
+                <Button type="button" variant="outline" onClick={closeModal} disabled={submitting}>
+                  Anuluj
+                </Button>
+                <Button type="submit" disabled={submitting} className="bg-sky-500 hover:bg-sky-600 text-white">
+                  {submitting ? "Zapisywanie..." : editingId ? "Zapisz zmiany" : "Dodaj dokument"}
+                </Button>
+              </div>
 						</form>
 					</div>
 				</div>

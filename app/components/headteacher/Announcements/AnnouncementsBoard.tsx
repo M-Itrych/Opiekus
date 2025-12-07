@@ -180,7 +180,7 @@ function AnnouncementModal({
           <button
             aria-label="Zamknij"
             onClick={onClose}
-            className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100"
+            className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100 cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
@@ -308,7 +308,7 @@ function AnnouncementModal({
             <Button type="button" variant="outline" onClick={onClose}>
               Anuluj
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} className="bg-sky-500 hover:bg-sky-600 text-white">
               {isSubmitting ? "Zapisuję..." : "Zapisz ogłoszenie"}
             </Button>
           </div>
@@ -466,7 +466,7 @@ export default function AnnouncementsBoard() {
                 : "Dla rodziców"}
             </Button>
           ))}
-          <Button onClick={openCreateModal} className="flex items-center gap-2">
+          <Button onClick={openCreateModal} className="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white">
             <Plus className="h-4 w-4" />
             Dodaj ogłoszenie
           </Button>

@@ -209,7 +209,7 @@ function StaffModal({
             <button
               aria-label="Zamknij"
               onClick={onCloseResult}
-              className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100"
+              className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100 cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
@@ -276,7 +276,7 @@ function StaffModal({
             </div>
 
             <div className="flex justify-end pt-2">
-              <Button onClick={onCloseResult} className="bg-sky-600 hover:bg-sky-500 text-white">
+              <Button onClick={onCloseResult} className="bg-sky-500 hover:bg-sky-600 text-white">
                 Zamknij
               </Button>
             </div>
@@ -303,7 +303,7 @@ function StaffModal({
           <button
             aria-label="Zamknij"
             onClick={onClose}
-            className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100"
+            className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100 cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
@@ -423,7 +423,7 @@ function StaffModal({
               {PERMISSION_OPTIONS.map((option) => (
                 <label
                   key={option.value}
-                  className="flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-700"
+                  className="flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-700 cursor-pointer"
                 >
                   <Checkbox
                     checked={formState.permissions.includes(option.value)}
@@ -441,7 +441,7 @@ function StaffModal({
             <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>
               Anuluj
             </Button>
-            <Button type="submit" disabled={submitting} className="bg-sky-600 hover:bg-sky-500 text-white">
+            <Button type="submit" disabled={submitting} className="bg-sky-500 hover:bg-sky-600 text-white">
               {submitting ? "Zapisywanie..." : mode === "create" ? "Utwórz pracownika" : "Zapisz zmiany"}
             </Button>
           </div>
@@ -637,7 +637,7 @@ export default function StaffList() {
             Dodawanie, usuwanie, przydzielanie uprawnień i grup.
           </p>
         </div>
-        <Button className="flex items-center gap-2" onClick={openCreateModal}>
+        <Button className="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white" onClick={openCreateModal}>
           <UserPlus className="h-4 w-4" />
           Dodaj pracownika
         </Button>

@@ -317,7 +317,7 @@ export default function TasksList() {
               Przydzielanie i śledzenie zadań dla personelu.
             </p>
           </div>
-          <Button className="flex items-center gap-2" onClick={openModal}>
+          <Button className="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white" onClick={openModal}>
             <Plus className="h-4 w-4" />
             Nowe zadanie
           </Button>
@@ -453,7 +453,7 @@ export default function TasksList() {
               <button
                 aria-label="Zamknij"
                 onClick={closeModal}
-                className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100"
+                className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -574,7 +574,7 @@ export default function TasksList() {
                 <Button type="button" variant="outline" onClick={closeModal} disabled={submitting}>
                   Anuluj
                 </Button>
-                <Button type="submit" disabled={submitting}>
+                <Button type="submit" disabled={submitting} className="bg-sky-500 hover:bg-sky-600 text-white">
                   {submitting ? "Dodawanie..." : "Dodaj zadanie"}
                 </Button>
               </div>

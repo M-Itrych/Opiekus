@@ -111,7 +111,7 @@ export default function GroupsList() {
             Zarządzanie grupami: żłobek (0-3 lata, 8-12 dzieci), przedszkole (3-6 lat, 15-25 dzieci)
           </p>
         </div>
-        <Button className="flex items-center gap-2" onClick={handleCreate}>
+        <Button className="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white" onClick={handleCreate}>
           <Plus className="h-4 w-4" />
           Dodaj grupę
         </Button>

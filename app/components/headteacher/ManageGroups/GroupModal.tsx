@@ -277,7 +277,7 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
               <div className="flex space-x-1 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
                 <button
                   onClick={() => setActiveTab("details")}
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
                     activeTab === "details"
                       ? "bg-white dark:bg-zinc-700 shadow text-zinc-900 dark:text-zinc-100"
                       : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400"
@@ -288,7 +288,7 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
                 <button
                   onClick={() => setActiveTab("children")}
                   disabled={!groupId}
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
                     activeTab === "children"
                       ? "bg-white dark:bg-zinc-700 shadow text-zinc-900 dark:text-zinc-100"
                       : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -299,7 +299,7 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
                 <button
                   onClick={() => setActiveTab("staff")}
                   disabled={!groupId}
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
                     activeTab === "staff"
                       ? "bg-white dark:bg-zinc-700 shadow text-zinc-900 dark:text-zinc-100"
                       : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -340,7 +340,7 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
                   </div>
                   
                   <div className="pt-4 flex justify-end border-t dark:border-zinc-800 mt-4">
-                    <Button onClick={handleSaveDetails} disabled={isSaving}>
+                    <Button onClick={handleSaveDetails} disabled={isSaving} className="bg-sky-500 hover:bg-sky-600 text-white">
                       {isSaving ? "Zapisywanie..." : "Zapisz zmiany"}
                     </Button>
                   </div>
@@ -366,7 +366,7 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
                         )}
                       </SelectContent>
                     </Select>
-                    <Button onClick={handleAddChild} disabled={!selectedChildToAdd}>
+                    <Button onClick={handleAddChild} disabled={!selectedChildToAdd} className="bg-sky-500 hover:bg-sky-600 text-white">
                       <UserPlus className="h-4 w-4" />
                     </Button>
                   </div>
@@ -424,7 +424,7 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
                         ))}
                       </SelectContent>
                     </Select>
-                    <Button onClick={handleAddTeacher} disabled={!selectedTeacherToAdd}>
+                    <Button onClick={handleAddTeacher} disabled={!selectedTeacherToAdd} className="bg-sky-500 hover:bg-sky-600 text-white">
                       <UserPlus className="h-4 w-4" />
                     </Button>
                   </div>

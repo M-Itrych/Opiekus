@@ -218,7 +218,7 @@ export default function RODOManagement() {
           <Button onClick={fetchConsents} variant="outline" size="icon">
             <RefreshCw className="h-4 w-4" />
           </Button>
-          <Button onClick={generateReport} className="flex items-center gap-2">
+          <Button onClick={generateReport} className="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white">
             <Download className="h-4 w-4" />
             Generuj raport
           </Button>

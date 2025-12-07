@@ -68,6 +68,18 @@ export async function GET(req: Request) {
 		const documents = await prisma.document.findMany({
 			where,
 			orderBy: { createdAt: "desc" },
+			include: {
+				groups: {
+					include: {
+						group: {
+							select: {
+								id: true,
+								name: true,
+							},
+						},
+					},
+				},
+			} as any,
 		});
 
 		return NextResponse.json(documents);
@@ -87,7 +99,7 @@ export async function POST(request: Request) {
 		if (authError) return authError;
 
 		const body = await request.json();
-		const { title, description, fileUrl, status } = body;
+		const { title, description, fileUrl, status, groupIds } = body;
 
 		const trimmedTitle = title?.trim();
 		const trimmedFileUrl = fileUrl?.trim();
@@ -98,6 +110,8 @@ export async function POST(request: Request) {
 
 		const normalizedStatus = normalizeStatus(status) ?? DocumentStatus.AKTYWNY;
 
+		const groupIdsArray = Array.isArray(groupIds) ? groupIds.filter((id: unknown) => typeof id === "string" && id.trim()) : [];
+
 		const document = await prisma.document.create({
 			data: {
 				title: trimmedTitle,
@@ -105,7 +119,46 @@ export async function POST(request: Request) {
 				fileUrl: trimmedFileUrl,
 				status: normalizedStatus,
 			},
+			include: {
+				groups: {
+					include: {
+						group: {
+							select: {
+								id: true,
+								name: true,
+							},
+						},
+					},
+				},
+			} as any,
 		});
+
+		if (groupIdsArray.length > 0) {
+			await (prisma as any).documentGroup.createMany({
+				data: groupIdsArray.map((groupId: string) => ({
+					documentId: document.id,
+					groupId: groupId.trim(),
+				})),
+			});
+
+			const documentWithGroups = await prisma.document.findUnique({
+				where: { id: document.id },
+				include: {
+					groups: {
+						include: {
+							group: {
+								select: {
+									id: true,
+									name: true,
+								},
+							},
+						},
+					},
+				} as any,
+			});
+
+			return NextResponse.json(documentWithGroups, { status: 201 });
+		}
 
 		return NextResponse.json(document, { status: 201 });
 	} catch (error) {

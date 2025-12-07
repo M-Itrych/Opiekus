@@ -60,6 +60,7 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
   const [availableTeachers, setAvailableTeachers] = useState<Staff[]>([]);
   const [unassignedChildren, setUnassignedChildren] = useState<Child[]>([]);
   const [allGroups, setAllGroups] = useState<{id: string, name: string}[]>([]);
+  const [rooms, setRooms] = useState<{id: string, name: string}[]>([]);
 
   const [selectedChildToAdd, setSelectedChildToAdd] = useState<string>("");
   const [selectedTeacherToAdd, setSelectedTeacherToAdd] = useState<string>("");
@@ -86,15 +87,20 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
 
   const fetchAuxiliaryData = async () => {
     try {
-      const [teachersRes, childrenRes, groupsRes] = await Promise.all([
+      const [teachersRes, childrenRes, groupsRes, roomsRes] = await Promise.all([
         fetch("/api/staff/teachers"),
         fetch("/api/children/unassigned"),
-        fetch("/api/groups")
+        fetch("/api/groups"),
+        fetch("/api/rooms")
       ]);
       
       if (teachersRes.ok) setAvailableTeachers(await teachersRes.json());
       if (childrenRes.ok) setUnassignedChildren(await childrenRes.json());
       if (groupsRes.ok) setAllGroups(await groupsRes.json());
+      if (roomsRes.ok) {
+        const roomsData = await roomsRes.json();
+        setRooms(roomsData.map((room: {id: string, name: string}) => ({ id: room.id, name: room.name })));
+      }
 
     } catch (error) {
       console.error("Error fetching auxiliary data:", error);
@@ -337,6 +343,26 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
                       value={maxCapacity}
                       onChange={(e) => setMaxCapacity(e.target.value)}
                     />
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    <Label htmlFor="room">Sala</Label>
+                    <Select
+                      value={roomId || "none"}
+                      onValueChange={(value) => setRoomId(value === "none" ? null : value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Wybierz salę" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Brak sali</SelectItem>
+                        {rooms.map((room) => (
+                          <SelectItem key={room.id} value={room.id}>
+                            {room.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   
                   <div className="pt-4 flex justify-end border-t dark:border-zinc-800 mt-4">

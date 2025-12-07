@@ -59,6 +59,7 @@ model Group {
   room          Room?          @relation(fields: [roomId], references: [id])
   mealPlans     MealPlan[]
   staff         Staff[]
+  documents     DocumentGroup[]
 
   @@map("groups")
 }
@@ -226,8 +227,23 @@ model Document {
   status      DocumentStatus @default(AKTYWNY)
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
+  groups      DocumentGroup[]
 
   @@map("documents")
+}
+
+model DocumentGroup {
+  id         String   @id @default(uuid())
+  documentId String
+  groupId    String
+  createdAt  DateTime @default(now())
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  group      Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, groupId])
+  @@index([documentId])
+  @@index([groupId])
+  @@map("document_groups")
 }
 
 model RecruitmentApplication {

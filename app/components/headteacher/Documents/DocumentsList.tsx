@@ -34,6 +34,11 @@ import { useUploadThing } from "@/lib/uploadthing";
 
 type Status = "AKTYWNY" | "ARCHIWALNY";
 
+interface Group {
+	id: string;
+	name: string;
+}
+
 interface DocumentRecord {
 	id: string;
 	title: string;
@@ -42,6 +47,9 @@ interface DocumentRecord {
 	status: Status;
 	createdAt: string;
 	updatedAt: string;
+	groups?: Array<{
+		group: Group;
+	}>;
 }
 
 interface DocumentFormState {
@@ -49,6 +57,7 @@ interface DocumentFormState {
 	description: string;
 	fileUrl: string;
 	status: Status;
+	groupIds: string[];
 }
 
 const statusLabels: Record<Status, string> = {
@@ -66,6 +75,7 @@ const defaultFormState: DocumentFormState = {
 	description: "",
 	fileUrl: "",
 	status: "AKTYWNY",
+	groupIds: [],
 };
 
 function formatDate(value: string) {
@@ -86,6 +96,8 @@ export default function DocumentsList() {
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [isUploading, setIsUploading] = useState(false);
 	const [uploadProgress, setUploadProgress] = useState(0);
+	const [groups, setGroups] = useState<Group[]>([]);
+	const [loadingGroups, setLoadingGroups] = useState(false);
 
 	const { startUpload } = useUploadThing("documentUploader", {
 		onClientUploadComplete: (res) => {
@@ -142,9 +154,24 @@ export default function DocumentsList() {
 		}
 	}, []);
 
+	const fetchGroups = useCallback(async () => {
+		try {
+			setLoadingGroups(true);
+			const response = await fetch("/api/groups");
+			if (!response.ok) throw new Error("Błąd pobierania grup");
+			const data = await response.json();
+			setGroups(data);
+		} catch (err) {
+			console.error(err);
+		} finally {
+			setLoadingGroups(false);
+		}
+	}, []);
+
 	useEffect(() => {
 		fetchDocuments();
-	}, [fetchDocuments]);
+		fetchGroups();
+	}, [fetchDocuments, fetchGroups]);
 
 	const filteredDocuments = useMemo(() => {
 		return documents.filter((doc) => {
@@ -168,6 +195,7 @@ export default function DocumentsList() {
 				description: doc.description || "",
 				fileUrl: doc.fileUrl,
 				status: doc.status,
+				groupIds: doc.groups?.map((g) => g.group.id) || [],
 			});
 		} else {
 			setEditingId(null);
@@ -212,10 +240,18 @@ export default function DocumentsList() {
 			const url = editingId ? `/api/documents/${editingId}` : "/api/documents";
 			const method = editingId ? "PUT" : "POST";
 
+			const payload = {
+				title: formState.title,
+				description: formState.description,
+				fileUrl: formState.fileUrl,
+				status: formState.status,
+				groupIds: formState.groupIds,
+			};
+
 			const response = await fetch(url, {
 				method,
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(formState),
+				body: JSON.stringify(payload),
 			});
 
 			if (!response.ok) {
@@ -554,6 +590,63 @@ export default function DocumentsList() {
 								</div>
 							)}
 						</div>
+
+							<div>
+								<label className="text-sm font-medium text-zinc-700">Grupy odbiorców (opcjonalnie)</label>
+								<Select
+									value=""
+									onValueChange={(value) => {
+										if (value && !formState.groupIds.includes(value)) {
+											setFormState((prev) => ({
+												...prev,
+												groupIds: [...prev.groupIds, value],
+											}));
+										}
+									}}
+								>
+									<SelectTrigger>
+										<SelectValue placeholder="Wybierz grupę..." />
+									</SelectTrigger>
+									<SelectContent>
+										{groups.map((group) => (
+											<SelectItem key={group.id} value={group.id}>
+												{group.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								{formState.groupIds.length > 0 && (
+									<div className="mt-2 flex flex-wrap gap-2">
+										{formState.groupIds.map((groupId) => {
+											const group = groups.find((g) => g.id === groupId);
+											if (!group) return null;
+											return (
+												<div
+													key={groupId}
+													className="flex items-center gap-1 rounded-full bg-sky-100 px-3 py-1 text-sm text-sky-800"
+												>
+													<span>{group.name}</span>
+													<button
+														type="button"
+														onClick={() => {
+															setFormState((prev) => ({
+																...prev,
+																groupIds: prev.groupIds.filter((id) => id !== groupId),
+															}));
+														}}
+														className="ml-1 text-sky-600 hover:text-sky-800"
+													>
+														<X className="h-3 w-3" />
+													</button>
+												</div>
+											);
+										})}
+									</div>
+								)}
+								<p className="mt-1 text-xs text-zinc-500">
+									Wybierz grupy, dla których dokument jest przeznaczony. Jeśli nie wybierzesz żadnej, dokument będzie dostępny dla wszystkich.
+								</p>
+							</div>
 
 							{editingId && (
 								<div>

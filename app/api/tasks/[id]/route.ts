@@ -88,7 +88,7 @@ export async function PATCH(req: Request, context: ParamsPromise) {
       updateData.dueDate = due;
     }
     if (payload.assignedToId) {
-      updateData.assignedToId = payload.assignedToId;
+      updateData.assignedTo = { connect: { id: payload.assignedToId } };
     }
     const normalizedPriority = normalizePriority(payload.priority);
     if (normalizedPriority) {

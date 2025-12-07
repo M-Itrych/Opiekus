@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import Restaurant from '@mui/icons-material/Restaurant';
 import FreeBreakfast from '@mui/icons-material/FreeBreakfast';
 import BrunchDining from '@mui/icons-material/BrunchDining';
 import LunchDining from '@mui/icons-material/LunchDining';
 import BakeryDining from '@mui/icons-material/BakeryDining';
 import LocalDining from '@mui/icons-material/LocalDining';
+import { Loader2 } from 'lucide-react';
 
 type MealKey = 'breakfast' | 'secondBreakfast' | 'lunch' | 'afternoonSnack' | 'dinner';
 
@@ -16,65 +17,44 @@ interface MealPlan {
   allergens?: string[];
 }
 
-const mealsOrder: Array<{ key: MealKey; label: string; Icon: typeof Restaurant }> = [
-  { key: 'breakfast', label: 'Śniadanie', Icon: FreeBreakfast },
-  { key: 'secondBreakfast', label: 'Drugie śniadanie', Icon: BrunchDining },
-  { key: 'lunch', label: 'Obiad', Icon: LunchDining },
-  { key: 'afternoonSnack', label: 'Podwieczorek', Icon: BakeryDining },
-  { key: 'dinner', label: 'Kolacja', Icon: LocalDining },
+interface ApiMealPlan {
+  id: string;
+  groupId: string | null;
+  date: string;
+  mealType: string;
+  name: string;
+  description: string | null;
+  allergens: string[];
+}
+
+const mealsOrder: Array<{ key: MealKey; label: string; mealType: string; Icon: typeof Restaurant }> = [
+  { key: 'breakfast', label: 'Śniadanie', mealType: 'breakfast', Icon: FreeBreakfast },
+  { key: 'secondBreakfast', label: 'Drugie śniadanie', mealType: 'secondBreakfast', Icon: BrunchDining },
+  { key: 'lunch', label: 'Obiad', mealType: 'lunch', Icon: LunchDining },
+  { key: 'afternoonSnack', label: 'Podwieczorek', mealType: 'afternoonSnack', Icon: BakeryDining },
+  { key: 'dinner', label: 'Kolacja', mealType: 'dinner', Icon: LocalDining },
 ];
 
-const menuData: Record<string, Record<MealKey, MealPlan>> = {
-  '2025-01-13': {
-    breakfast: {
-      title: 'Owsianka z malinami',
-      description: 'Płatki owsiane na mleku, świeże maliny, plasterki banana, herbata owocowa',
-    },
-    secondBreakfast: {
-      title: 'Kanapka z twarożkiem',
-      description: 'Pełnoziarnista bułka z twarożkiem i rzodkiewką, ogórki, sok marchwiowo-jabłkowy',
-    },
-    lunch: {
-      title: 'Zupa pomidorowa z ryżem',
-      description: 'Domowa zupa pomidorowa na bulionie warzywnym z naturalnym ryżem',
-      allergens: ['seler'],
-    },
-    afternoonSnack: {
-      title: 'Jogurt naturalny z bakaliami',
-      description: 'Jogurt naturalny z mieszanką bakalii i miodem',
-      allergens: ['orzechy', 'mleko'],
-    },
-    dinner: {
-      title: 'Lekkie risotto warzywne',
-      description: 'Risotto z sezonowych warzyw z parmezanem',
-      allergens: ['mleko'],
-    },
+const fallbackMenu: Record<MealKey, MealPlan> = {
+  breakfast: {
+    title: 'Brak danych',
+    description: 'Jadłospis dla tego dnia nie został jeszcze wprowadzony',
   },
-  '2025-01-14': {
-    breakfast: {
-      title: 'Placuszki bananowe',
-      description: 'Placuszki bananowe z jogurtem naturalnym i miodem, herbata z cytryną',
-      allergens: ['jaja', 'mleko'],
-    },
-    secondBreakfast: {
-      title: 'Owocowy talerz',
-      description: 'Plasterki jabłka, gruszki i winogron, woda z miętą',
-    },
-    lunch: {
-      title: 'Krem z dyni',
-      description: 'Kremowa zupa z dyni z pestkami słonecznika, grzanki pełnoziarniste',
-      allergens: ['seler', 'gluten'],
-    },
-    afternoonSnack: {
-      title: 'Ciasto marchewkowe',
-      description: 'Wilgotne ciasto marchewkowe z polewą z serka, kompot truskawkowy',
-      allergens: ['gluten', 'mleko', 'jaja'],
-    },
-    dinner: {
-      title: 'Sałatka makaronowa',
-      description: 'Makaron pełnoziarnisty, kurczak, kukurydza, groszek, jogurtowy dressing',
-      allergens: ['gluten', 'mleko'],
-    },
+  secondBreakfast: {
+    title: 'Brak danych',
+    description: 'Jadłospis dla tego dnia nie został jeszcze wprowadzony',
+  },
+  lunch: {
+    title: 'Brak danych',
+    description: 'Jadłospis dla tego dnia nie został jeszcze wprowadzony',
+  },
+  afternoonSnack: {
+    title: 'Brak danych',
+    description: 'Jadłospis dla tego dnia nie został jeszcze wprowadzony',
+  },
+  dinner: {
+    title: 'Brak danych',
+    description: 'Jadłospis dla tego dnia nie został jeszcze wprowadzony',
   },
 };
 
@@ -92,37 +72,48 @@ function formatDateLabel(dateString: string) {
 
 export default function JadlospisPage() {
   const [selectedDate, setSelectedDate] = useState<string>(getTodayKey());
+  const [mealPlans, setMealPlans] = useState<ApiMealPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchMealPlans = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const res = await fetch(`/api/meal-plans?date=${selectedDate}`);
+      if (!res.ok) throw new Error('Błąd pobierania jadłospisu');
+      
+      const data: ApiMealPlan[] = await res.json();
+      setMealPlans(data);
+    } catch (err) {
+      console.error(err);
+      setError('Nie udało się pobrać jadłospisu');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedDate]);
+
+  useEffect(() => {
+    fetchMealPlans();
+  }, [fetchMealPlans]);
 
   const menuForDay = useMemo(() => {
-    if (menuData[selectedDate]) return menuData[selectedDate];
+    const menu: Record<MealKey, MealPlan> = { ...fallbackMenu };
+    
+    mealPlans.forEach((plan) => {
+      const mealKey = plan.mealType.toLowerCase() as MealKey;
+      if (mealsOrder.some((m) => m.key === mealKey)) {
+        menu[mealKey] = {
+          title: plan.name,
+          description: plan.description || '',
+          allergens: plan.allergens.length > 0 ? plan.allergens : undefined,
+        };
+      }
+    });
 
-    return {
-      breakfast: {
-        title: 'Kanapka z pastą warzywną',
-        description: 'Pełnoziarnisty chleb z pastą z ciecierzycy i warzywami, herbata z cytryną',
-      },
-      secondBreakfast: {
-        title: 'Smoothie truskawkowe',
-        description: 'Koktajl z truskawek, banana i jogurtu naturalnego',
-        allergens: ['mleko'],
-      },
-      lunch: {
-        title: 'Zupa jarzynowa',
-        description: 'Lekka zupa z sezonowych warzyw z makaronem',
-        allergens: ['seler', 'gluten'],
-      },
-      afternoonSnack: {
-        title: 'Ryż z jabłkami',
-        description: 'Ryż na mleku z cynamonem i duszonym jabłkiem',
-        allergens: ['mleko'],
-      },
-      dinner: {
-        title: 'Zapiekanka warzywna',
-        description: 'Zapiekane warzywa z serem mozzarella i ziołami',
-        allergens: ['mleko'],
-      },
-    } satisfies Record<MealKey, MealPlan>;
-  }, [selectedDate]);
+    return menu;
+  }, [mealPlans]);
 
   const handleChangeDay = (direction: 'prev' | 'next') => {
     const date = new Date(selectedDate);
@@ -141,7 +132,7 @@ export default function JadlospisPage() {
         <div>
           <h1 className="text-xl font-bold text-gray-800">Jadłospis</h1>
           <p className="text-gray-600 text-sm">
-            Sprawdź, co przygotowaliśmy dla dzieci na dzisiejszy dzień.
+            Sprawdź, co przygotowaliśmy dla dzieci na wybrany dzień.
           </p>
         </div>
 
@@ -179,35 +170,64 @@ export default function JadlospisPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {mealsOrder.map(({ key, label, Icon }) => {
-          const meal = menuForDay[key];
-          return (
-            <div
-              key={key}
-              className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow"
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="flex flex-col items-center gap-3 text-gray-500">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <p>Ładowanie jadłospisu...</p>
+          </div>
+        </div>
+      ) : error ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center text-red-600">
+            <p>{error}</p>
+            <button
+              onClick={fetchMealPlans}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              <div className="flex items-center gap-3 mb-2.5">
-                <div className="p-2 bg-blue-50 rounded-lg shrink-0">
-                  <Icon className="text-blue-500" />
+              Spróbuj ponownie
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {mealsOrder.map(({ key, label, Icon }) => {
+            const meal = menuForDay[key];
+            const hasData = meal.title !== 'Brak danych';
+            
+            return (
+              <div
+                key={key}
+                className={`bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow ${
+                  hasData ? 'border-gray-200' : 'border-gray-100 opacity-60'
+                }`}
+              >
+                <div className="flex items-center gap-3 mb-2.5">
+                  <div className={`p-2 rounded-lg shrink-0 ${hasData ? 'bg-blue-50' : 'bg-gray-50'}`}>
+                    <Icon className={hasData ? 'text-blue-500' : 'text-gray-400'} />
+                  </div>
+                  <h3 className="text-base font-semibold text-gray-800">{label}</h3>
                 </div>
-                <h3 className="text-base font-semibold text-gray-800">{label}</h3>
-              </div>
-              <p className="text-gray-700 font-medium text-sm mb-1">{meal.title}</p>
-              <p className="text-gray-600 text-xs leading-relaxed">{meal.description}</p>
+                <p className={`font-medium text-sm mb-1 ${hasData ? 'text-gray-700' : 'text-gray-400'}`}>
+                  {meal.title}
+                </p>
+                <p className={`text-xs leading-relaxed ${hasData ? 'text-gray-600' : 'text-gray-400'}`}>
+                  {meal.description}
+                </p>
 
-              {meal.allergens && meal.allergens.length > 0 && (
-                <div className="mt-3 px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-[11px] font-semibold text-red-600 uppercase tracking-wide">
-                    Alergeny:
-                  </p>
-                  <p className="text-xs text-red-500">{meal.allergens.join(', ')}</p>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                {meal.allergens && meal.allergens.length > 0 && (
+                  <div className="mt-3 px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-[11px] font-semibold text-red-600 uppercase tracking-wide">
+                      Alergeny:
+                    </p>
+                    <p className="text-xs text-red-500">{meal.allergens.join(', ')}</p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <div className="mt-5 bg-blue-50 border border-blue-200 rounded-xl p-4">
         <h3 className="text-blue-800 font-semibold mb-1">Informacje dodatkowe</h3>
@@ -223,4 +243,3 @@ export default function JadlospisPage() {
     </div>
   );
 }
-

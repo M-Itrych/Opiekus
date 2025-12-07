@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { verifyToken } from "@/lib/session";
-import { Prisma } from "@prisma/client";
+import { Prisma, AnnouncementCategory } from "@prisma/client";
 
 type SessionRole = "ADMIN" | "HEADTEACHER" | "TEACHER" | "PARENT";
 type SessionUser = {
@@ -146,9 +146,9 @@ export async function POST(request: Request) {
 
     const normalizedAudience =
       normalizeAudience(body.audience ?? body.targetGroup) ?? "ALL";
-    const normalizedCategory =
+    const normalizedCategory: AnnouncementCategory =
       typeof category === "string" && category.trim()
-        ? category.trim().toUpperCase()
+        ? (category.trim().toUpperCase() as AnnouncementCategory)
         : "INNE";
 
     const baseEventDate = parseDate(eventDate);

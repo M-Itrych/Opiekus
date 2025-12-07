@@ -14,10 +14,7 @@ export async function GET() {
 
     const payload = await verifyToken(token);
 
-    if (
-      !payload ||
-      (payload.role !== "HEADTEACHER" && payload.role !== "ADMIN")
-    ) {
+    if (!payload) {
       return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
     }
 
@@ -32,6 +29,12 @@ export async function GET() {
             name: true,
             surname: true,
             email: true,
+          },
+        },
+        group: {
+          select: {
+            id: true,
+            name: true,
           },
         },
       },

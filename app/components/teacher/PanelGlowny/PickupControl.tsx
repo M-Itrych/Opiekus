@@ -1,18 +1,37 @@
 "use client";
 
-import { useState } from "react";
-import { CheckCircle, XCircle, Clock, User, AlertTriangle } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { CheckCircle, Clock, User, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 interface PickupRecord {
+  id: string;
   childId: string;
   childName: string;
-  pickupTime?: string;
-  pickupPerson?: string;
+  pickupTime: string;
+  pickupDate: string;
+  pickupPerson: string;
   pickupPersonId?: string;
   isAuthorized: boolean;
-  verificationMethod?: "id" | "pin" | "qr";
+  notes?: string;
+}
+
+interface ApiPickupRecord {
+  id: string;
+  childId: string;
+  pickupDate: string;
+  pickupTime: string;
+  pickupPerson: string;
+  pickupPersonId: string | null;
+  relation: string;
+  isAuthorized: boolean;
+  notes: string | null;
+  child: {
+    id: string;
+    name: string;
+    surname: string;
+  };
 }
 
 interface PickupControlProps {
@@ -32,8 +51,47 @@ export default function PickupControl({ children }: PickupControlProps) {
   const [pickupRecords, setPickupRecords] = useState<Record<string, PickupRecord>>({});
   const [verificationCode, setVerificationCode] = useState("");
   const [selectedChild, setSelectedChild] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState<string | null>(null);
 
-  const handlePickup = (childId: string, personName: string, personId: string) => {
+  const fetchTodayPickups = useCallback(async () => {
+    try {
+      setLoading(true);
+      const today = new Date().toISOString().split('T')[0];
+      const res = await fetch(`/api/pickup?pickupDate=${today}`);
+      
+      if (!res.ok) throw new Error('Failed to fetch pickups');
+      
+      const data: ApiPickupRecord[] = await res.json();
+      
+      const records: Record<string, PickupRecord> = {};
+      data.forEach((record) => {
+        records[record.childId] = {
+          id: record.id,
+          childId: record.childId,
+          childName: `${record.child.name} ${record.child.surname}`,
+          pickupTime: record.pickupTime,
+          pickupDate: record.pickupDate,
+          pickupPerson: record.pickupPerson,
+          pickupPersonId: record.pickupPersonId || undefined,
+          isAuthorized: record.isAuthorized,
+          notes: record.notes || undefined,
+        };
+      });
+      
+      setPickupRecords(records);
+    } catch (err) {
+      console.error('Error fetching pickups:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTodayPickups();
+  }, [fetchTodayPickups]);
+
+  const handlePickup = async (childId: string, personName: string, personId: string, relation: string) => {
     const child = children.find((c) => c.id === childId);
     const authorizedPerson = child?.pickupAuthorized.find((p) => p.id === personId);
 
@@ -42,27 +100,105 @@ export default function PickupControl({ children }: PickupControlProps) {
       return;
     }
 
-    setPickupRecords((prev) => ({
-      ...prev,
-      [childId]: {
-        childId,
-        childName: `${child?.name} ${child?.surname}`,
-        pickupTime: new Date().toLocaleTimeString("pl-PL"),
-        pickupPerson: personName,
-        pickupPersonId: personId,
-        isAuthorized: true,
-        verificationMethod: "id",
-      },
-    }));
+    setSaving(childId);
+    try {
+      const now = new Date();
+      const pickupDate = now.toISOString().split('T')[0];
+      const pickupTime = now.toLocaleTimeString("pl-PL", { hour: '2-digit', minute: '2-digit' });
 
-    setSelectedChild(null);
-    setVerificationCode("");
+      const res = await fetch('/api/pickup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          childId,
+          pickupDate,
+          pickupTime,
+          pickupPerson: personName,
+          pickupPersonId: personId,
+          relation,
+          isAuthorized: true,
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to save pickup');
+      
+      const savedRecord: ApiPickupRecord = await res.json();
+
+      setPickupRecords((prev) => ({
+        ...prev,
+        [childId]: {
+          id: savedRecord.id,
+          childId,
+          childName: `${child?.name} ${child?.surname}`,
+          pickupTime: savedRecord.pickupTime,
+          pickupDate: savedRecord.pickupDate,
+          pickupPerson: personName,
+          pickupPersonId: personId,
+          isAuthorized: true,
+        },
+      }));
+
+      setSelectedChild(null);
+      setVerificationCode("");
+    } catch (err) {
+      console.error('Error saving pickup:', err);
+      alert('Wystąpił błąd podczas zapisywania odbioru');
+    } finally {
+      setSaving(null);
+    }
   };
 
-  const handleVerification = (childId: string) => {
+  const handleVerification = async (childId: string) => {
     const child = children.find((c) => c.id === childId);
     if (child) {
-      handlePickup(childId, "Zweryfikowana osoba", verificationCode);
+      setSaving(childId);
+      try {
+        const now = new Date();
+        const pickupDate = now.toISOString().split('T')[0];
+        const pickupTime = now.toLocaleTimeString("pl-PL", { hour: '2-digit', minute: '2-digit' });
+
+        const res = await fetch('/api/pickup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            childId,
+            pickupDate,
+            pickupTime,
+            pickupPerson: 'Osoba zweryfikowana kodem',
+            pickupPersonId: verificationCode,
+            relation: 'Zweryfikowana',
+            isAuthorized: true,
+            notes: `Weryfikacja kodem: ${verificationCode}`,
+          }),
+        });
+
+        if (!res.ok) throw new Error('Failed to save pickup');
+        
+        const savedRecord: ApiPickupRecord = await res.json();
+
+        setPickupRecords((prev) => ({
+          ...prev,
+          [childId]: {
+            id: savedRecord.id,
+            childId,
+            childName: `${child.name} ${child.surname}`,
+            pickupTime: savedRecord.pickupTime,
+            pickupDate: savedRecord.pickupDate,
+            pickupPerson: 'Osoba zweryfikowana kodem',
+            pickupPersonId: verificationCode,
+            isAuthorized: true,
+            notes: `Weryfikacja kodem: ${verificationCode}`,
+          },
+        }));
+
+        setSelectedChild(null);
+        setVerificationCode("");
+      } catch (err) {
+        console.error('Error saving pickup:', err);
+        alert('Wystąpił błąd podczas zapisywania odbioru');
+      } finally {
+        setSaving(null);
+      }
     }
   };
 
@@ -72,6 +208,17 @@ export default function PickupControl({ children }: PickupControlProps) {
   const completedPickups = children.filter(
     (child) => pickupRecords[child.id]
   );
+
+  if (loading) {
+    return (
+      <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-sky-600" />
+          <span className="ml-2 text-zinc-600">Ładowanie danych odbiorów...</span>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
@@ -96,6 +243,7 @@ export default function PickupControl({ children }: PickupControlProps) {
           <div className="flex flex-col gap-3">
             {pendingPickups.map((child) => {
               const isSelected = selectedChild === child.id;
+              const isSaving = saving === child.id;
               return (
                 <div
                   key={child.id}
@@ -118,8 +266,18 @@ export default function PickupControl({ children }: PickupControlProps) {
                       variant={isSelected ? "default" : "outline"}
                       size="sm"
                       onClick={() => setSelectedChild(isSelected ? null : child.id)}
+                      disabled={isSaving}
                     >
-                      {isSelected ? "Anuluj" : "Odbierz"}
+                      {isSaving ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                          Zapisywanie...
+                        </>
+                      ) : isSelected ? (
+                        "Anuluj"
+                      ) : (
+                        "Odbierz"
+                      )}
                     </Button>
                   </div>
 
@@ -139,9 +297,9 @@ export default function PickupControl({ children }: PickupControlProps) {
                           />
                           <Button
                             onClick={() => handleVerification(child.id)}
-                            disabled={!verificationCode}
+                            disabled={!verificationCode || isSaving}
                           >
-                            Zweryfikuj
+                            {isSaving ? 'Zapisywanie...' : 'Zweryfikuj'}
                           </Button>
                         </div>
                       </div>
@@ -157,8 +315,9 @@ export default function PickupControl({ children }: PickupControlProps) {
                               variant="outline"
                               className="flex items-center justify-between"
                               onClick={() =>
-                                handlePickup(child.id, person.name, person.id)
+                                handlePickup(child.id, person.name, person.id, person.relation)
                               }
+                              disabled={isSaving}
                             >
                               <div className="flex items-center gap-2">
                                 <User className="h-4 w-4" />
@@ -210,6 +369,11 @@ export default function PickupControl({ children }: PickupControlProps) {
                       <p>
                         Godzina: <span className="font-medium">{record.pickupTime}</span>
                       </p>
+                      {record.notes && (
+                        <p className="text-xs text-zinc-500">
+                          Uwagi: {record.notes}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -229,4 +393,3 @@ export default function PickupControl({ children }: PickupControlProps) {
     </section>
   );
 }
-

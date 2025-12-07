@@ -66,5 +66,116 @@ export async function POST(request: Request) {
 		console.error("POST /api/documents:", error);
 		return NextResponse.json({ error: "Błąd serwera" }, { status: 500 });
 	}
+import { cookies } from "next/headers";
+import { prisma } from "@/lib/prisma";
+import { verifyToken } from "@/lib/session";
+import { Prisma, DocumentStatus } from "@prisma/client";
+
+type SessionUser = {
+  id: string;
+  role: "ADMIN" | "HEADTEACHER" | "TEACHER" | "PARENT";
+};
+
+async function getSessionUser(): Promise<SessionUser | null> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+  if (!token) return null;
+  const payload = await verifyToken(token);
+  if (!payload) return null;
+  return payload as SessionUser;
+}
+
+function normalizeStatus(value: unknown): DocumentStatus | null {
+  if (!value || typeof value !== "string") return null;
+  const upper = value.toUpperCase();
+  return Object.values(DocumentStatus).includes(upper as DocumentStatus)
+    ? (upper as DocumentStatus)
+    : null;
+}
+
+function ensureManager(user: SessionUser | null) {
+  if (!user) {
+    return NextResponse.json({ error: "Nieautoryzowany dostęp" }, { status: 401 });
+  }
+  if (!["HEADTEACHER", "ADMIN"].includes(user.role)) {
+    return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
+  }
+  return null;
+}
+
+export async function GET(req: Request) {
+  try {
+    const user = await getSessionUser();
+    if (!user) {
+      return NextResponse.json({ error: "Nieautoryzowany dostęp" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const status = searchParams.get("status");
+    const search = searchParams.get("search");
+
+    const where: Prisma.DocumentWhereInput = {};
+
+    // Status filter
+    const normalizedStatus = normalizeStatus(status);
+    if (normalizedStatus) {
+      where.status = normalizedStatus;
+    }
+
+    // Search filter
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    const documents = await prisma.document.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+    });
+
+    return NextResponse.json(documents);
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    return NextResponse.json(
+      { error: "Błąd podczas pobierania dokumentów" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const user = await getSessionUser();
+    const authError = ensureManager(user);
+    if (authError) return authError;
+
+    const body = await request.json();
+    const { title, description, fileUrl, status } = body;
+
+    if (!title || !fileUrl) {
+      return NextResponse.json({ error: "Brak wymaganych pól" }, { status: 400 });
+    }
+
+    const normalizedStatus = normalizeStatus(status) ?? DocumentStatus.AKTYWNY;
+
+    const document = await prisma.document.create({
+      data: {
+        title: title.trim(),
+        description: description?.trim() || null,
+        fileUrl: fileUrl.trim(),
+        status: normalizedStatus,
+      },
+    });
+
+    return NextResponse.json(document, { status: 201 });
+  } catch (error) {
+    console.error("Error creating document:", error);
+    return NextResponse.json(
+      { error: "Błąd podczas tworzenia dokumentu" },
+      { status: 500 }
+    );
+  }
 }
 

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { verifyToken } from "@/lib/session";
-import { Prisma } from "@prisma/client";
+import { Prisma, AnnouncementCategory } from "@prisma/client";
 
 type SessionUser = {
   id: string;
@@ -75,7 +75,7 @@ export async function PATCH(req: Request, context: ParamsPromise) {
       updateData.content = payload.content.trim();
     }
     if (typeof payload.category === "string" && payload.category.trim()) {
-      updateData.category = payload.category.trim().toUpperCase();
+      updateData.category = payload.category.trim().toUpperCase() as AnnouncementCategory;
     }
     if (typeof payload.location !== "undefined") {
       updateData.location = payload.location ? String(payload.location) : null;
@@ -103,7 +103,11 @@ export async function PATCH(req: Request, context: ParamsPromise) {
     }
 
     if (payload.groupId !== undefined) {
-      updateData.groupId = payload.groupId || null;
+      if (payload.groupId) {
+        updateData.group = { connect: { id: payload.groupId } };
+      } else {
+        updateData.group = { disconnect: true };
+      }
     }
 
     if (!Object.keys(updateData).length) {

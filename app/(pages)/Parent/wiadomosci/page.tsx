@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import SendIcon from '@mui/icons-material/Send';
 import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread';
@@ -9,128 +9,159 @@ import OutboxIcon from '@mui/icons-material/Outbox';
 import PersonIcon from '@mui/icons-material/Person';
 import ReplyIcon from '@mui/icons-material/Reply';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import { Loader2 } from 'lucide-react';
 
 interface Teacher {
   id: string;
-  name: string;
-  subject: string;
+  userId: string;
+  user: {
+    id: string;
+    name: string;
+    surname: string;
+  };
+  group?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 interface Message {
   id: string;
-  sender: string;
-  senderRole: 'nauczyciel' | 'administracja';
+  senderId: string;
+  receiverId: string;
   subject: string;
-  preview: string;
   body: string;
-  date: string; // ISO
-  isRead?: boolean;
+  status: string;
+  isRead: boolean;
+  createdAt: string;
+  sender: {
+    id: string;
+    name: string;
+    surname: string;
+    role: string;
+  };
+  receiver: {
+    id: string;
+    name: string;
+    surname: string;
+    role: string;
+  };
 }
-
-const teachers: Teacher[] = [
-  { id: 't-01', name: 'Anna Kowalczyk', subject: 'Wychowawca grupy "Motylki"' },
-  { id: 't-02', name: 'Marek Nowak', subject: 'Język angielski' },
-  { id: 't-03', name: 'Ewelina Wróbel', subject: 'Logopedia' },
-  { id: 't-04', name: 'Katarzyna Zielińska', subject: 'Zajęcia sportowe' },
-];
-
-const inboxSeed: Message[] = [
-  {
-    id: 'msg-001',
-    sender: 'Anna Kowalczyk',
-    senderRole: 'nauczyciel',
-    subject: 'Podsumowanie tygodnia',
-    preview: 'Szanowni Państwo, przesyłam krótkie podsumowanie zajęć z minionego tygodnia...',
-    body: `Szanowni Państwo,
-
-W minionym tygodniu skupiliśmy się na temacie zimy. Dzieci wykonywały kreatywne prace plastyczne oraz uczyły się zimowych piosenek. Przypominam również o czwartkowym wyjściu na zajęcia sportowe – proszę pamiętać o stroju gimnastycznym.
-
-W razie pytań zapraszam do kontaktu.
-
-Pozdrawiam serdecznie,
-Anna Kowalczyk`,
-    date: '2025-01-18T15:40:00',
-    isRead: false,
-  },
-  {
-    id: 'msg-002',
-    sender: 'Administracja przedszkola',
-    senderRole: 'administracja',
-    subject: 'Informacja o płatnościach',
-    preview: 'Przypominamy o terminie płatności za czesne za miesiąc styczeń...',
-    body: `Dzień dobry,
-
-Przypominamy o terminie płatności za czesne za miesiąc styczeń, który upływa 25 stycznia.
-W razie trudności z terminową wpłatą prosimy o kontakt z administracją przedszkola.
-
-Pozdrawiamy,
-Administracja`,
-    date: '2025-01-16T09:15:00',
-    isRead: true,
-  },
-  {
-    id: 'msg-003',
-    sender: 'Marek Nowak',
-    senderRole: 'nauczyciel',
-    subject: 'Materiały z języka angielskiego',
-    preview: 'Przesyłam materiały powtórkowe z bieżącego modułu...',
-    body: `Dzień dobry,
-
-Przesyłam materiały powtórkowe z języka angielskiego. Dzieci bardzo chętnie pracowały w grupach. Zachęcam do wspólnego utrwalania słówek w domu.
-
-Pozdrawiam,
-Marek Nowak`,
-    date: '2025-01-12T17:55:00',
-    isRead: true,
-  },
-];
 
 type InboxFilter = 'all' | 'unread';
 
-interface SentMessage {
-  id: string;
-  recipients: string[];
-  subject: string;
-  preview: string;
-  body: string;
-  date: string;
-}
-
 export default function WiadomosciPage() {
   const [activeSection, setActiveSection] = useState<'inbox' | 'sent' | 'compose'>('inbox');
-  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(inboxSeed[0]?.id ?? null);
-  const [messages, setMessages] = useState<Message[]>(inboxSeed);
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
+  const [inboxMessages, setInboxMessages] = useState<Message[]>([]);
+  const [sentMessages, setSentMessages] = useState<Message[]>([]);
   const [filter, setFilter] = useState<InboxFilter>('all');
-  const [sentMessages, setSentMessages] = useState<SentMessage[]>([]);
   const [selectedSentId, setSelectedSentId] = useState<string | null>(null);
 
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [selectedTeachers, setSelectedTeachers] = useState<string[]>([]);
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+
+  const fetchMessages = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const [inboxRes, sentRes] = await Promise.all([
+        fetch('/api/messages?type=inbox'),
+        fetch('/api/messages?type=sent'),
+      ]);
+
+      if (!inboxRes.ok || !sentRes.ok) {
+        throw new Error('Błąd pobierania wiadomości');
+      }
+
+      const inboxData = await inboxRes.json();
+      const sentData = await sentRes.json();
+
+      setInboxMessages(inboxData);
+      setSentMessages(sentData);
+
+      if (inboxData.length > 0 && !selectedMessageId) {
+        setSelectedMessageId(inboxData[0].id);
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Nie udało się pobrać wiadomości');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedMessageId]);
+
+  const fetchTeachers = useCallback(async () => {
+    try {
+      const res = await fetch('/api/staff/teachers');
+      if (!res.ok) throw new Error('Błąd pobierania nauczycieli');
+      const data = await res.json();
+      setTeachers(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchMessages();
+    fetchTeachers();
+  }, [fetchMessages, fetchTeachers]);
+
   const filteredMessages = useMemo(() => {
-    return messages.filter((msg) => (filter === 'unread' ? !msg.isRead : true));
-  }, [messages, filter]);
+    return inboxMessages.filter((msg) => (filter === 'unread' ? !msg.isRead : true));
+  }, [inboxMessages, filter]);
 
   const selectedMessage = useMemo(() => {
-    return messages.find((msg) => msg.id === selectedMessageId) ?? null;
-  }, [messages, selectedMessageId]);
+    return inboxMessages.find((msg) => msg.id === selectedMessageId) ?? null;
+  }, [inboxMessages, selectedMessageId]);
 
-  const unreadCount = messages.filter((msg) => !msg.isRead).length;
+  const unreadCount = inboxMessages.filter((msg) => !msg.isRead).length;
 
-  const handleSelectMessage = (id: string) => {
+  const handleSelectMessage = async (id: string) => {
     setSelectedSentId(null);
     setSelectedMessageId(id);
     setActiveSection('inbox');
-    setMessages((prev) =>
-      prev.map((msg) => (msg.id === id ? { ...msg, isRead: true } : msg))
-    );
+
+    const msg = inboxMessages.find((m) => m.id === id);
+    if (msg && !msg.isRead) {
+      try {
+        await fetch(`/api/messages/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isRead: true }),
+        });
+        setInboxMessages((prev) =>
+          prev.map((m) => (m.id === id ? { ...m, isRead: true } : m))
+        );
+      } catch (err) {
+        console.error('Error marking message as read:', err);
+      }
+    }
   };
 
-  const handleToggleRead = (id: string) => {
-    setMessages((prev) =>
-      prev.map((msg) => (msg.id === id ? { ...msg, isRead: !msg.isRead } : msg))
-    );
+  const handleToggleRead = async (id: string) => {
+    const msg = inboxMessages.find((m) => m.id === id);
+    if (!msg) return;
+
+    try {
+      await fetch(`/api/messages/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isRead: !msg.isRead }),
+      });
+      setInboxMessages((prev) =>
+        prev.map((m) => (m.id === id ? { ...m, isRead: !m.isRead } : m))
+      );
+    } catch (err) {
+      console.error('Error toggling read status:', err);
+    }
   };
 
   const handleToggleTeacher = (id: string) => {
@@ -139,7 +170,7 @@ export default function WiadomosciPage() {
     );
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (selectedTeachers.length === 0) {
       alert('Wybierz przynajmniej jednego nauczyciela.');
       return;
@@ -153,27 +184,68 @@ export default function WiadomosciPage() {
       return;
     }
 
-    const now = new Date().toISOString();
-    const newSent: SentMessage = {
-      id: `sent-${Date.now()}`,
-      recipients: selectedTeachers.map(
-        (id) => teachers.find((teacher) => teacher.id === id)?.name ?? 'Nauczyciel'
-      ),
-      subject,
-      preview: content.slice(0, 120) + (content.length > 120 ? '…' : ''),
-      body: content,
-      date: now,
-    };
+    setSending(true);
+    try {
+      // Send a message to each selected teacher
+      for (const teacherId of selectedTeachers) {
+        const teacher = teachers.find((t) => t.id === teacherId);
+        if (!teacher) continue;
 
-    setSentMessages((prev) => [newSent, ...prev]);
-    setSelectedSentId(newSent.id);
+        const res = await fetch('/api/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            receiverId: teacher.user.id,
+            subject,
+            body: content,
+          }),
+        });
 
-    alert('Wiadomość została wysłana do wybranych nauczycieli.');
-    setSelectedTeachers([]);
-    setSubject('');
-    setContent('');
-    setActiveSection('sent');
+        if (!res.ok) {
+          throw new Error('Błąd wysyłania wiadomości');
+        }
+      }
+
+      alert('Wiadomość została wysłana do wybranych nauczycieli.');
+      setSelectedTeachers([]);
+      setSubject('');
+      setContent('');
+      setActiveSection('sent');
+      fetchMessages();
+    } catch (err) {
+      console.error(err);
+      alert('Wystąpił błąd podczas wysyłania wiadomości.');
+    } finally {
+      setSending(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="p-4 md:p-6 min-h-[80vh] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-gray-500">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <p>Ładowanie wiadomości...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 md:p-6 min-h-[80vh] flex items-center justify-center">
+        <div className="text-center text-red-600">
+          <p>{error}</p>
+          <button
+            onClick={fetchMessages}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Spróbuj ponownie
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 min-h-[80vh] flex flex-col">
@@ -209,8 +281,8 @@ export default function WiadomosciPage() {
               <button
                 onClick={() => {
                   setActiveSection('inbox');
-                  if (!selectedMessageId && messages.length > 0) {
-                    setSelectedMessageId(messages[0].id);
+                  if (!selectedMessageId && inboxMessages.length > 0) {
+                    setSelectedMessageId(inboxMessages[0].id);
                   }
                 }}
                 className={`rounded-md px-3 py-1.5 ${
@@ -279,7 +351,7 @@ export default function WiadomosciPage() {
                   >
                     <div className="flex items-center justify-between text-xs text-gray-500">
                       <span>
-                        {new Date(msg.date).toLocaleDateString('pl-PL', {
+                        {new Date(msg.createdAt).toLocaleDateString('pl-PL', {
                           day: '2-digit',
                           month: '2-digit',
                           hour: '2-digit',
@@ -299,7 +371,10 @@ export default function WiadomosciPage() {
                       )}
                     </div>
                     <p className="text-sm font-semibold text-gray-800">{msg.subject}</p>
-                    <p className="text-xs text-gray-500 line-clamp-2">{msg.preview}</p>
+                    <p className="text-xs text-gray-500">
+                      Od: {msg.sender.name} {msg.sender.surname}
+                    </p>
+                    <p className="text-xs text-gray-500 line-clamp-2">{msg.body}</p>
                   </button>
                 ))
               )
@@ -319,7 +394,7 @@ export default function WiadomosciPage() {
                 >
                   <div className="flex items-center justify-between text-xs text-gray-500">
                     <span>
-                      {new Date(msg.date).toLocaleDateString('pl-PL', {
+                      {new Date(msg.createdAt).toLocaleDateString('pl-PL', {
                         day: '2-digit',
                         month: '2-digit',
                         hour: '2-digit',
@@ -332,8 +407,10 @@ export default function WiadomosciPage() {
                     </span>
                   </div>
                   <p className="text-sm font-semibold text-gray-800">{msg.subject}</p>
-                  <p className="text-xs text-gray-500">Do: {msg.recipients.join(', ')}</p>
-                  <p className="text-xs text-gray-500 line-clamp-2">{msg.preview}</p>
+                  <p className="text-xs text-gray-500">
+                    Do: {msg.receiver.name} {msg.receiver.surname}
+                  </p>
+                  <p className="text-xs text-gray-500 line-clamp-2">{msg.body}</p>
                 </button>
               ))
             )}
@@ -356,30 +433,36 @@ export default function WiadomosciPage() {
                   Odbiorcy
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {teachers.map((teacher) => (
-                    <label
-                      key={teacher.id}
-                      className={`flex items-start gap-2 rounded-lg border px-3 py-2 text-sm shadow-sm ${
-                        selectedTeachers.includes(teacher.id)
-                          ? 'border-blue-300 bg-blue-50'
-                          : 'border-gray-200 bg-white hover:bg-gray-50'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedTeachers.includes(teacher.id)}
-                        onChange={() => handleToggleTeacher(teacher.id)}
-                        className="mt-1"
-                      />
-                      <div>
-                        <p className="font-semibold text-gray-800 flex items-center gap-1">
-                          <PersonIcon fontSize="small" className="text-blue-500" />
-                          {teacher.name}
-                        </p>
-                        <p className="text-xs text-gray-500">{teacher.subject}</p>
-                      </div>
-                    </label>
-                  ))}
+                  {teachers.length === 0 ? (
+                    <p className="text-sm text-gray-500 col-span-2">Brak dostępnych nauczycieli.</p>
+                  ) : (
+                    teachers.map((teacher) => (
+                      <label
+                        key={teacher.id}
+                        className={`flex items-start gap-2 rounded-lg border px-3 py-2 text-sm shadow-sm cursor-pointer ${
+                          selectedTeachers.includes(teacher.id)
+                            ? 'border-blue-300 bg-blue-50'
+                            : 'border-gray-200 bg-white hover:bg-gray-50'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedTeachers.includes(teacher.id)}
+                          onChange={() => handleToggleTeacher(teacher.id)}
+                          className="mt-1"
+                        />
+                        <div>
+                          <p className="font-semibold text-gray-800 flex items-center gap-1">
+                            <PersonIcon fontSize="small" className="text-blue-500" />
+                            {teacher.user.name} {teacher.user.surname}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {teacher.group?.name || 'Brak przypisanej grupy'}
+                          </p>
+                        </div>
+                      </label>
+                    ))
+                  )}
                 </div>
               </div>
 
@@ -412,10 +495,11 @@ export default function WiadomosciPage() {
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={handleSendMessage}
-                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+                  disabled={sending}
+                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors disabled:bg-blue-300"
                 >
                   <SendIcon fontSize="small" />
-                  Wyślij wiadomość
+                  {sending ? 'Wysyłanie...' : 'Wyślij wiadomość'}
                 </button>
                 <button
                   onClick={() => setActiveSection('inbox')}
@@ -433,7 +517,7 @@ export default function WiadomosciPage() {
                   return (
                     <div className="flex flex-1 flex-col items-center justify-center text-center text-gray-500">
                       <MailOutlineIcon fontSize="large" className="text-blue-400 mb-2" />
-                      <p>Wybierz wiadomość ze skrzynki „Wysłane”, aby zobaczyć szczegóły.</p>
+                      <p>Wybierz wiadomość ze skrzynki „Wysłane", aby zobaczyć szczegóły.</p>
                     </div>
                   );
                 }
@@ -443,13 +527,13 @@ export default function WiadomosciPage() {
                       <div>
                         <h2 className="text-lg font-semibold text-gray-800">{sent.subject}</h2>
                         <p className="text-sm text-gray-500">
-                          Odbiorcy:{' '}
+                          Odbiorca:{' '}
                           <span className="text-gray-700 font-medium">
-                            {sent.recipients.join(', ')}
+                            {sent.receiver.name} {sent.receiver.surname}
                           </span>
                         </p>
                         <p className="text-xs text-gray-400">
-                          {new Date(sent.date).toLocaleString('pl-PL', {
+                          {new Date(sent.createdAt).toLocaleString('pl-PL', {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric',
@@ -462,11 +546,10 @@ export default function WiadomosciPage() {
                         onClick={() => {
                           setSubject(`Re: ${sent.subject}`);
                           setContent(`\n\n---\nOryginał:\n${sent.body}`);
-                          setSelectedTeachers(
-                            sent.recipients
-                              .map((name) => teachers.find((teacher) => teacher.name === name)?.id)
-                              .filter(Boolean) as string[]
-                          );
+                          const teacher = teachers.find((t) => t.user.id === sent.receiver.id);
+                          if (teacher) {
+                            setSelectedTeachers([teacher.id]);
+                          }
                           setActiveSection('compose');
                         }}
                         className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
@@ -493,7 +576,7 @@ export default function WiadomosciPage() {
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center text-center text-gray-500">
                 <MailOutlineIcon fontSize="large" className="text-blue-400 mb-2" />
-                <p>Wybierz wiadomość ze skrzynki „Wysłane”, aby zobaczyć szczegóły.</p>
+                <p>Wybierz wiadomość ze skrzynki „Wysłane", aby zobaczyć szczegóły.</p>
               </div>
             )
           ) : selectedMessage ? (
@@ -502,11 +585,13 @@ export default function WiadomosciPage() {
                 <div>
                   <h2 className="text-lg font-semibold text-gray-800">{selectedMessage.subject}</h2>
                   <p className="text-sm text-gray-500">
-                    {selectedMessage.senderRole === 'nauczyciel' ? 'Nauczyciel' : 'Administracja'}:{' '}
-                    <span className="text-gray-700 font-medium">{selectedMessage.sender}</span>
+                    Od:{' '}
+                    <span className="text-gray-700 font-medium">
+                      {selectedMessage.sender.name} {selectedMessage.sender.surname}
+                    </span>
                   </p>
                   <p className="text-xs text-gray-400">
-                    {new Date(selectedMessage.date).toLocaleString('pl-PL', {
+                    {new Date(selectedMessage.createdAt).toLocaleString('pl-PL', {
                       day: '2-digit',
                       month: '2-digit',
                       year: 'numeric',
@@ -516,7 +601,15 @@ export default function WiadomosciPage() {
                   </p>
                 </div>
                 <button
-                  onClick={() => setActiveSection('compose')}
+                  onClick={() => {
+                    setSubject(`Re: ${selectedMessage.subject}`);
+                    setContent('');
+                    const teacher = teachers.find((t) => t.user.id === selectedMessage.sender.id);
+                    if (teacher) {
+                      setSelectedTeachers([teacher.id]);
+                    }
+                    setActiveSection('compose');
+                  }}
                   className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
                 >
                   <ReplyIcon fontSize="small" />
@@ -563,4 +656,3 @@ export default function WiadomosciPage() {
     </div>
   );
 }
-

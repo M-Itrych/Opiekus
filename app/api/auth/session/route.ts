@@ -86,6 +86,13 @@ export async function GET() {
               },
             })
           : [],
+    } as {
+      id: string;
+      role: string;
+      name: string;
+      surname: string;
+      email: string;
+      children: Array<{ id: string; name: string; surname: string; groupId: string | null }>;
     });
   } catch (error) {
     console.error("Session API error:", error);

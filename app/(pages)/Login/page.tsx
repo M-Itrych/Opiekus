@@ -10,6 +10,11 @@ function LoginContent() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
+  const [forgotPasswordMessage, setForgotPasswordMessage] = useState("");
+  const [forgotPasswordError, setForgotPasswordError] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
   const registered = searchParams.get("registered");
@@ -40,6 +45,42 @@ function LoginContent() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotPasswordError("");
+    setForgotPasswordMessage("");
+    setForgotPasswordLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: forgotPasswordEmail }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Błąd podczas wysyłania żądania");
+      }
+
+      setForgotPasswordMessage(data.message || "Jeśli podany email istnieje w systemie, wysłano instrukcje resetowania hasła");
+      setForgotPasswordEmail("");
+      
+      // Zamknij modal po 3 sekundach
+      setTimeout(() => {
+        setShowForgotPassword(false);
+        setForgotPasswordMessage("");
+      }, 3000);
+    } catch (err: any) {
+      setForgotPasswordError(err.message);
+    } finally {
+      setForgotPasswordLoading(false);
     }
   };
 
@@ -118,9 +159,13 @@ function LoginContent() {
             </div>
 
             <div className="text-sm">
-              <a href="#" className="font-medium text-[#005FA6] hover:text-[#005FA6]">
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(true)}
+                className="font-medium text-[#005FA6] hover:text-[#005FA6] cursor-pointer"
+              >
                 Zapomniałeś hasła?
-              </a>
+              </button>
             </div>
           </div>
 
@@ -141,6 +186,74 @@ function LoginContent() {
           </div>
         </form>
       </div>
+
+      {/* Modal resetowania hasła */}
+      {showForgotPassword && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Resetowanie hasła
+            </h3>
+            
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              {forgotPasswordMessage && (
+                <div className="rounded-md bg-green-50 dark:bg-green-900/20 p-4">
+                  <p className="text-sm text-green-800 dark:text-green-400">
+                    {forgotPasswordMessage}
+                  </p>
+                </div>
+              )}
+              
+              {forgotPasswordError && (
+                <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
+                  <p className="text-sm text-red-800 dark:text-red-400">
+                    {forgotPasswordError}
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <label htmlFor="forgot-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Adres email
+                </label>
+                <input
+                  id="forgot-email"
+                  type="email"
+                  required
+                  value={forgotPasswordEmail}
+                  onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-[#005FA6] focus:border-[#005FA6] sm:text-sm"
+                  placeholder="Podaj adres email"
+                  disabled={forgotPasswordLoading || !!forgotPasswordMessage}
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setForgotPasswordEmail("");
+                    setForgotPasswordError("");
+                    setForgotPasswordMessage("");
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#005FA6]"
+                  disabled={forgotPasswordLoading}
+                >
+                  Anuluj
+                </button>
+                <button
+                  type="submit"
+                  disabled={forgotPasswordLoading || !!forgotPasswordMessage}
+                  className="flex-1 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#005FA6] hover:bg-[#004a85] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#005FA6] disabled:opacity-50"
+                >
+                  {forgotPasswordLoading ? "Wysyłanie..." : "Wyślij"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

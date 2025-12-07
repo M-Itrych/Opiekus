@@ -162,7 +162,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Nieautoryzowany dostęp" }, { status: 401 });
     }
 
-    // Only managers can delete consents
     if (!["HEADTEACHER", "ADMIN"].includes(user.role)) {
       return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
     }

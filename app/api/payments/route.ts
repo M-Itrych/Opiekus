@@ -49,7 +49,6 @@ export async function GET(req: Request) {
 
     const where: Prisma.PaymentWhereInput = {};
 
-    // Parents can only see their children's payments
     if (user.role === "PARENT") {
       const children = await prisma.child.findMany({
         where: { parentId: user.id },
@@ -59,7 +58,6 @@ export async function GET(req: Request) {
       where.childId = { in: childIds };
     }
 
-    // Filter by specific child
     if (childId) {
       if (user.role === "PARENT") {
         const child = await prisma.child.findFirst({
@@ -72,7 +70,6 @@ export async function GET(req: Request) {
       where.childId = childId;
     }
 
-    // Status filter
     const normalizedStatus = normalizeStatus(status);
     if (normalizedStatus) {
       where.status = normalizedStatus;

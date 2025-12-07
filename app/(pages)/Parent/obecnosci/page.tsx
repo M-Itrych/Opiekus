@@ -54,10 +54,16 @@ export default function ObecnosciPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchChildren = useCallback(async () => {
+  const fetchChildren = useCallback(async (selectFirst = false) => {
     try {
-      const res = await fetch('/api/children/unassigned');
-      // If this doesn't return proper children, we'll use the attendance data
+      const res = await fetch('/api/children');
+      if (res.ok) {
+        const data = await res.json();
+        setChildren(data);
+        if (selectFirst && data.length > 0) {
+          setSelectedChildId(data[0].id);
+        }
+      }
     } catch (err) {
       console.error('Error fetching children:', err);
     }
@@ -117,7 +123,6 @@ export default function ObecnosciPage() {
       
       const data: ApiAttendance[] = await res.json();
       
-      // Extract unique children from attendance data
       const uniqueChildren: { [key: string]: Child } = {};
       data.forEach((item) => {
         if (!uniqueChildren[item.child.id]) {
@@ -132,7 +137,6 @@ export default function ObecnosciPage() {
         setSelectedChildId(childList[0].id);
       }
       
-      // Build attendance map for selected child
       if (selectedChildId) {
         const attendanceMap: { [key: string]: AttendanceData } = {};
         data
@@ -158,8 +162,14 @@ export default function ObecnosciPage() {
   }, [selectedMonth, selectedYear, selectedChildId]);
 
   useEffect(() => {
-    fetchAllAttendances();
-  }, [fetchAllAttendances]);
+    fetchChildren(true);
+  }, [fetchChildren]);
+
+  useEffect(() => {
+    if (selectedChildId) {
+      fetchAllAttendances();
+    }
+  }, [fetchAllAttendances, selectedChildId]);
 
   useEffect(() => {
     if (selectedChildId) {
@@ -254,7 +264,8 @@ export default function ObecnosciPage() {
     
     setAttendance(prev => {
       if (newStatus === 'present') {
-        const { [dateKey]: _, ...rest } = prev;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [dateKey]: _unused, ...rest } = prev;
         return rest;
       }
       return {
@@ -318,7 +329,8 @@ export default function ObecnosciPage() {
     
     const dateKey = selectedDate.toISOString().split('T')[0];
     setAttendance(prev => {
-      const { [dateKey]: _, ...rest } = prev;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [dateKey]: _unused, ...rest } = prev;
       return rest;
     });
     setHasChanges(true);
@@ -333,7 +345,6 @@ export default function ObecnosciPage() {
 
     setIsSaving(true);
     try {
-      // Save all attendance changes
       for (const [dateKey, data] of Object.entries(attendance)) {
         if (data.status === 'absent') {
           await fetch('/api/attendances', {
@@ -614,7 +625,7 @@ export default function ObecnosciPage() {
         <h3 className="font-semibold text-blue-800 mb-2">Informacje</h3>
         <p className="text-blue-700 text-sm">
           Kliknij na dowolny dzień roboczy w kalendarzu (również przyszły), aby zaznaczyć lub odznaczyć nieobecność, 
-          lub użyj przycisku "Zgłoś nieobecność", aby dodać wpis z powodem. Najedź kursorem na dzień z nieobecnością, 
+          lub użyj przycisku &quot;Zgłoś nieobecność&quot;, aby dodać wpis z powodem. Najedź kursorem na dzień z nieobecnością, 
           aby zobaczyć podany powód.
         </p>
       </div>

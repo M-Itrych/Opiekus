@@ -136,7 +136,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Generate password if not provided
     const generatedPassword = password?.trim() || generatePassword();
     const hashedPassword = await hashPassword(generatedPassword);
     const normalizedPermissions = normalizePermissions(permissions);
@@ -171,7 +170,6 @@ export async function POST(request: Request) {
       },
     });
 
-    // Return staff data with generated password (only shown once)
     return NextResponse.json({
       ...serializeStaff(staff as StaffWithRelations),
       generatedPassword: generatedPassword,

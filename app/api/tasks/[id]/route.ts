@@ -99,7 +99,6 @@ export async function PATCH(req: Request, context: ParamsPromise) {
         );
       }
 
-      // Teachers can only update status
       const normalizedStatus = normalizeStatus(payload.status);
       if (normalizedStatus) {
         updateData.status = normalizedStatus;
@@ -112,7 +111,6 @@ export async function PATCH(req: Request, context: ParamsPromise) {
         );
       }
     } else {
-      // Manager logic - full update allowed
       if (typeof payload.title === "string" && payload.title.trim()) {
         updateData.title = payload.title.trim();
       }

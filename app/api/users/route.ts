@@ -25,7 +25,6 @@ export async function GET(req: Request) {
 			return NextResponse.json({ error: "Nieautoryzowany dostęp" }, { status: 401 });
 		}
 
-		// Only HEADTEACHER and ADMIN can fetch all users
 		if (user.role !== "HEADTEACHER" && user.role !== "ADMIN") {
 			return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
 		}

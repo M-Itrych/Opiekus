@@ -32,11 +32,9 @@ export async function GET(req: Request) {
 
     const where: Prisma.TrainingWhereInput = {};
 
-    // Only show published trainings to teachers
     if (user.role === "TEACHER") {
       where.status = "PUBLISHED";
     } else if (user.role === "HEADTEACHER" || user.role === "ADMIN") {
-      // Admins/HeadTeachers can filter by status
       if (status) {
         where.status = status as "DRAFT" | "PUBLISHED" | "ARCHIVED";
       }
@@ -44,7 +42,6 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Brak dostępu" }, { status: 403 });
     }
 
-    // Filter by category
     if (category) {
       where.category = category as Prisma.EnumTrainingCategoryFilter;
     }
@@ -67,7 +64,6 @@ export async function GET(req: Request) {
         : undefined,
     });
 
-    // Transform to include user's progress status
     const trainingsWithProgress = trainings.map((training) => {
       const trainingWithProgress = training as typeof training & { 
         progress?: { id: string; startedAt: Date; completedAt: Date | null; score: number | null }[] 
@@ -98,7 +94,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Nieautoryzowany dostęp" }, { status: 401 });
     }
 
-    // Only HeadTeacher and Admin can create trainings
     if (!["HEADTEACHER", "ADMIN"].includes(user.role)) {
       return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
     }

@@ -35,7 +35,6 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Nieautoryzowany dostęp" }, { status: 401 });
     }
 
-    // Only managers can access reports
     if (!["HEADTEACHER", "ADMIN"].includes(user.role)) {
       return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
     }
@@ -48,17 +47,14 @@ export async function GET(req: Request) {
 
     const where: Prisma.ReportWhereInput = {};
 
-    // Filter by report type
     if (reportType) {
       where.reportType = reportType;
     }
 
-    // Filter by author
     if (authorId) {
       where.authorId = authorId;
     }
 
-    // Filter by period
     if (startDate || endDate) {
       if (startDate) {
         where.periodStart = { gte: new Date(startDate) };

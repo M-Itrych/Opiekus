@@ -119,7 +119,6 @@ export async function PUT(
     const normalizedStatus = normalizeStatus(status);
     if (normalizedStatus) {
       updateData.status = normalizedStatus;
-      // If marking as paid, set paidDate
       if (normalizedStatus === PaymentStatus.PAID && !existing.paidDate) {
         updateData.paidDate = new Date();
       }
@@ -129,7 +128,6 @@ export async function PUT(
       updateData.paidDate = paidDate ? new Date(paidDate) : null;
     }
 
-    // Only managers can update amount, description, dueDate
     if (user.role === "ADMIN" || user.role === "HEADTEACHER") {
       if (amount !== undefined) {
         updateData.amount = parseFloat(amount);
@@ -172,7 +170,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Nieautoryzowany dostęp" }, { status: 401 });
     }
 
-    // Only managers can delete payments
     if (!["HEADTEACHER", "ADMIN"].includes(user.role)) {
       return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
     }

@@ -71,7 +71,6 @@ export async function GET(
       );
     }
 
-    // Check permissions
     if (user.role === "PARENT" && child.parentId !== user.id) {
       return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
     }
@@ -111,29 +110,90 @@ export async function PATCH(
 
     const payload = await verifyToken(token);
 
-    if (
-      !payload ||
-      (payload.role !== "HEADTEACHER" && payload.role !== "ADMIN")
-    ) {
-      return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
+    if (!payload) {
+      return NextResponse.json({ error: "Brak autoryzacji" }, { status: 401 });
     }
 
     const { id } = await params;
+
+    const existingChild = await prisma.child.findUnique({
+      where: { id },
+      select: { parentId: true },
+    });
+
+    if (!existingChild) {
+      return NextResponse.json(
+        { error: "Nie znaleziono dziecka" },
+        { status: 404 }
+      );
+    }
+
     const body = await request.json();
-    const { groupId } = body;
+    const { 
+      name,
+      surname,
+      age,
+      groupId, 
+      hasImageConsent, 
+      hasDataConsent, 
+      allergies, 
+      specialNeeds 
+    } = body;
+
+    const updateData: Record<string, unknown> = {};
+
+    if (payload.role === "PARENT") {
+      if (existingChild.parentId !== payload.id) {
+        return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
+      }
+
+      if (name !== undefined) updateData.name = name.trim();
+      if (surname !== undefined) updateData.surname = surname.trim();
+      if (age !== undefined) updateData.age = parseInt(age);
+      if (hasImageConsent !== undefined) updateData.hasImageConsent = hasImageConsent;
+      if (hasDataConsent !== undefined) updateData.hasDataConsent = hasDataConsent;
+      if (allergies !== undefined) updateData.allergies = allergies;
+      if (specialNeeds !== undefined) updateData.specialNeeds = specialNeeds || null;
+    } else if (payload.role === "HEADTEACHER" || payload.role === "ADMIN") {
+      if (name !== undefined) updateData.name = name.trim();
+      if (surname !== undefined) updateData.surname = surname.trim();
+      if (age !== undefined) updateData.age = parseInt(age);
+      if (groupId !== undefined) updateData.groupId = groupId === "null" ? null : groupId;
+      if (hasImageConsent !== undefined) updateData.hasImageConsent = hasImageConsent;
+      if (hasDataConsent !== undefined) updateData.hasDataConsent = hasDataConsent;
+      if (allergies !== undefined) updateData.allergies = allergies;
+      if (specialNeeds !== undefined) updateData.specialNeeds = specialNeeds || null;
+    } else {
+      return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
+    }
 
     const updatedChild = await prisma.child.update({
       where: { id },
-      data: {
-        groupId: groupId === "null" ? null : groupId,
+      data: updateData,
+      include: {
+        parent: {
+          select: {
+            id: true,
+            name: true,
+            surname: true,
+            email: true,
+            phone: true,
+          },
+        },
+        group: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
     return NextResponse.json(updatedChild);
   } catch (error) {
-    console.error("Error updating child group:", error);
+    console.error("Error updating child:", error);
     return NextResponse.json(
-      { error: "Błąd podczas aktualizacji grupy dziecka" },
+      { error: "Błąd podczas aktualizacji danych dziecka" },
       { status: 500 }
     );
   }

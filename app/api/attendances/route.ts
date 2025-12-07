@@ -41,7 +41,6 @@ export async function GET(req: Request) {
 
     const where: Prisma.AttendanceWhereInput = {};
 
-    // Parents can only see their children's attendance
     if (user.role === "PARENT") {
       const children = await prisma.child.findMany({
         where: { parentId: user.id },
@@ -51,7 +50,6 @@ export async function GET(req: Request) {
       where.childId = { in: childIds };
     }
 
-    // Teachers can see attendance for their group
     if (user.role === "TEACHER") {
       const staff = await prisma.staff.findUnique({
         where: { userId: user.id },
@@ -67,9 +65,7 @@ export async function GET(req: Request) {
       }
     }
 
-    // Filter by specific child
     if (childId) {
-      // Verify access to this child
       if (user.role === "PARENT") {
         const child = await prisma.child.findFirst({
           where: { id: childId, parentId: user.id },
@@ -81,7 +77,6 @@ export async function GET(req: Request) {
       where.childId = childId;
     }
 
-    // Date range filter
     if (startDate || endDate) {
       where.date = {};
       if (startDate) {
@@ -92,7 +87,6 @@ export async function GET(req: Request) {
       }
     }
 
-    // Status filter
     const normalizedStatus = normalizeStatus(status);
     if (normalizedStatus) {
       where.status = normalizedStatus;
@@ -132,7 +126,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Brak wymaganych pól" }, { status: 400 });
     }
 
-    // Verify access to child
     if (user.role === "PARENT") {
       const child = await prisma.child.findFirst({
         where: { id: childId, parentId: user.id },
@@ -158,7 +151,6 @@ export async function POST(request: Request) {
 
     const normalizedStatus = normalizeStatus(status) ?? AttendanceStatus.PRESENT;
 
-    // Check if attendance for this date already exists
     const existing = await prisma.attendance.findFirst({
       where: {
         childId,
@@ -170,7 +162,6 @@ export async function POST(request: Request) {
     });
 
     if (existing) {
-      // Update existing record
       const attendance = await prisma.attendance.update({
         where: { id: existing.id },
         data: {

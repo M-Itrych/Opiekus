@@ -32,14 +32,11 @@ export async function GET(req: Request) {
     const groupId = searchParams.get("groupId");
     const parentId = searchParams.get("parentId");
 
-    // Build where clause based on role and filters
-    let whereClause: Record<string, unknown> = {};
+    const whereClause: Record<string, unknown> = {};
 
     if (user.role === "PARENT") {
-      // Parents can only see their own children
       whereClause.parentId = user.id;
     } else if (user.role === "TEACHER") {
-      // Teachers can only see children in their assigned group
       const staff = await prisma.staff.findUnique({
         where: { userId: user.id },
         select: { groupId: true },
@@ -53,7 +50,6 @@ export async function GET(req: Request) {
       }
       whereClause.groupId = staff.groupId;
     } else if (user.role === "HEADTEACHER" || user.role === "ADMIN") {
-      // HeadTeacher and Admin can see all children, with optional filters
       if (groupId) {
         whereClause.groupId = groupId === "null" ? null : groupId;
       }
@@ -104,7 +100,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Brak autoryzacji" }, { status: 401 });
     }
 
-    if (user.role !== "HEADTEACHER" && user.role !== "ADMIN") {
+    if (user.role !== "PARENT" && user.role !== "HEADTEACHER" && user.role !== "ADMIN") {
       return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
     }
 
@@ -113,44 +109,46 @@ export async function POST(req: Request) {
       name,
       surname,
       age,
-      parentId,
-      groupId,
       hasImageConsent,
       hasDataConsent,
       allergies,
       specialNeeds,
     } = body;
+    let { parentId, groupId } = body;
 
-    // Validate required fields
+    if (user.role === "PARENT") {
+      parentId = user.id;
+      groupId = null;
+    }
     if (!name || !surname || age === undefined || !parentId) {
       return NextResponse.json(
-        { error: "Imię, nazwisko, wiek i ID rodzica są wymagane" },
+        { error: "Imię, nazwisko i wiek są wymagane" },
         { status: 400 }
       );
     }
 
-    // Verify parent exists
-    const parent = await prisma.user.findUnique({
-      where: { id: parentId },
-      select: { id: true, role: true },
-    });
+    if (user.role !== "PARENT") {
+      const parent = await prisma.user.findUnique({
+        where: { id: parentId },
+        select: { id: true, role: true },
+      });
 
-    if (!parent) {
-      return NextResponse.json(
-        { error: "Nie znaleziono rodzica o podanym ID" },
-        { status: 400 }
-      );
+      if (!parent) {
+        return NextResponse.json(
+          { error: "Nie znaleziono rodzica o podanym ID" },
+          { status: 400 }
+        );
+      }
+
+      if (parent.role !== "PARENT") {
+        return NextResponse.json(
+          { error: "Podany użytkownik nie jest rodzicem" },
+          { status: 400 }
+        );
+      }
     }
 
-    if (parent.role !== "PARENT") {
-      return NextResponse.json(
-        { error: "Podany użytkownik nie jest rodzicem" },
-        { status: 400 }
-      );
-    }
-
-    // Verify group exists if provided
-    if (groupId) {
+    if (groupId && (user.role === "HEADTEACHER" || user.role === "ADMIN")) {
       const group = await prisma.group.findUnique({
         where: { id: groupId },
         select: { id: true },

@@ -44,12 +44,10 @@ export async function GET(req: Request) {
 
     const where: Prisma.MealPlanWhereInput = {};
 
-    // Filter by group
     if (groupId) {
       where.groupId = groupId;
     }
 
-    // Filter by specific date
     if (date) {
       const targetDate = new Date(date);
       const startOfDay = new Date(targetDate);
@@ -63,7 +61,6 @@ export async function GET(req: Request) {
       };
     }
 
-    // Filter by date range
     if (startDate || endDate) {
       where.date = where.date || {};
       if (startDate) {
@@ -74,7 +71,6 @@ export async function GET(req: Request) {
       }
     }
 
-    // Filter by meal type
     if (mealType) {
       where.mealType = mealType;
     }
@@ -117,7 +113,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Nieprawidłowa data" }, { status: 400 });
     }
 
-    // Verify group exists if provided
     if (groupId) {
       const group = await prisma.group.findUnique({
         where: { id: groupId },

@@ -24,7 +24,6 @@ export async function GET() {
       return NextResponse.json({ error: "Nieautoryzowany dostęp" }, { status: 401 });
     }
 
-    // Teachers can only see children in their assigned group
     if (user.role === "TEACHER") {
       const staff = await prisma.staff.findUnique({
         where: { userId: user.id },
@@ -63,7 +62,6 @@ export async function GET() {
       return NextResponse.json(children);
     }
 
-    // HeadTeacher and Admin can see all children
     if (user.role === "HEADTEACHER" || user.role === "ADMIN") {
       const children = await prisma.child.findMany({
         select: {
@@ -98,7 +96,6 @@ export async function GET() {
       return NextResponse.json(children);
     }
 
-    // Parents can see only their children
     if (user.role === "PARENT") {
       const children = await prisma.child.findMany({
         where: { parentId: user.id },

@@ -92,7 +92,6 @@ export default function TrainingList() {
 
       if (!res.ok) throw new Error("Failed to start training");
 
-      // Refresh training data
       const trainingRes = await fetch(`/api/trainings/${trainingId}?includeProgress=true`);
       if (trainingRes.ok) {
         const updatedTraining = await trainingRes.json();
@@ -120,7 +119,6 @@ export default function TrainingList() {
 
       if (!res.ok) throw new Error("Failed to complete training");
 
-      // Refresh training data
       const trainingRes = await fetch(`/api/trainings/${trainingId}?includeProgress=true`);
       if (trainingRes.ok) {
         const updatedTraining = await trainingRes.json();
@@ -162,7 +160,6 @@ export default function TrainingList() {
     );
   }
 
-  // Training Detail View
   if (viewMode === "detail" && selectedTraining) {
     const status = getProgressStatus(selectedTraining);
 
@@ -260,7 +257,6 @@ export default function TrainingList() {
     );
   }
 
-  // Training List View
   return (
     <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -274,7 +270,6 @@ export default function TrainingList() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         <div className="rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
           <div className="flex items-center gap-2">
@@ -301,7 +296,6 @@ export default function TrainingList() {
         </div>
       </div>
 
-      {/* Category Filter */}
       <div className="flex flex-wrap items-center gap-2">
         <Filter className="h-4 w-4 text-zinc-400" />
         <button
@@ -329,7 +323,6 @@ export default function TrainingList() {
         ))}
       </div>
 
-      {/* Training List */}
       <div className="flex flex-col gap-3">
         {trainings.length > 0 ? (
           trainings.map((training) => {

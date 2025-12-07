@@ -44,7 +44,6 @@ export default function MessagesInbox() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Compose form state
   const [newMessage, setNewMessage] = useState({
     receiverId: "",
     subject: "",
@@ -67,12 +66,10 @@ export default function MessagesInbox() {
 
   const fetchParents = useCallback(async () => {
     try {
-      // Fetch children first to get their parents
       const res = await fetch("/api/groups/children");
       if (!res.ok) throw new Error("Failed to fetch children");
       const children = await res.json();
       
-      // Extract unique parents
       const parentMap = new Map<string, Parent>();
       children.forEach((child: { parent?: Parent }) => {
         if (child.parent) {
@@ -100,7 +97,6 @@ export default function MessagesInbox() {
     setSelectedMessage(message);
     setViewMode("detail");
 
-    // Mark as read if viewing inbox message
     if (!message.isRead && viewMode === "inbox") {
       try {
         await fetch(`/api/messages/${message.id}`, {
@@ -183,7 +179,6 @@ export default function MessagesInbox() {
     );
   }
 
-  // Compose View
   if (viewMode === "compose") {
     return (
       <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
@@ -262,7 +257,6 @@ export default function MessagesInbox() {
     );
   }
 
-  // Message Detail View
   if (viewMode === "detail" && selectedMessage) {
     const isInbox = selectedMessage.receiver.id !== selectedMessage.sender.id;
     const otherPerson = isInbox ? selectedMessage.sender : selectedMessage.receiver;
@@ -320,7 +314,6 @@ export default function MessagesInbox() {
     );
   }
 
-  // Inbox/Sent List View
   return (
     <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -339,7 +332,6 @@ export default function MessagesInbox() {
         </Button>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-2 border-b border-zinc-200 dark:border-zinc-700">
         <button
           onClick={() => handleViewChange("inbox")}
@@ -370,7 +362,6 @@ export default function MessagesInbox() {
         </button>
       </div>
 
-      {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
         <Input
@@ -382,7 +373,6 @@ export default function MessagesInbox() {
         />
       </div>
 
-      {/* Messages List */}
       <div className="flex flex-col gap-2">
         {filteredMessages.length > 0 ? (
           filteredMessages.map((message) => {

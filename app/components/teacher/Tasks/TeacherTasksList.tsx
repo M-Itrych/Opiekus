@@ -164,7 +164,6 @@ export default function TeacherTasksList() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Today's Tasks */}
       <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <div>
@@ -205,7 +204,6 @@ export default function TeacherTasksList() {
         )}
       </section>
 
-      {/* All Tasks */}
       <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between">
           <div>

@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/session";
 import { UserRole, StaffRole } from "@prisma/client";
 
-// Map UserRole to StaffRole (only TEACHER should be in Staff)
 const USER_ROLE_TO_STAFF_ROLE: Partial<Record<UserRole, StaffRole>> = {
 	TEACHER: "NAUCZYCIEL",
 };
@@ -31,7 +30,6 @@ export async function POST() {
 		const { error } = await authorize();
 		if (error) return error;
 
-		// Find users with TEACHER role without Staff entry
 		const usersWithoutStaff = await prisma.user.findMany({
 			where: {
 				role: "TEACHER",
@@ -50,7 +48,6 @@ export async function POST() {
 			});
 		}
 
-		// Create Staff entries for users without one
 		const createPromises = usersWithoutStaff.map((user) => {
 			const staffRole = USER_ROLE_TO_STAFF_ROLE[user.role];
 			if (!staffRole) return null;

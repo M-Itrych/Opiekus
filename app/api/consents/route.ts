@@ -48,7 +48,6 @@ export async function GET(req: Request) {
 
     const where: Prisma.ConsentWhereInput = {};
 
-    // Parents can only see their children's consents
     if (user.role === "PARENT") {
       const children = await prisma.child.findMany({
         where: { parentId: user.id },
@@ -58,7 +57,6 @@ export async function GET(req: Request) {
       where.childId = { in: childIds };
     }
 
-    // Filter by specific child
     if (childId) {
       if (user.role === "PARENT") {
         const child = await prisma.child.findFirst({
@@ -71,13 +69,11 @@ export async function GET(req: Request) {
       where.childId = childId;
     }
 
-    // Filter by consent type
     const normalizedType = normalizeConsentType(consentType);
     if (normalizedType) {
       where.consentType = normalizedType;
     }
 
-    // Filter by status
     const normalizedStatus = normalizeConsentStatus(status);
     if (normalizedStatus) {
       where.status = normalizedStatus;
@@ -124,7 +120,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Brak wymaganych pól" }, { status: 400 });
     }
 
-    // Verify access to child
     if (user.role === "PARENT") {
       const child = await prisma.child.findFirst({
         where: { id: childId, parentId: user.id },
@@ -158,7 +153,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // Check if consent of this type already exists for this child
     const existing = await prisma.consent.findFirst({
       where: {
         childId,
@@ -167,7 +161,6 @@ export async function POST(request: Request) {
     });
 
     if (existing) {
-      // Update existing consent
       const consent = await prisma.consent.update({
         where: { id: existing.id },
         data: {

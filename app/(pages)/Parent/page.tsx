@@ -1,13 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Restaurant from '@mui/icons-material/Restaurant';
 import FreeBreakfast from '@mui/icons-material/FreeBreakfast';
-import BrunchDining from '@mui/icons-material/BrunchDining';
 import LunchDining from '@mui/icons-material/LunchDining';
 import BakeryDining from '@mui/icons-material/BakeryDining';
-import LocalDining from '@mui/icons-material/LocalDining';
 import ChildCare from '@mui/icons-material/ChildCare';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread';
@@ -17,201 +15,194 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { QrCodeIcon } from 'lucide-react';
+import { QrCodeIcon, Loader2 } from 'lucide-react';
 
-type MealKey = 'breakfast' | 'secondBreakfast' | 'lunch' | 'afternoonSnack' | 'dinner';
+type MealKey = 'BREAKFAST' | 'LUNCH' | 'SNACK';
 
-interface MealPlan {
-  title: string;
-  description: string;
+interface MealPlanApi {
+  id: string;
+  mealType: string;
+  name: string;
+  description: string | null;
+  date: string;
+  allergens: string[];
 }
 
-const mealsOrder: Array<{ key: MealKey; label: string; Icon: typeof Restaurant }> = [
-  { key: 'breakfast', label: 'Śniadanie', Icon: FreeBreakfast },
-  { key: 'secondBreakfast', label: 'Drugie śniadanie', Icon: BrunchDining },
-  { key: 'lunch', label: 'Obiad', Icon: LunchDining },
-  { key: 'afternoonSnack', label: 'Podwieczorek', Icon: BakeryDining },
-  { key: 'dinner', label: 'Kolacja', Icon: LocalDining },
-];
-
-const menuData: Record<string, Record<MealKey, MealPlan>> = {
-  '2025-01-13': {
-    breakfast: {
-      title: 'Owsianka z malinami',
-      description: 'Płatki owsiane na mleku, świeże maliny, plasterki banana, herbata owocowa',
-    },
-    secondBreakfast: {
-      title: 'Kanapka z twarożkiem',
-      description: 'Pełnoziarnista bułka z twarożkiem i rzodkiewką, sok marchwiowo-jabłkowy',
-    },
-    lunch: {
-      title: 'Zupa pomidorowa z ryżem',
-      description: 'Domowa zupa pomidorowa z ryżem i świeżą pietruszką',
-    },
-    afternoonSnack: {
-      title: 'Jogurt naturalny z bakaliami',
-      description: 'Jogurt naturalny z mieszanką bakalii i miodem',
-    },
-    dinner: {
-      title: 'Risotto warzywne',
-      description: 'Risotto z warzywami sezonowymi i parmezanem',
-    },
-  },
-  '2025-01-14': {
-    breakfast: {
-      title: 'Placuszki bananowe',
-      description: 'Placuszki z banana z jogurtem naturalnym i syropem klonowym',
-    },
-    secondBreakfast: {
-      title: 'Owocowy talerz',
-      description: 'Zestaw świeżych owoców sezonowych',
-    },
-    lunch: {
-      title: 'Krem z dyni',
-      description: 'Zupa krem z dyni z grzankami pełnoziarnistymi',
-    },
-    afternoonSnack: {
-      title: 'Ciasto marchewkowe',
-      description: 'Wilgotne ciasto marchewkowe z polewą z serka',
-    },
-    dinner: {
-      title: 'Sałatka makaronowa',
-      description: 'Makaron pełnoziarnisty, kurczak, kukurydza, jogurtowy dressing',
-    },
-  },
-};
-
-const fallbackMenu: Record<MealKey, MealPlan> = {
-  breakfast: {
-    title: 'Kanapka z pastą warzywną',
-    description: 'Pełnoziarnisty chleb z pastą z ciecierzycy i warzywami',
-  },
-  secondBreakfast: {
-    title: 'Smoothie truskawkowe',
-    description: 'Koktajl z truskawek, banana i jogurtu naturalnego',
-  },
-  lunch: {
-    title: 'Zupa jarzynowa',
-    description: 'Zupa z sezonowych warzyw z makaronem',
-  },
-  afternoonSnack: {
-    title: 'Ryż z jabłkami',
-    description: 'Ryż na mleku z cynamonem i duszonym jabłkiem',
-  },
-  dinner: {
-    title: 'Zapiekanka warzywna',
-    description: 'Warzywa zapiekane z serem mozzarella i ziołami',
-  },
-};
+interface Child {
+  id: string;
+  name: string;
+  surname: string;
+  age: number;
+  group: {
+    id: string;
+    name: string;
+  } | null;
+  parent: {
+    id: string;
+    name: string;
+    surname: string;
+  };
+}
 
 interface Message {
   id: string;
-  sender: string;
   subject: string;
-  preview: string;
-  date: string;
-  isRead?: boolean;
+  body: string;
+  isRead: boolean;
+  createdAt: string;
+  sender: {
+    id: string;
+    name: string;
+    surname: string;
+  };
 }
 
-const inboxSeed: Message[] = [
-  {
-    id: 'msg-001',
-    sender: 'Anna Kowalczyk',
-    subject: 'Podsumowanie tygodnia',
-    preview: 'Szanowni Państwo, przesyłam krótkie podsumowanie zajęć z minionego tygodnia...',
-    date: '2025-01-18T15:40:00',
-    isRead: false,
-  },
-  {
-    id: 'msg-002',
-    sender: 'Administracja przedszkola',
-    subject: 'Informacja o płatnościach',
-    preview: 'Przypominamy o terminie płatności za czesne za miesiąc styczeń...',
-    date: '2025-01-16T09:15:00',
-    isRead: true,
-  },
-  {
-    id: 'msg-003',
-    sender: 'Marek Nowak',
-    subject: 'Materiały z języka angielskiego',
-    preview: 'Przesyłam materiały powtórkowe z bieżącego modułu...',
-    date: '2025-01-12T17:55:00',
-    isRead: true,
-  },
-];
-
-type PaymentStatus = 'pending' | 'overdue';
-
-interface UpcomingPaymentSummary {
+interface Payment {
   id: string;
-  month: string;
+  amount: number;
+  description: string;
   dueDate: string;
-  status: PaymentStatus;
-  total: number;
+  paidDate: string | null;
+  status: 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
+  child: {
+    id: string;
+    name: string;
+    surname: string;
+  };
 }
 
-const upcomingSummary: UpcomingPaymentSummary[] = [
-  {
-    id: 'up-2025-02',
-    month: 'Luty 2025',
-    dueDate: '2025-02-10',
-    total: 650,
-    status: 'pending',
-  },
-  {
-    id: 'up-2025-03',
-    month: 'Marzec 2025',
-    dueDate: '2025-03-10',
-    total: 640,
-    status: 'pending',
-  },
-  {
-    id: 'up-2025-01',
-    month: 'Styczeń 2025',
-    dueDate: '2025-01-10',
-    total: 620,
-    status: 'overdue',
-  },
+const mealsOrder: Array<{ key: MealKey; label: string; Icon: typeof Restaurant }> = [
+  { key: 'BREAKFAST', label: 'Śniadanie', Icon: FreeBreakfast },
+  { key: 'LUNCH', label: 'Obiad', Icon: LunchDining },
+  { key: 'SNACK', label: 'Podwieczorek', Icon: BakeryDining },
 ];
-
-const childProfile = {
-  imie: 'Anna',
-  nazwisko: 'Kowalska',
-  grupa: 'Motylki',
-  rodzice: ['Agnieszka Kowalska', 'Piotr Kowalski'],
-};
-
-const getTodayKey = () => new Date().toISOString().split('T')[0];
 
 export default function ParentPage() {
   const router = useRouter();
-  const todayKey = getTodayKey();
-  const todaysMenu = menuData[todayKey] ?? fallbackMenu;
+  
+  const [children, setChildren] = useState<Child[]>([]);
+  const [mealPlans, setMealPlans] = useState<MealPlanApi[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  
+  const [loadingChildren, setLoadingChildren] = useState(true);
+  const [loadingMeals, setLoadingMeals] = useState(true);
+  const [loadingMessages, setLoadingMessages] = useState(true);
+  const [loadingPayments, setLoadingPayments] = useState(true);
+  
   const [attendanceStatus, setAttendanceStatus] = useState<'none' | 'arrived' | 'pickedUp'>('none');
   const [arrivalTime, setArrivalTime] = useState<Date | null>(null);
   const [pickupTime, setPickupTime] = useState<Date | null>(null);
   const [kodOdbioru, setKodOdbioru] = useState<string>('');
 
-  const { unreadCount, recentMessages } = useMemo(() => {
-    const sorted = [...inboxSeed].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-    return {
-      unreadCount: inboxSeed.filter((msg) => !msg.isRead).length,
-      recentMessages: sorted.slice(0, 3),
-    };
+  const fetchChildren = useCallback(async () => {
+    try {
+      setLoadingChildren(true);
+      const res = await fetch('/api/children');
+      if (res.ok) {
+        const data = await res.json();
+        setChildren(data);
+      }
+    } catch (err) {
+      console.error('Error fetching children:', err);
+    } finally {
+      setLoadingChildren(false);
+    }
   }, []);
 
+  const fetchMealPlans = useCallback(async () => {
+    try {
+      setLoadingMeals(true);
+      const now = new Date();
+      const month = now.getMonth() + 1;
+      const year = now.getFullYear();
+      const day = now.getDate();
+      
+      const res = await fetch(`/api/menu?month=${month}&year=${year}`);
+      if (res.ok) {
+        const data: MealPlanApi[] = await res.json();
+        const todaysMeals = data.filter(meal => {
+          const mealDate = new Date(meal.date);
+          return mealDate.getFullYear() === year && 
+                mealDate.getMonth() + 1 === month && 
+                mealDate.getDate() === day;
+        });
+        setMealPlans(todaysMeals);
+      }
+    } catch (err) {
+      console.error('Error fetching meal plans:', err);
+    } finally {
+      setLoadingMeals(false);
+    }
+  }, []);
+
+  const fetchMessages = useCallback(async () => {
+    try {
+      setLoadingMessages(true);
+      const res = await fetch('/api/messages?type=inbox');
+      if (res.ok) {
+        const data = await res.json();
+        setMessages(data);
+      }
+    } catch (err) {
+      console.error('Error fetching messages:', err);
+    } finally {
+      setLoadingMessages(false);
+    }
+  }, []);
+
+  const fetchPayments = useCallback(async () => {
+    try {
+      setLoadingPayments(true);
+      const res = await fetch('/api/payments');
+      if (res.ok) {
+        const data = await res.json();
+        setPayments(data);
+      }
+    } catch (err) {
+      console.error('Error fetching payments:', err);
+    } finally {
+      setLoadingPayments(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchChildren();
+    fetchMealPlans();
+    fetchMessages();
+    fetchPayments();
+  }, [fetchChildren, fetchMealPlans, fetchMessages, fetchPayments]);
+
+  const selectedChild = children[0];
+
+  const todaysMeals = useMemo(() => {
+    const mealMap: Record<string, MealPlanApi> = {};
+    mealPlans.forEach(meal => {
+      mealMap[meal.mealType.toUpperCase()] = meal;
+    });
+    return mealMap;
+  }, [mealPlans]);
+
+  const { unreadCount, recentMessages } = useMemo(() => {
+    const sorted = [...messages].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    return {
+      unreadCount: messages.filter((msg) => !msg.isRead).length,
+      recentMessages: sorted.slice(0, 3),
+    };
+  }, [messages]);
+
   const { outstandingTotal, overdueTotal, nearestDue } = useMemo(() => {
-    const total = upcomingSummary.reduce((sum, item) => sum + item.total, 0);
-    const overdue = upcomingSummary
-      .filter((item) => item.status === 'overdue')
-      .reduce((sum, item) => sum + item.total, 0);
-    const nearest = upcomingSummary
-      .slice()
+    const unpaidPayments = payments.filter(p => p.status !== 'PAID' && p.status !== 'CANCELLED');
+    const total = unpaidPayments.reduce((sum, item) => sum + item.amount, 0);
+    const overdue = unpaidPayments
+      .filter((item) => item.status === 'OVERDUE')
+      .reduce((sum, item) => sum + item.amount, 0);
+    const nearest = unpaidPayments
       .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
     return { outstandingTotal: total, overdueTotal: overdue, nearestDue: nearest };
-  }, []);
+  }, [payments]);
 
   const todayLabel = new Date().toLocaleDateString('pl-PL', {
     weekday: 'long',
@@ -246,10 +237,11 @@ export default function ParentPage() {
           minute: '2-digit',
         })
       : null;
-    const odswiezKodOdbioru = () => {
-      const randomCode = Math.floor(10000 + Math.random() * 90000).toString();
-      setKodOdbioru(randomCode);
-    };
+
+  const odswiezKodOdbioru = () => {
+    const randomCode = Math.floor(10000 + Math.random() * 90000).toString();
+    setKodOdbioru(randomCode);
+  };
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -259,18 +251,20 @@ export default function ParentPage() {
           <p className="text-sm text-gray-600">
             Szybki przegląd najważniejszych informacji z dzisiejszego dnia.
           </p>
-
         </div>
-        <div className='flex flex-col items-center gap-2  '>
-          <button className='inline-flex items-center gap-2 rounded-lg border cursor-pointer border-sky-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors' onClick={() => {
-            odswiezKodOdbioru();
-          }}>
+        <div className='flex flex-col items-center gap-2'>
+          <button 
+            className='inline-flex items-center gap-2 rounded-lg border cursor-pointer border-sky-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors' 
+            onClick={odswiezKodOdbioru}
+          >
             <RefreshIcon fontSize="small" />
             Odśwież kod odbioru
           </button>
           <div className='flex items-center gap-2'>
-            <QrCodeIcon fontSize="small" />
-            <p className='text-sm text-gray-600 gap-2'>Kod odbioru: <span className='font-semibold text-gray-800 gap-2 text-xl font-bold'>{kodOdbioru ? kodOdbioru : 'Brak kodu odbioru'}</span></p>
+            <QrCodeIcon className="h-4 w-4" />
+            <p className='text-sm text-gray-600 gap-2'>
+              Kod odbioru: <span className='font-semibold text-gray-800 text-xl'>{kodOdbioru || 'Brak kodu odbioru'}</span>
+            </p>
           </div>
         </div>
       </div>
@@ -280,20 +274,34 @@ export default function ParentPage() {
           <div className="p-3 bg-blue-50 rounded-2xl">
             <ChildCare className="text-blue-500" fontSize="large" />
           </div>
-          <div>
-            <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">
-              Dane dziecka
-            </p>
-            <h2 className="text-xl font-bold text-gray-800">
-              {childProfile.imie} {childProfile.nazwisko}
-            </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Grupa: <span className="font-semibold text-gray-800">{childProfile.grupa}</span>
-            </p>
-            <p className="text-xs text-gray-500 mt-2">
-              Rodzice / opiekunowie: {childProfile.rodzice.join(', ')}
-            </p>
-          </div>
+          {loadingChildren ? (
+            <div className="flex items-center gap-2 text-gray-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Ładowanie...
+            </div>
+          ) : selectedChild ? (
+            <div>
+              <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">
+                Dane dziecka
+              </p>
+              <h2 className="text-xl font-bold text-gray-800">
+                {selectedChild.name} {selectedChild.surname}
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Grupa: <span className="font-semibold text-gray-800">{selectedChild.group?.name || 'Nieprzypisana'}</span>
+              </p>
+              <p className="text-xs text-gray-500 mt-2">
+                Rodzic: {selectedChild.parent.name} {selectedChild.parent.surname}
+              </p>
+            </div>
+          ) : (
+            <div>
+              <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">
+                Dane dziecka
+              </p>
+              <p className="text-gray-600 mt-1">Brak przypisanych dzieci</p>
+            </div>
+          )}
         </div>
         <button
           onClick={() => router.push('/Parent/dziecko')}
@@ -377,23 +385,43 @@ export default function ParentPage() {
               <ArrowForwardIosIcon fontSize="inherit" />
             </button>
           </header>
-          <ul className="space-y-3 text-sm text-gray-700">
-            {mealsOrder.map(({ key, label, Icon }) => {
-              const meal = todaysMenu[key];
-              return (
-                <li key={key} className="flex items-start gap-3">
-                  <div className="p-2 bg-blue-50 rounded-lg shrink-0">
-                    <Icon className="text-blue-500" fontSize="small" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-800">{label}</p>
-                    <p className="text-gray-600 text-sm">{meal.title}</p>
-                    <p className="text-xs text-gray-500">{meal.description}</p>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+          
+          {loadingMeals ? (
+            <div className="flex items-center justify-center py-8 text-gray-500">
+              <Loader2 className="h-5 w-5 animate-spin mr-2" />
+              Ładowanie jadłospisu...
+            </div>
+          ) : mealPlans.length === 0 ? (
+            <div className="text-center py-8 text-gray-500 text-sm">
+              Brak jadłospisu na dzisiaj
+            </div>
+          ) : (
+            <ul className="space-y-3 text-sm text-gray-700">
+              {mealsOrder.map(({ key, label, Icon }) => {
+                const meal = todaysMeals[key];
+                if (!meal) return null;
+                return (
+                  <li key={key} className="flex items-start gap-3">
+                    <div className="p-2 bg-blue-50 rounded-lg shrink-0">
+                      <Icon className="text-blue-500" fontSize="small" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800">{label}</p>
+                      <p className="text-gray-600 text-sm">{meal.name}</p>
+                      {meal.description && (
+                        <p className="text-xs text-gray-500">{meal.description}</p>
+                      )}
+                      {meal.allergens.length > 0 && (
+                        <p className="text-xs text-amber-600 mt-1">
+                          Alergeny: {meal.allergens.join(', ')}
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </section>
 
         <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex flex-col">
@@ -416,27 +444,38 @@ export default function ParentPage() {
             </button>
           </header>
 
-          <ul className="space-y-3 flex-1 overflow-y-auto pr-1">
-            {recentMessages.map((msg) => (
-              <li
-                key={msg.id}
-                className="rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 shadow-sm"
-              >
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                  <span>{new Date(msg.date).toLocaleString('pl-PL')}</span>
-                  {!msg.isRead && (
-                    <span className="inline-flex items-center gap-1 text-blue-600 font-medium">
-                      <MarkEmailUnreadIcon fontSize="inherit" />
-                      Nowa
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm font-semibold text-gray-800">{msg.subject}</p>
-                <p className="text-xs text-gray-600">{msg.sender}</p>
-                <p className="text-sm text-gray-600 line-clamp-2 mt-1">{msg.preview}</p>
-              </li>
-            ))}
-          </ul>
+          {loadingMessages ? (
+            <div className="flex items-center justify-center py-8 text-gray-500">
+              <Loader2 className="h-5 w-5 animate-spin mr-2" />
+              Ładowanie wiadomości...
+            </div>
+          ) : recentMessages.length === 0 ? (
+            <div className="text-center py-8 text-gray-500 text-sm">
+              Brak wiadomości
+            </div>
+          ) : (
+            <ul className="space-y-3 flex-1 overflow-y-auto pr-1">
+              {recentMessages.map((msg) => (
+                <li
+                  key={msg.id}
+                  className="rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 shadow-sm"
+                >
+                  <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                    <span>{new Date(msg.createdAt).toLocaleString('pl-PL')}</span>
+                    {!msg.isRead && (
+                      <span className="inline-flex items-center gap-1 text-blue-600 font-medium">
+                        <MarkEmailUnreadIcon fontSize="inherit" />
+                        Nowa
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800">{msg.subject}</p>
+                  <p className="text-xs text-gray-600">{msg.sender.name} {msg.sender.surname}</p>
+                  <p className="text-sm text-gray-600 line-clamp-2 mt-1">{msg.body}</p>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex flex-col">
@@ -457,51 +496,62 @@ export default function ParentPage() {
             </button>
           </header>
 
-          <div className="space-y-4">
-            <div className="rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-emerald-600 font-semibold">
-                Łączne saldo
-              </p>
-              <p className="text-2xl font-bold text-emerald-700">
-                {outstandingTotal.toLocaleString('pl-PL', {
-                  style: 'currency',
-                  currency: 'PLN',
-                })}
-              </p>
+          {loadingPayments ? (
+            <div className="flex items-center justify-center py-8 text-gray-500">
+              <Loader2 className="h-5 w-5 animate-spin mr-2" />
+              Ładowanie płatności...
             </div>
-
-            {nearestDue && (
-              <div className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-4 py-3">
-                <div>
-                  <p className="text-sm font-semibold text-gray-800">Najbliższa płatność</p>
-                  <p className="text-xs text-gray-500">
-                    {nearestDue.month} • termin{' '}
-                    {new Date(nearestDue.dueDate).toLocaleDateString('pl-PL', {
-                      day: '2-digit',
-                      month: 'long',
-                    })}
-                  </p>
-                </div>
-                <span className="text-sm font-semibold text-gray-700">
-                  {nearestDue.total.toLocaleString('pl-PL', {
+          ) : (
+            <div className="space-y-4">
+              <div className="rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3">
+                <p className="text-xs uppercase tracking-wide text-emerald-600 font-semibold">
+                  Łączne saldo
+                </p>
+                <p className="text-2xl font-bold text-emerald-700">
+                  {outstandingTotal.toLocaleString('pl-PL', {
                     style: 'currency',
                     currency: 'PLN',
                   })}
-                </span>
+                </p>
               </div>
-            )}
 
-            {overdueTotal > 0 ? (
-              <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-700 text-sm">
-                <WarningAmberIcon fontSize="small" />
-                Zaległe płatności: {overdueTotal.toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' })}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">
-                Brak zaległości. Dziękujemy za terminowe wpłaty!
-              </p>
-            )}
-          </div>
+              {nearestDue && (
+                <div className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-4 py-3">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">Najbliższa płatność</p>
+                    <p className="text-xs text-gray-500">
+                      {nearestDue.description} • termin{' '}
+                      {new Date(nearestDue.dueDate).toLocaleDateString('pl-PL', {
+                        day: '2-digit',
+                        month: 'long',
+                      })}
+                    </p>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-700">
+                    {nearestDue.amount.toLocaleString('pl-PL', {
+                      style: 'currency',
+                      currency: 'PLN',
+                    })}
+                  </span>
+                </div>
+              )}
+
+              {overdueTotal > 0 ? (
+                <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-700 text-sm">
+                  <WarningAmberIcon fontSize="small" />
+                  Zaległe płatności: {overdueTotal.toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' })}
+                </div>
+              ) : payments.length === 0 ? (
+                <p className="text-sm text-gray-500">
+                  Brak płatności do wyświetlenia.
+                </p>
+              ) : (
+                <p className="text-sm text-gray-500">
+                  Brak zaległości. Dziękujemy za terminowe wpłaty!
+                </p>
+              )}
+            </div>
+          )}
         </section>
       </div>
     </div>

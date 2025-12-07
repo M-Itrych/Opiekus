@@ -49,13 +49,11 @@ export async function GET(req: Request) {
 
 		const where: Prisma.DocumentWhereInput = {};
 
-		// Status filter
 		const normalizedStatus = normalizeStatus(status);
 		if (normalizedStatus) {
 			where.status = normalizedStatus;
 		}
 
-		// Search filter - use AND to combine with status filter
 		if (search) {
 			where.AND = [
 				{

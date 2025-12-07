@@ -98,7 +98,6 @@ export async function PUT(
       return NextResponse.json({ error: "Nieautoryzowany dostęp" }, { status: 401 });
     }
 
-    // Only teachers, headteachers, and admins can update pickup records
     if (!["TEACHER", "HEADTEACHER", "ADMIN"].includes(user.role)) {
       return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
     }
@@ -186,7 +185,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Nieautoryzowany dostęp" }, { status: 401 });
     }
 
-    // Only headteachers and admins can delete pickup records
     if (!["HEADTEACHER", "ADMIN"].includes(user.role)) {
       return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
     }

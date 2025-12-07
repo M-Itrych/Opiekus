@@ -120,7 +120,6 @@ export default function PickupControl() {
       setLoading(true);
       const [childrenData] = await Promise.all([fetchChildren(), fetchTodayPickups()]);
       
-      // Fetch authorized persons for all children
       const personsMap: Record<string, AuthorizedPerson[]> = {};
       await Promise.all(
         childrenData.map(async (child: Child) => {
@@ -138,7 +137,6 @@ export default function PickupControl() {
   const getAuthorizedPersons = (child: Child): { id: string; name: string; relation: string }[] => {
     const persons: { id: string; name: string; relation: string }[] = [];
     
-    // Add parent as authorized person
     if (child.parent) {
       persons.push({
         id: child.parent.id,
@@ -147,7 +145,6 @@ export default function PickupControl() {
       });
     }
     
-    // Add authorized persons from the database
     const dbPersons = authorizedPersonsMap[child.id] || [];
     dbPersons.forEach((person) => {
       persons.push({

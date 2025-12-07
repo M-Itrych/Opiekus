@@ -266,7 +266,6 @@ export default function DocumentsList() {
 
 	return (
 		<div className="flex flex-col gap-6">
-			{/* Sekcja aktywnych dokumentów */}
 			<section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
 				<div className="mb-4 flex items-center justify-between">
 					<div>
@@ -314,7 +313,6 @@ export default function DocumentsList() {
 				)}
 			</section>
 
-			{/* Sekcja zarządzania dokumentami */}
 			<section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
 				<div className="flex items-center justify-between">
 					<div>
@@ -449,7 +447,6 @@ export default function DocumentsList() {
 				)}
 			</section>
 
-			{/* Modal */}
 			{isModalOpen && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
 					<div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">

@@ -46,7 +46,6 @@ export async function GET(
       return NextResponse.json({ error: "Wiadomość nie istnieje" }, { status: 404 });
     }
 
-    // Check if user has access to this message
     if (message.senderId !== user.id && message.receiverId !== user.id) {
       return NextResponse.json({ error: "Brak dostępu do tej wiadomości" }, { status: 403 });
     }
@@ -83,7 +82,6 @@ export async function PUT(
       return NextResponse.json({ error: "Wiadomość nie istnieje" }, { status: 404 });
     }
 
-    // Only receiver can mark as read
     if (existing.receiverId !== user.id && existing.senderId !== user.id) {
       return NextResponse.json({ error: "Brak dostępu do tej wiadomości" }, { status: 403 });
     }
@@ -142,7 +140,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Wiadomość nie istnieje" }, { status: 404 });
     }
 
-    // Only sender or receiver can delete
     if (existing.senderId !== user.id && existing.receiverId !== user.id) {
       return NextResponse.json({ error: "Brak dostępu do tej wiadomości" }, { status: 403 });
     }

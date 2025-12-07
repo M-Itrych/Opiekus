@@ -186,7 +186,6 @@ export default function WiadomosciPage() {
 
     setSending(true);
     try {
-      // Send a message to each selected teacher
       for (const teacherId of selectedTeachers) {
         const teacher = teachers.find((t) => t.id === teacherId);
         if (!teacher) continue;

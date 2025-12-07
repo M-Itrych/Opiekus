@@ -48,7 +48,6 @@ export async function GET(
       return NextResponse.json({ error: "Szkolenie nie istnieje" }, { status: 404 });
     }
 
-    // Teachers can only see published trainings
     if (user.role === "TEACHER" && training.status !== "PUBLISHED") {
       return NextResponse.json({ error: "Szkolenie niedostępne" }, { status: 403 });
     }
@@ -80,9 +79,7 @@ export async function PATCH(
     const { id } = await params;
     const body = await req.json();
 
-    // Check if this is a progress update (for teachers)
     if (body.action === "start" || body.action === "complete") {
-      // Any staff can update their own progress
       if (!["TEACHER", "HEADTEACHER", "ADMIN"].includes(user.role)) {
         return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
       }
@@ -96,7 +93,6 @@ export async function PATCH(
       }
 
       if (body.action === "start") {
-        // Start training - create or update progress
         const progress = await prisma.trainingProgress.upsert({
           where: {
             trainingId_userId: {
@@ -118,7 +114,6 @@ export async function PATCH(
       }
 
       if (body.action === "complete") {
-        // Complete training
         const progress = await prisma.trainingProgress.upsert({
           where: {
             trainingId_userId: {
@@ -143,7 +138,6 @@ export async function PATCH(
       }
     }
 
-    // Only HeadTeacher and Admin can update training details
     if (!["HEADTEACHER", "ADMIN"].includes(user.role)) {
       return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
     }
@@ -183,19 +177,16 @@ export async function DELETE(
       return NextResponse.json({ error: "Nieautoryzowany dostęp" }, { status: 401 });
     }
 
-    // Only HeadTeacher and Admin can delete trainings
     if (!["HEADTEACHER", "ADMIN"].includes(user.role)) {
       return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
     }
 
     const { id } = await params;
 
-    // Delete progress records first
     await prisma.trainingProgress.deleteMany({
       where: { trainingId: id },
     });
 
-    // Delete the training
     await prisma.training.delete({
       where: { id },
     });

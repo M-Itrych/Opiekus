@@ -145,7 +145,6 @@ export default function MealPlanView() {
         </div>
       </div>
 
-      {/* Weekly Grid */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
         {weekDays.map((day) => {
           const meals = getMealsForDate(day);
@@ -212,7 +211,6 @@ export default function MealPlanView() {
         })}
       </div>
 
-      {/* Legend */}
       <div className="flex flex-wrap items-center gap-4 border-t border-zinc-200 pt-4 dark:border-zinc-700">
         <span className="text-xs font-medium text-zinc-500">Legenda:</span>
         {Object.entries(mealTypeConfig).map(([key, config]) => (

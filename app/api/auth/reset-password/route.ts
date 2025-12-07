@@ -25,7 +25,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate password strength
     if (newPassword.length < 8) {
       return NextResponse.json(
         { error: 'Hasło musi mieć co najmniej 8 znaków' },
@@ -33,13 +32,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verify the reset token
     let payload: ResetTokenPayload;
     try {
       const { payload: verifiedPayload } = await jwtVerify(token, secretKey);
       payload = verifiedPayload as unknown as ResetTokenPayload;
 
-      // Verify token type
       if (payload.type !== 'password_reset') {
         return NextResponse.json(
           { error: 'Nieprawidłowy token resetowania hasła' },
@@ -53,7 +50,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Find user
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
       select: { id: true, email: true },
@@ -66,7 +62,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verify email matches
     if (user.email !== payload.email) {
       return NextResponse.json(
         { error: 'Token jest nieprawidłowy' },
@@ -74,7 +69,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Hash new password and update user
     const hashedPassword = await hashPassword(newPassword);
 
     await prisma.user.update({

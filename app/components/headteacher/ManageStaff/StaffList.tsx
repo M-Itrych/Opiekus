@@ -191,7 +191,6 @@ function StaffModal({
 
   if (!open) return null;
 
-  // Show success screen with generated credentials
   if (createdResult) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
@@ -470,7 +469,6 @@ export default function StaffList() {
       setLoading(true);
       setError(null);
       
-      // Sync existing TEACHER users to Staff table first (ignore errors - non-critical)
       try {
         const syncResponse = await fetch("/api/staff/sync", { method: "POST" });
         if (!syncResponse.ok) {
@@ -551,7 +549,6 @@ export default function StaffList() {
       groupId: state.groupId || null,
     };
 
-    // For edit mode, only include password if provided
     if (modalMode === "edit" && state.password.trim()) {
       payload.password = state.password.trim();
     }
@@ -577,7 +574,6 @@ export default function StaffList() {
       const data = await response.json();
 
       if (modalMode === "create" && data.generatedPassword) {
-        // Show success screen with credentials
         setCreatedResult({
           name: state.name.trim(),
           surname: state.surname.trim(),

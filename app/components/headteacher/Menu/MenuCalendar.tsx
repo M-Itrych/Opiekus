@@ -110,7 +110,6 @@ export function MenuCalendar() {
 		const end = endOfMonth(currentDate);
 		const days = eachDayOfInterval({ start, end });
 
-		// Dodaj puste dni na początku tygodnia (poniedziałek = 0)
 		const startDay = getDay(start);
 		const paddingStart = startDay === 0 ? 6 : startDay - 1;
 		const padding = Array(paddingStart).fill(null);
@@ -159,7 +158,6 @@ export function MenuCalendar() {
 
 	return (
 		<div className="flex flex-col gap-6">
-			{/* Header z nawigacją */}
 			<div className="flex items-center gap-4">
 				<Button variant="outline" size="icon" onClick={handlePrevMonth}>
 					<ChevronLeft className="h-4 w-4" />
@@ -172,7 +170,6 @@ export function MenuCalendar() {
 				</Button>
 			</div>
 
-			{/* Legenda */}
 			<div className="flex items-center gap-4 flex-wrap">
 				{Object.entries(MEAL_TYPES).map(([key, { label, icon: Icon, color }]) => (
 					<div key={key} className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${color}`}>
@@ -182,14 +179,12 @@ export function MenuCalendar() {
 				))}
 			</div>
 
-			{/* Kalendarz */}
 			{isLoading ? (
 				<div className="flex items-center justify-center py-20">
 					<Loader2 className="h-8 w-8 animate-spin text-sky-500" />
 				</div>
 			) : (
 				<div className="border border-zinc-200 rounded-xl overflow-hidden bg-white">
-					{/* Nagłówki dni tygodnia */}
 					<div className="grid grid-cols-7 bg-zinc-50 border-b border-zinc-200">
 						{WEEKDAYS.map((day) => (
 							<div key={day} className="py-3 text-center text-sm font-medium text-zinc-600">
@@ -198,7 +193,6 @@ export function MenuCalendar() {
 						))}
 					</div>
 
-					{/* Dni kalendarza */}
 					<div className="grid grid-cols-7">
 						{calendarDays.map((day, index) => {
 							if (!day) {
@@ -280,7 +274,6 @@ export function MenuCalendar() {
 				</div>
 			)}
 
-			{/* Modal */}
 			<MealModal
 				isOpen={isModalOpen}
 				onClose={handleModalClose}

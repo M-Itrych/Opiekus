@@ -36,7 +36,6 @@ async function verifyAccessToChild(user: SessionUser, childId: string): Promise<
   return false;
 }
 
-// GET - List authorized persons for a child
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -69,7 +68,6 @@ export async function GET(
   }
 }
 
-// POST - Add a new authorized person
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -82,7 +80,6 @@ export async function POST(
 
     const { id: childId } = await params;
 
-    // Only parents, headteachers, and admins can add authorized persons
     if (!["PARENT", "HEADTEACHER", "ADMIN"].includes(user.role)) {
       return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
     }

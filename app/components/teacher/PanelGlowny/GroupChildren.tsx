@@ -77,7 +77,6 @@ export default function GroupChildren({ groupName = "Moja grupa" }: GroupChildre
   }
 
   if (error) {
-    // Handle "no assigned group" as an informational message, not an error
     if (error === "Brak przypisanej grupy") {
       return (
         <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
@@ -105,7 +104,6 @@ export default function GroupChildren({ groupName = "Moja grupa" }: GroupChildre
       );
     }
 
-    // Other errors show as actual errors
     return (
       <section className="flex w-full flex-col gap-6 rounded-2xl border border-red-200 bg-red-50 px-6 py-6 shadow-sm dark:border-red-800 dark:bg-red-900/20">
         <div className="flex flex-col items-center justify-center gap-4 py-8">
@@ -243,7 +241,6 @@ export default function GroupChildren({ groupName = "Moja grupa" }: GroupChildre
         )}
       </section>
 
-      {/* Child Details Modal */}
       {selectedChild && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="relative mx-4 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl dark:bg-zinc-900">

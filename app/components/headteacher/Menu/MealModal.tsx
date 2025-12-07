@@ -155,7 +155,6 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 			<div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
-				{/* Header */}
 				<div className="flex items-center justify-between p-6 border-b dark:border-zinc-800">
 					<div>
 						<h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
@@ -172,7 +171,6 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 					</Button>
 				</div>
 
-				{/* Content */}
 				<div className="flex-1 overflow-y-auto p-6">
 					<div className="space-y-6">
 						{error && (
@@ -182,7 +180,6 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 							</div>
 						)}
 
-						{/* Typ posiłku */}
 						<div className="space-y-2">
 							<Label>Typ posiłku</Label>
 							<div className="grid grid-cols-3 gap-2">
@@ -204,7 +201,6 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 							</div>
 						</div>
 
-						{/* Nazwa */}
 						<div className="space-y-2">
 							<Label htmlFor="name">Nazwa posiłku *</Label>
 							<Input
@@ -215,7 +211,6 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 							/>
 						</div>
 
-						{/* Opis */}
 						<div className="space-y-2">
 							<Label htmlFor="description">Opis (opcjonalnie)</Label>
 							<Textarea
@@ -227,7 +222,6 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 							/>
 						</div>
 
-						{/* Alergeny */}
 						<div className="space-y-2">
 							<Label>Alergeny</Label>
 							<div className="flex flex-wrap gap-2">
@@ -255,7 +249,6 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 					</div>
 				</div>
 
-				{/* Footer */}
 				<div className="flex items-center justify-between p-6 border-t dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
 					<div>
 						{isEditMode && (

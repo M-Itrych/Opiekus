@@ -35,7 +35,6 @@ async function verifyAccessToAuthorizedPerson(
   return { hasAccess: false, authorizedPerson };
 }
 
-// GET - Get a specific authorized person
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -72,7 +71,6 @@ export async function GET(
   }
 }
 
-// PATCH - Update an authorized person
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -133,7 +131,6 @@ export async function PATCH(
   }
 }
 
-// DELETE - Remove an authorized person
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }

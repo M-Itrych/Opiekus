@@ -33,7 +33,6 @@ export async function GET(req: Request) {
 
     const where: Prisma.PickupRecordWhereInput = {};
 
-    // Parents can only see their children's pickup records
     if (user.role === "PARENT") {
       const children = await prisma.child.findMany({
         where: { parentId: user.id },
@@ -43,7 +42,6 @@ export async function GET(req: Request) {
       where.childId = { in: childIds };
     }
 
-    // Teachers can see pickup records for their group
     if (user.role === "TEACHER") {
       const staff = await prisma.staff.findUnique({
         where: { userId: user.id },
@@ -59,7 +57,6 @@ export async function GET(req: Request) {
       }
     }
 
-    // Filter by specific child
     if (childId) {
       if (user.role === "PARENT") {
         const child = await prisma.child.findFirst({
@@ -72,7 +69,6 @@ export async function GET(req: Request) {
       where.childId = childId;
     }
 
-    // Filter by specific date
     if (date) {
       const targetDate = new Date(date);
       const startOfDay = new Date(targetDate);
@@ -86,7 +82,6 @@ export async function GET(req: Request) {
       };
     }
 
-    // Filter by date range
     if (startDate || endDate) {
       where.pickupDate = where.pickupDate || {};
       if (startDate) {
@@ -124,7 +119,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Nieautoryzowany dostęp" }, { status: 401 });
     }
 
-    // Only teachers, headteachers, and admins can create pickup records
     if (!["TEACHER", "HEADTEACHER", "ADMIN"].includes(user.role)) {
       return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
     }
@@ -145,7 +139,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Dziecko nie istnieje" }, { status: 400 });
     }
 
-    // Teachers can only create records for children in their group
     if (user.role === "TEACHER") {
       const staff = await prisma.staff.findUnique({
         where: { userId: user.id },

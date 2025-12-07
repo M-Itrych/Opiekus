@@ -67,7 +67,6 @@ export default function DailyActivities() {
       const data = await res.json();
       setChildren(data);
 
-      // Initialize activities for each child
       const initialActivities: Record<string, ChildActivity> = {};
       data.forEach((child: Child) => {
         initialActivities[child.id] = {
@@ -94,7 +93,6 @@ export default function DailyActivities() {
       if (!res.ok) return;
       
       const data = await res.json();
-      // Update activities with fetched data if exists
       if (data && data.length > 0) {
         setActivities(prev => {
           const updated = { ...prev };
@@ -302,7 +300,6 @@ export default function DailyActivities() {
         </div>
       </div>
 
-      {/* Stats Overview */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-zinc-50/50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
           <div className="flex items-center gap-2">
@@ -354,7 +351,6 @@ export default function DailyActivities() {
         </div>
       </div>
 
-      {/* Individual Child Forms */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-green-600" />
@@ -391,7 +387,6 @@ export default function DailyActivities() {
 
               {editingChildId === childActivity.childId && (
                 <div className="space-y-4 border-t border-zinc-200 pt-4 dark:border-zinc-700">
-                  {/* Meals */}
                   <div>
                     <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Posiłki</p>
                     <div className="grid grid-cols-2 gap-2">
@@ -410,7 +405,6 @@ export default function DailyActivities() {
                     </div>
                   </div>
 
-                  {/* Nap */}
                   <div>
                     <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Drzemka</p>
                     <div className="flex gap-3">
@@ -433,7 +427,6 @@ export default function DailyActivities() {
                     </div>
                   </div>
 
-                  {/* Activities */}
                   <div>
                     <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Aktywności</p>
                     <div className="flex flex-wrap gap-2 mb-2">
@@ -469,7 +462,6 @@ export default function DailyActivities() {
                 </div>
               )}
 
-              {/* Display current activities */}
               <div className="mt-3">
                 {childActivity.activities.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
@@ -495,7 +487,6 @@ export default function DailyActivities() {
                 )}
               </div>
 
-              {/* Meal indicators */}
               <div className="mt-2 flex gap-1">
                 {activities[childActivity.childId]?.breakfast && (
                   <span className="rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-700">Śniad.</span>

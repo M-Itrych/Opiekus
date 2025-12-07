@@ -38,21 +38,18 @@ export default function Teacher() {
     try {
       setLoading(true);
       
-      // Fetch children
       const childrenRes = await fetch("/api/groups/children");
       if (childrenRes.ok) {
         const childrenData = await childrenRes.json();
         setChildren(childrenData);
       }
 
-      // Fetch today's attendances
       const attendanceRes = await fetch(`/api/attendances?startDate=${today}&endDate=${today}`);
       if (attendanceRes.ok) {
         const attendanceData = await attendanceRes.json();
         setAttendances(attendanceData);
       }
 
-      // Fetch today's pickups
       const pickupRes = await fetch(`/api/pickup?date=${today}`);
       if (pickupRes.ok) {
         const pickupData = await pickupRes.json();
@@ -94,7 +91,6 @@ export default function Teacher() {
       title="Panel główny"
       description="Przegląd najważniejszych informacji o grupie"
     >
-      {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <div className="flex items-center gap-3">
@@ -145,9 +141,7 @@ export default function Teacher() {
         </div>
       </div>
 
-      {/* Main Cards */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Attendance Card */}
         <section className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -191,7 +185,6 @@ export default function Teacher() {
           )}
         </section>
 
-        {/* Group Card */}
         <section className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -237,9 +230,7 @@ export default function Teacher() {
         </section>
       </div>
 
-      {/* Second Row */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Activities Card */}
         <section className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -275,7 +266,6 @@ export default function Teacher() {
           </div>
         </section>
 
-        {/* Pickup Card */}
         <section className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -307,7 +297,6 @@ export default function Teacher() {
         </section>
       </div>
 
-      {/* Today's Date Card */}
       <section className="rounded-2xl border border-zinc-200 bg-gradient-to-r from-sky-500 to-indigo-600 p-6 shadow-sm">
         <div className="flex items-center justify-between text-white">
           <div className="flex items-center gap-4">

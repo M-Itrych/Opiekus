@@ -61,7 +61,7 @@ export async function GET(
             },
           },
         },
-      } as any,
+      },
     });
 
     if (!document) {
@@ -137,18 +137,18 @@ export async function PUT(
             },
           },
         },
-      } as any,
+      },
     });
 
     if (groupIds !== undefined) {
       const groupIdsArray = Array.isArray(groupIds) ? groupIds.filter((id: unknown) => typeof id === "string" && id.trim()) : [];
       
-      await (prisma as any).documentGroup.deleteMany({
+      await prisma.documentGroup.deleteMany({
         where: { documentId: id },
       });
 
       if (groupIdsArray.length > 0) {
-        await (prisma as any).documentGroup.createMany({
+        await prisma.documentGroup.createMany({
           data: groupIdsArray.map((groupId: string) => ({
             documentId: id,
             groupId: groupId.trim(),
@@ -169,7 +169,7 @@ export async function PUT(
               },
             },
           },
-        } as any,
+        },
       });
 
       return NextResponse.json(documentWithGroups);

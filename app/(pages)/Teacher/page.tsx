@@ -1,163 +1,207 @@
 "use client";
 
-import GroupChildren from "@/app/components/teacher/PanelGlowny/GroupChildren";
-import DailyActivities from "@/app/components/teacher/PanelGlowny/DailyActivities";
-import PickupControl from "@/app/components/teacher/PanelGlowny/PickupControl";
+import { useState, useEffect, useCallback } from "react";
 import TeacherLayout from "@/app/components/global/Layout/TeacherLayout";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
+import { 
+  ChevronRight, Users, CheckCircle, Clock, 
+  Activity, Loader2, AlertTriangle, Calendar
+} from "lucide-react";
 
-const mockChildren = [
-  {
-    id: "1",
-    name: "Jan",
-    surname: "Kowalski",
-    age: 4,
-    hasImageConsent: true,
-    hasDataConsent: true,
-    allergies: ["Orzechy"],
-    specialNeeds: undefined,
-    pickupAuthorized: [
-      { name: "Anna Kowalska", id: "p1", relation: "Mama" },
-      { name: "Piotr Kowalski", id: "p2", relation: "Tata" },
-      { name: "Maria Nowak", id: "p3", relation: "Babcia" },
-    ],
-  },
-  {
-    id: "2",
-    name: "Zuzanna",
-    surname: "Nowak",
-    age: 5,
-    hasImageConsent: false,
-    hasDataConsent: true,
-    allergies: [],
-    specialNeeds: undefined,
-    pickupAuthorized: [
-      { name: "Katarzyna Nowak", id: "p4", relation: "Mama" },
-      { name: "Tomasz Nowak", id: "p5", relation: "Tata" },
-    ],
-  },
-  {
-    id: "3",
-    name: "Michał",
-    surname: "Wiśniewski",
-    age: 3,
-    hasImageConsent: true,
-    hasDataConsent: true,
-    allergies: ["Laktoza"],
-    specialNeeds: "Wymaga dodatkowej uwagi podczas zajęć",
-    pickupAuthorized: [
-      { name: "Ewa Wiśniewska", id: "p6", relation: "Mama" },
-    ],
-  },
-  {
-    id: "4",
-    name: "Lena",
-    surname: "Wójcik",
-    age: 4,
-    hasImageConsent: true,
-    hasDataConsent: true,
-    allergies: [],
-    specialNeeds: undefined,
-    pickupAuthorized: [
-      { name: "Agnieszka Wójcik", id: "p7", relation: "Mama" },
-      { name: "Robert Wójcik", id: "p8", relation: "Tata" },
-      { name: "Janina Kowalczyk", id: "p9", relation: "Babcia" },
-    ],
-  },
-  {
-    id: "5",
-    name: "Antoni",
-    surname: "Kowalczyk",
-    age: 5,
-    hasImageConsent: true,
-    hasDataConsent: false,
-    allergies: ["Jajka"],
-    specialNeeds: undefined,
-    pickupAuthorized: [
-      { name: "Magdalena Kowalczyk", id: "p10", relation: "Mama" },
-    ],
-  },
-];
+interface Child {
+  id: string;
+  name: string;
+  surname: string;
+}
 
-const mockActivities = [
-  {
-    childId: "1",
-    childName: "Jan Kowalski",
-    breakfast: true,
-    secondBreakfast: true,
-    lunch: true,
-    snack: false,
-    napStart: "12:45",
-    napEnd: "14:30",
-    napDuration: 105,
-    activities: ["Zajęcia plastyczne", "Zabawa na placu zabaw"],
-  },
-  {
-    childId: "2",
-    childName: "Zuzanna Nowak",
-    breakfast: true,
-    secondBreakfast: true,
-    lunch: true,
-    snack: true,
-    napStart: "13:00",
-    napEnd: "14:15",
-    napDuration: 75,
-    activities: ["Czytanie bajek", "Zajęcia muzyczne"],
-  },
-  {
-    childId: "3",
-    childName: "Michał Wiśniewski",
-    breakfast: true,
-    secondBreakfast: false,
-    lunch: true,
-    snack: true,
-    napStart: "12:30",
-    napEnd: "15:00",
-    napDuration: 150,
-    activities: ["Zabawa konstrukcyjna"],
-  },
-  {
-    childId: "4",
-    childName: "Lena Wójcik",
-    breakfast: true,
-    secondBreakfast: true,
-    lunch: true,
-    snack: true,
-    napStart: "13:15",
-    napEnd: "14:45",
-    napDuration: 90,
-    activities: ["Zajęcia plastyczne", "Taniec", "Zabawa na placu zabaw"],
-  },
-  {
-    childId: "5",
-    childName: "Antoni Kowalczyk",
-    breakfast: true,
-    secondBreakfast: true,
-    lunch: true,
-    snack: false,
-    napStart: "12:45",
-    napEnd: "14:00",
-    napDuration: 75,
-    activities: ["Zajęcia sportowe"],
-  },
-];
+interface AttendanceRecord {
+  id: string;
+  childId: string;
+  status: "PRESENT" | "ABSENT" | "PENDING";
+}
+
+interface PickupRecord {
+  id: string;
+  childId: string;
+}
 
 export default function Teacher() {
-  const today = new Date();
+  const [children, setChildren] = useState<Child[]>([]);
+  const [attendances, setAttendances] = useState<AttendanceRecord[]>([]);
+  const [pickups, setPickups] = useState<PickupRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const today = new Date().toISOString().split("T")[0];
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch children
+      const childrenRes = await fetch("/api/groups/children");
+      if (childrenRes.ok) {
+        const childrenData = await childrenRes.json();
+        setChildren(childrenData);
+      }
+
+      // Fetch today's attendances
+      const attendanceRes = await fetch(`/api/attendances?startDate=${today}&endDate=${today}`);
+      if (attendanceRes.ok) {
+        const attendanceData = await attendanceRes.json();
+        setAttendances(attendanceData);
+      }
+
+      // Fetch today's pickups
+      const pickupRes = await fetch(`/api/pickup?date=${today}`);
+      if (pickupRes.ok) {
+        const pickupData = await pickupRes.json();
+        setPickups(pickupData);
+      }
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [today]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const presentCount = attendances.filter(a => a.status === "PRESENT").length;
+  const absentCount = attendances.filter(a => a.status === "ABSENT").length;
+  const pendingAttendance = children.length - presentCount - absentCount;
+  const pickedUpCount = pickups.length;
+  const awaitingPickup = presentCount - pickedUpCount;
+
+  if (loading) {
+    return (
+      <TeacherLayout
+        title="Panel główny"
+        description="Przegląd najważniejszych informacji o grupie"
+      >
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-sky-600" />
+          <span className="ml-3 text-zinc-600">Ładowanie danych...</span>
+        </div>
+      </TeacherLayout>
+    );
+  }
 
   return (
     <TeacherLayout
       title="Panel główny"
       description="Przegląd najważniejszych informacji o grupie"
     >
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sky-600 dark:bg-sky-900/30">
+              <Users className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{children.length}</p>
+              <p className="text-xs text-zinc-500">Dzieci w grupie</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30">
+              <CheckCircle className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-green-600">{presentCount}</p>
+              <p className="text-xs text-zinc-500">Obecnych</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/30">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-red-600">{absentCount}</p>
+              <p className="text-xs text-zinc-500">Nieobecnych</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/30">
+              <Clock className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-amber-600">{pendingAttendance}</p>
+              <p className="text-xs text-zinc-500">Do sprawdzenia</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Cards */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Attendance Card */}
         <section className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              Moja grupa - Podgląd
-            </h2>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sky-600 dark:bg-sky-900/30">
+                <CheckCircle className="h-5 w-5" />
+              </div>
+              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                Obecności
+              </h2>
+            </div>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/Teacher/Attendance">
+                Zarządzaj
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-xl bg-green-50 p-3 text-center dark:bg-green-900/20">
+              <p className="text-xl font-bold text-green-600">{presentCount}</p>
+              <p className="text-xs text-green-700 dark:text-green-400">Obecnych</p>
+            </div>
+            <div className="rounded-xl bg-red-50 p-3 text-center dark:bg-red-900/20">
+              <p className="text-xl font-bold text-red-600">{absentCount}</p>
+              <p className="text-xs text-red-700 dark:text-red-400">Nieobecnych</p>
+            </div>
+            <div className="rounded-xl bg-amber-50 p-3 text-center dark:bg-amber-900/20">
+              <p className="text-xl font-bold text-amber-600">{pendingAttendance}</p>
+              <p className="text-xs text-amber-700 dark:text-amber-400">Oczekuje</p>
+            </div>
+          </div>
+
+          {pendingAttendance > 0 && (
+            <div className="rounded-lg bg-amber-50 px-4 py-3 dark:bg-amber-900/20">
+              <p className="text-sm text-amber-700 dark:text-amber-400">
+                <AlertTriangle className="inline h-4 w-4 mr-1" />
+                {pendingAttendance} dzieci czeka na sprawdzenie obecności
+              </p>
+            </div>
+          )}
+        </section>
+
+        {/* Group Card */}
+        <section className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30">
+                <Users className="h-5 w-5" />
+              </div>
+              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                Moja grupa
+              </h2>
+            </div>
             <Button asChild variant="outline" size="sm">
               <Link href="/Teacher/Group">
                 Zobacz wszystkie
@@ -165,49 +209,123 @@ export default function Teacher() {
               </Link>
             </Button>
           </div>
+          
           <div className="text-sm text-zinc-500 dark:text-zinc-400">
-            <p>Liczba dzieci w grupie: <span className="font-semibold text-zinc-900 dark:text-zinc-100">{mockChildren.length}</span></p>
-            <p className="mt-2">Obecni dzisiaj: <span className="font-semibold text-sky-600">{mockChildren.length}</span></p>
+            <p>Liczba dzieci w grupie: <span className="font-semibold text-zinc-900 dark:text-zinc-100">{children.length}</span></p>
           </div>
-        </section>
 
+          {children.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {children.slice(0, 6).map((child) => (
+                <div
+                  key={child.id}
+                  className="flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 dark:bg-zinc-800"
+                >
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 text-xs font-semibold dark:bg-indigo-900/30">
+                    {child.name[0]}
+                  </div>
+                  <span className="text-sm text-zinc-700 dark:text-zinc-300">{child.name}</span>
+                </div>
+              ))}
+              {children.length > 6 && (
+                <div className="flex items-center rounded-full bg-zinc-100 px-3 py-1 dark:bg-zinc-800">
+                  <span className="text-sm text-zinc-500">+{children.length - 6} więcej</span>
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* Second Row */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Activities Card */}
         <section className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              Aktywności dzienne - Podgląd
-            </h2>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30">
+                <Activity className="h-5 w-5" />
+              </div>
+              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                Aktywności dzienne
+              </h2>
+            </div>
             <Button asChild variant="outline" size="sm">
               <Link href="/Teacher/Activities">
-                Zobacz wszystkie
+                Zarządzaj
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
+          
           <div className="text-sm text-zinc-500 dark:text-zinc-400">
-            <p>Zarejestrowane aktywności: <span className="font-semibold text-zinc-900 dark:text-zinc-100">{mockActivities.length}</span></p>
-            <p className="mt-2">Dzieci śpiące: <span className="font-semibold text-sky-600">{mockActivities.filter(a => a.napStart).length}</span></p>
+            <p>Rejestruj posiłki, drzemki i aktywności dla dzieci obecnych w grupie.</p>
+          </div>
+
+          <div className="flex gap-2">
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+              Śniadanie 8:00
+            </span>
+            <span className="rounded-full bg-orange-100 px-3 py-1 text-xs text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+              Obiad 11:30
+            </span>
+            <span className="rounded-full bg-purple-100 px-3 py-1 text-xs text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+              Drzemka 12:30
+            </span>
+          </div>
+        </section>
+
+        {/* Pickup Card */}
+        <section className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-100 text-teal-600 dark:bg-teal-900/30">
+                <Clock className="h-5 w-5" />
+              </div>
+              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                Kontrola odbioru
+              </h2>
+            </div>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/Teacher/Pickup">
+                Przejdź do kontroli
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl bg-teal-50 p-3 text-center dark:bg-teal-900/20">
+              <p className="text-xl font-bold text-teal-600">{awaitingPickup > 0 ? awaitingPickup : 0}</p>
+              <p className="text-xs text-teal-700 dark:text-teal-400">Oczekuje na odbiór</p>
+            </div>
+            <div className="rounded-xl bg-green-50 p-3 text-center dark:bg-green-900/20">
+              <p className="text-xl font-bold text-green-600">{pickedUpCount}</p>
+              <p className="text-xs text-green-700 dark:text-green-400">Odebranych</p>
+            </div>
           </div>
         </section>
       </div>
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-            Kontrola odbioru - Podgląd
-          </h2>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/Teacher/Pickup">
-              Przejdź do kontroli
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-        <div className="text-sm text-zinc-500 dark:text-zinc-400">
-          <p>Dzieci oczekujące na odbiór: <span className="font-semibold text-sky-600">{mockChildren.length}</span></p>
-          <p className="mt-2">Odebrane: <span className="font-semibold text-sky-600">0</span></p>
+      {/* Today's Date Card */}
+      <section className="rounded-2xl border border-zinc-200 bg-gradient-to-r from-sky-500 to-indigo-600 p-6 shadow-sm">
+        <div className="flex items-center justify-between text-white">
+          <div className="flex items-center gap-4">
+            <Calendar className="h-8 w-8" />
+            <div>
+              <p className="text-lg font-semibold">
+                {new Date().toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+              </p>
+              <p className="text-sm opacity-80">
+                Dzień pracy w przedszkolu
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-3xl font-bold">{new Date().toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })}</p>
+          </div>
         </div>
       </section>
     </TeacherLayout>
   );
 }
-

@@ -22,10 +22,8 @@ interface ApiPickupRecord {
   childId: string;
   pickupDate: string;
   pickupTime: string;
-  pickupPerson: string;
-  pickupPersonId: string | null;
-  relation: string;
-  isAuthorized: boolean;
+  authorizedPerson: string;
+  verificationMethod: string | null;
   notes: string | null;
   child: {
     id: string;
@@ -34,31 +32,46 @@ interface ApiPickupRecord {
   };
 }
 
-interface PickupControlProps {
-  children: Array<{
+interface AuthorizedPerson {
+  name: string;
+  id: string;
+  relation: string;
+}
+
+interface Child {
+  id: string;
+  name: string;
+  surname: string;
+  parent?: {
     id: string;
     name: string;
     surname: string;
-    pickupAuthorized: Array<{
-      name: string;
-      id: string;
-      relation: string;
-    }>;
-  }>;
+  };
 }
 
-export default function PickupControl({ children }: PickupControlProps) {
+export default function PickupControl() {
+  const [children, setChildren] = useState<Child[]>([]);
   const [pickupRecords, setPickupRecords] = useState<Record<string, PickupRecord>>({});
   const [verificationCode, setVerificationCode] = useState("");
   const [selectedChild, setSelectedChild] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
+
+  const fetchChildren = useCallback(async () => {
+    try {
+      const res = await fetch("/api/groups/children");
+      if (!res.ok) throw new Error("Failed to fetch children");
+      const data = await res.json();
+      setChildren(data);
+    } catch (err) {
+      console.error("Error fetching children:", err);
+    }
+  }, []);
 
   const fetchTodayPickups = useCallback(async () => {
     try {
-      setLoading(true);
       const today = new Date().toISOString().split('T')[0];
-      const res = await fetch(`/api/pickup?pickupDate=${today}`);
+      const res = await fetch(`/api/pickup?date=${today}`);
       
       if (!res.ok) throw new Error('Failed to fetch pickups');
       
@@ -70,11 +83,11 @@ export default function PickupControl({ children }: PickupControlProps) {
           id: record.id,
           childId: record.childId,
           childName: `${record.child.name} ${record.child.surname}`,
-          pickupTime: record.pickupTime,
+          pickupTime: new Date(record.pickupTime).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
           pickupDate: record.pickupDate,
-          pickupPerson: record.pickupPerson,
-          pickupPersonId: record.pickupPersonId || undefined,
-          isAuthorized: record.isAuthorized,
+          pickupPerson: record.authorizedPerson,
+          pickupPersonId: record.verificationMethod || undefined,
+          isAuthorized: true,
           notes: record.notes || undefined,
         };
       });
@@ -82,29 +95,38 @@ export default function PickupControl({ children }: PickupControlProps) {
       setPickupRecords(records);
     } catch (err) {
       console.error('Error fetching pickups:', err);
-    } finally {
-      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchTodayPickups();
-  }, [fetchTodayPickups]);
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([fetchChildren(), fetchTodayPickups()]);
+      setLoading(false);
+    };
+    loadData();
+  }, [fetchChildren, fetchTodayPickups]);
+
+  const getAuthorizedPersons = (child: Child): AuthorizedPerson[] => {
+    // Get parent as authorized person
+    const persons: AuthorizedPerson[] = [];
+    if (child.parent) {
+      persons.push({
+        id: child.parent.id,
+        name: `${child.parent.name} ${child.parent.surname}`,
+        relation: "Rodzic",
+      });
+    }
+    return persons;
+  };
 
   const handlePickup = async (childId: string, personName: string, personId: string, relation: string) => {
-    const child = children.find((c) => c.id === childId);
-    const authorizedPerson = child?.pickupAuthorized.find((p) => p.id === personId);
-
-    if (!authorizedPerson) {
-      alert("Osoba nie jest upoważniona do odbioru tego dziecka!");
-      return;
-    }
-
     setSaving(childId);
     try {
+      const child = children.find((c) => c.id === childId);
       const now = new Date();
-      const pickupDate = now.toISOString().split('T')[0];
-      const pickupTime = now.toLocaleTimeString("pl-PL", { hour: '2-digit', minute: '2-digit' });
+      const pickupDate = now.toISOString();
+      const pickupTime = now.toISOString();
 
       const res = await fetch('/api/pickup', {
         method: 'POST',
@@ -113,10 +135,8 @@ export default function PickupControl({ children }: PickupControlProps) {
           childId,
           pickupDate,
           pickupTime,
-          pickupPerson: personName,
-          pickupPersonId: personId,
-          relation,
-          isAuthorized: true,
+          authorizedPerson: personName,
+          verificationMethod: `${relation} - ${personId}`,
         }),
       });
 
@@ -130,7 +150,7 @@ export default function PickupControl({ children }: PickupControlProps) {
           id: savedRecord.id,
           childId,
           childName: `${child?.name} ${child?.surname}`,
-          pickupTime: savedRecord.pickupTime,
+          pickupTime: new Date(savedRecord.pickupTime).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
           pickupDate: savedRecord.pickupDate,
           pickupPerson: personName,
           pickupPersonId: personId,
@@ -154,8 +174,8 @@ export default function PickupControl({ children }: PickupControlProps) {
       setSaving(childId);
       try {
         const now = new Date();
-        const pickupDate = now.toISOString().split('T')[0];
-        const pickupTime = now.toLocaleTimeString("pl-PL", { hour: '2-digit', minute: '2-digit' });
+        const pickupDate = now.toISOString();
+        const pickupTime = now.toISOString();
 
         const res = await fetch('/api/pickup', {
           method: 'POST',
@@ -164,10 +184,8 @@ export default function PickupControl({ children }: PickupControlProps) {
             childId,
             pickupDate,
             pickupTime,
-            pickupPerson: 'Osoba zweryfikowana kodem',
-            pickupPersonId: verificationCode,
-            relation: 'Zweryfikowana',
-            isAuthorized: true,
+            authorizedPerson: 'Osoba zweryfikowana kodem',
+            verificationMethod: `Kod: ${verificationCode}`,
             notes: `Weryfikacja kodem: ${verificationCode}`,
           }),
         });
@@ -182,7 +200,7 @@ export default function PickupControl({ children }: PickupControlProps) {
             id: savedRecord.id,
             childId,
             childName: `${child.name} ${child.surname}`,
-            pickupTime: savedRecord.pickupTime,
+            pickupTime: new Date(savedRecord.pickupTime).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
             pickupDate: savedRecord.pickupDate,
             pickupPerson: 'Osoba zweryfikowana kodem',
             pickupPersonId: verificationCode,
@@ -244,6 +262,8 @@ export default function PickupControl({ children }: PickupControlProps) {
             {pendingPickups.map((child) => {
               const isSelected = selectedChild === child.id;
               const isSaving = saving === child.id;
+              const authorizedPersons = getAuthorizedPersons(child);
+
               return (
                 <div
                   key={child.id}
@@ -254,13 +274,18 @@ export default function PickupControl({ children }: PickupControlProps) {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">
-                        {child.name} {child.surname}
-                      </h4>
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                        {child.pickupAuthorized.length} upoważnionych osób
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sky-600 font-semibold dark:bg-sky-900/30">
+                        {child.name[0]}{child.surname[0]}
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">
+                          {child.name} {child.surname}
+                        </h4>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                          {authorizedPersons.length} upoważnionych osób
+                        </p>
+                      </div>
                     </div>
                     <Button
                       variant={isSelected ? "default" : "outline"}
@@ -304,44 +329,54 @@ export default function PickupControl({ children }: PickupControlProps) {
                         </div>
                       </div>
 
-                      <div className="flex flex-col gap-2">
-                        <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                          Upoważnione osoby:
-                        </p>
+                      {authorizedPersons.length > 0 && (
                         <div className="flex flex-col gap-2">
-                          {child.pickupAuthorized.map((person) => (
-                            <Button
-                              key={person.id}
-                              variant="outline"
-                              className="flex items-center justify-between"
-                              onClick={() =>
-                                handlePickup(child.id, person.name, person.id, person.relation)
-                              }
-                              disabled={isSaving}
-                            >
-                              <div className="flex items-center gap-2">
-                                <User className="h-4 w-4" />
-                                <span>{person.name}</span>
-                                <span className="text-xs text-zinc-500">
-                                  ({person.relation})
-                                </span>
-                              </div>
-                              <CheckCircle className="h-4 w-4 text-sky-600" />
-                            </Button>
-                          ))}
+                          <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                            Upoważnione osoby:
+                          </p>
+                          <div className="flex flex-col gap-2">
+                            {authorizedPersons.map((person) => (
+                              <Button
+                                key={person.id}
+                                variant="outline"
+                                className="flex items-center justify-between"
+                                onClick={() =>
+                                  handlePickup(child.id, person.name, person.id, person.relation)
+                                }
+                                disabled={isSaving}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <User className="h-4 w-4" />
+                                  <span>{person.name}</span>
+                                  <span className="text-xs text-zinc-500">
+                                    ({person.relation})
+                                  </span>
+                                </div>
+                                <CheckCircle className="h-4 w-4 text-sky-600" />
+                              </Button>
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   )}
                 </div>
               );
             })}
+
+            {pendingPickups.length === 0 && (
+              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-8 text-center dark:border-zinc-700 dark:bg-zinc-800/50">
+                <p className="text-zinc-500 dark:text-zinc-400">
+                  Wszystkie dzieci zostały odebrane
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-sky-600" />
+            <CheckCircle className="h-5 w-5 text-green-600" />
             <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
               Odebrane ({completedPickups.length})
             </h3>
@@ -353,11 +388,11 @@ export default function PickupControl({ children }: PickupControlProps) {
               return (
                 <div
                   key={child.id}
-                  className="flex items-center justify-between rounded-xl border border-sky-200 bg-sky-50 p-4 dark:border-sky-800 dark:bg-sky-900/20"
+                  className="flex items-center justify-between rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20"
                 >
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5 text-sky-600" />
+                      <CheckCircle className="h-5 w-5 text-green-600" />
                       <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">
                         {child.name} {child.surname}
                       </h4>

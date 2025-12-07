@@ -88,7 +88,14 @@ export async function GET(req: Request) {
       orderBy: { date: "desc" },
       include: {
         child: {
-          select: { id: true, name: true, surname: true },
+          select: {
+            id: true,
+            name: true,
+            surname: true,
+            parent: {
+              select: { id: true, name: true, surname: true },
+            },
+          },
         },
       },
     });

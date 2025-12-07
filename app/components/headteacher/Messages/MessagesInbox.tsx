@@ -58,6 +58,7 @@ export default function MessagesInbox() {
 	const [sending, setSending] = useState(false);
 	const [viewMode, setViewMode] = useState<ViewMode>("inbox");
 	const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+	const [previousViewMode, setPreviousViewMode] = useState<"inbox" | "sent">("inbox");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [recipientFilter, setRecipientFilter] = useState<RecipientFilter>("all");
 
@@ -133,16 +134,18 @@ export default function MessagesInbox() {
 
 	const handleViewChange = (mode: "inbox" | "sent") => {
 		setViewMode(mode);
+		setPreviousViewMode(mode);
 		setSelectedMessage(null);
 		fetchMessages(mode);
 	};
 
-	const handleMessageClick = async (message: Message) => {
+	const handleMessageClick = async (message: Message, fromView: "inbox" | "sent") => {
 		setSelectedMessage(message);
+		setPreviousViewMode(fromView);
 		setViewMode("detail");
 
 		// Mark as read if viewing inbox message
-		if (!message.isRead && viewMode === "inbox") {
+		if (!message.isRead && fromView === "inbox") {
 			try {
 				await fetch(`/api/messages/${message.id}`, {
 					method: "PATCH",
@@ -337,7 +340,7 @@ export default function MessagesInbox() {
 
 	// Message Detail View
 	if (viewMode === "detail" && selectedMessage) {
-		const isInbox = selectedMessage.receiver.id !== selectedMessage.sender.id;
+		const isInbox = previousViewMode === "inbox";
 		const otherPerson = isInbox ? selectedMessage.sender : selectedMessage.receiver;
 
 		return (
@@ -466,7 +469,7 @@ export default function MessagesInbox() {
 						return (
 							<button
 								key={message.id}
-								onClick={() => handleMessageClick(message)}
+								onClick={() => handleMessageClick(message, viewMode as "inbox" | "sent")}
 								className={`flex items-start gap-4 rounded-xl border p-4 text-left transition-all hover:shadow-md ${
 									!message.isRead && isInbox
 										? "border-sky-200 bg-sky-50 dark:border-sky-800 dark:bg-sky-900/20"

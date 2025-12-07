@@ -32,18 +32,24 @@ interface GroupChildrenProps {
 export default function GroupChildren({ groupName = "Moja grupa" }: GroupChildrenProps) {
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
 
   const fetchChildren = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
       const res = await fetch("/api/groups/children");
-      if (!res.ok) throw new Error("Failed to fetch children");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Nie udało się pobrać danych dzieci");
+      }
       const data = await res.json();
       setChildren(data);
     } catch (err) {
       console.error("Error fetching children:", err);
+      setError(err instanceof Error ? err.message : "Wystąpił błąd podczas pobierania danych");
     } finally {
       setLoading(false);
     }
@@ -65,6 +71,53 @@ export default function GroupChildren({ groupName = "Moja grupa" }: GroupChildre
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-sky-600" />
           <span className="ml-2 text-zinc-600">Ładowanie danych grupy...</span>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    // Handle "no assigned group" as an informational message, not an error
+    if (error === "Brak przypisanej grupy") {
+      return (
+        <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex flex-col items-center justify-center gap-4 py-12">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+              <User className="h-8 w-8 text-zinc-400" />
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+                Brak przypisanej grupy
+              </h3>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-md">
+                Nie jesteś obecnie przypisany do żadnej grupy. Skontaktuj się z dyrektorem, aby zostać przypisanym do grupy.
+              </p>
+            </div>
+            <Button
+              onClick={fetchChildren}
+              variant="outline"
+              className="mt-2"
+            >
+              Odśwież
+            </Button>
+          </div>
+        </section>
+      );
+    }
+
+    // Other errors show as actual errors
+    return (
+      <section className="flex w-full flex-col gap-6 rounded-2xl border border-red-200 bg-red-50 px-6 py-6 shadow-sm dark:border-red-800 dark:bg-red-900/20">
+        <div className="flex flex-col items-center justify-center gap-4 py-8">
+          <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+          <p className="text-center text-red-600 dark:text-red-400">{error}</p>
+          <Button
+            onClick={fetchChildren}
+            variant="outline"
+            className="mt-2"
+          >
+            Spróbuj ponownie
+          </Button>
         </div>
       </section>
     );

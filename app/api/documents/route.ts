@@ -55,11 +55,15 @@ export async function GET(req: Request) {
 			where.status = normalizedStatus;
 		}
 
-		// Search filter
+		// Search filter - use AND to combine with status filter
 		if (search) {
-			where.OR = [
-				{ title: { contains: search, mode: "insensitive" } },
-				{ description: { contains: search, mode: "insensitive" } },
+			where.AND = [
+				{
+					OR: [
+						{ title: { contains: search, mode: "insensitive" } },
+						{ description: { contains: search, mode: "insensitive" } },
+					],
+				},
 			];
 		}
 
@@ -87,7 +91,10 @@ export async function POST(request: Request) {
 		const body = await request.json();
 		const { title, description, fileUrl, status } = body;
 
-		if (!title || !fileUrl) {
+		const trimmedTitle = title?.trim();
+		const trimmedFileUrl = fileUrl?.trim();
+
+		if (!trimmedTitle || !trimmedFileUrl) {
 			return NextResponse.json({ error: "Brak wymaganych pól" }, { status: 400 });
 		}
 
@@ -95,9 +102,9 @@ export async function POST(request: Request) {
 
 		const document = await prisma.document.create({
 			data: {
-				title: title.trim(),
+				title: trimmedTitle,
 				description: description?.trim() || null,
-				fileUrl: fileUrl.trim(),
+				fileUrl: trimmedFileUrl,
 				status: normalizedStatus,
 			},
 		});

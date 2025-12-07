@@ -71,6 +71,33 @@ export const ourFileRouter = {
         fileUrl: file.url 
       };
     }),
+
+  // FileRoute for document uploads (PDF, DOCX, etc.)
+  documentUploader: f({
+    pdf: { maxFileSize: "16MB", maxFileCount: 1 },
+    "application/msword": { maxFileSize: "16MB", maxFileCount: 1 },
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": { maxFileSize: "16MB", maxFileCount: 1 },
+    "application/vnd.ms-excel": { maxFileSize: "16MB", maxFileCount: 1 },
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": { maxFileSize: "16MB", maxFileCount: 1 },
+    "text/plain": { maxFileSize: "4MB", maxFileCount: 1 },
+  })
+    .middleware(async () => {
+      const user = await auth();
+      if (!user) throw new UploadThingError("Unauthorized");
+      if (user.role !== "HEADTEACHER" && user.role !== "ADMIN") {
+        throw new UploadThingError("Only administrators can upload documents");
+      }
+      return { userId: user.id };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log("Document upload complete for userId:", metadata.userId);
+      console.log("file url", file.url);
+      return { 
+        uploadedBy: metadata.userId,
+        fileUrl: file.url,
+        fileName: file.name,
+      };
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

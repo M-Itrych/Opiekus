@@ -76,7 +76,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, ageRange, maxCapacity, roomId } = body;
+    const { name, ageRange, maxCapacity, roomId, breakfastPrice, lunchPrice, snackPrice } = body;
 
     if (!name || !ageRange || !maxCapacity) {
       return NextResponse.json(
@@ -91,6 +91,9 @@ export async function POST(request: Request) {
         ageRange,
         maxCapacity: parseInt(maxCapacity),
         roomId: roomId || null,
+        breakfastPrice: breakfastPrice !== undefined ? parseFloat(breakfastPrice) : 5.0,
+        lunchPrice: lunchPrice !== undefined ? parseFloat(lunchPrice) : 12.0,
+        snackPrice: snackPrice !== undefined ? parseFloat(snackPrice) : 4.0,
       },
     });
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/session";
+import { DietType } from "@prisma/client";
 
 async function getAuthUser() {
 	const cookieStore = await cookies();
@@ -9,6 +10,8 @@ async function getAuthUser() {
 	if (!token) return null;
 	return await verifyToken(token);
 }
+
+const VALID_DIET_TYPES: DietType[] = ["STANDARD", "VEGETARIAN", "VEGAN", "GLUTEN_FREE", "LACTOSE_FREE", "CUSTOM"];
 
 export async function GET(
 	request: Request,
@@ -64,7 +67,7 @@ export async function PUT(
 
 		const { id } = await params;
 		const body = await request.json();
-		const { date, mealType, name, description, allergens, groupId } = body;
+		const { date, mealType, name, description, allergens, groupId, diet } = body;
 
 		const existingMeal = await prisma.mealPlan.findUnique({
 			where: { id },
@@ -83,6 +86,7 @@ export async function PUT(
 				...(description !== undefined && { description }),
 				...(allergens && { allergens }),
 				...(groupId !== undefined && { groupId }),
+				...(diet && VALID_DIET_TYPES.includes(diet) && { diet }),
 			},
 			include: {
 				group: {

@@ -14,6 +14,7 @@ import { usePathname } from "next/navigation";
 import BarChartOutlined from "@mui/icons-material/BarChartOutlined";
 import TaskOutlined from "@mui/icons-material/TaskOutlined";
 import CalendarMonthOutlined from "@mui/icons-material/CalendarMonthOutlined";
+import ReceiptOutlined from "@mui/icons-material/ReceiptOutlined";
 
 export default function Topbar() {
     const pathname = usePathname().toLowerCase();
@@ -73,6 +74,11 @@ export default function Topbar() {
             label: "Jadłospis",
             href: "/HeadTeacher/Menu",
             Icon: RestaurantMenuOutlined,
+        },
+        {
+            label: "Rozliczenia",
+            href: "/HeadTeacher/Settlements",
+            Icon: ReceiptOutlined,
         },
         {
             label: "Dokumenty",

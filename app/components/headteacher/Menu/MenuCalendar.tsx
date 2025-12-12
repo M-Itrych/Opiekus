@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, getDay } from "date-fns";
 import { pl } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Utensils, Coffee, Cookie, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Utensils, Coffee, Cookie, Loader2, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MealModal } from "./MealModal";
 
@@ -14,6 +14,7 @@ interface MealPlan {
 	name: string;
 	description: string | null;
 	allergens: string[];
+	diet?: string;
 	groupId: string | null;
 	group?: {
 		id: string;
@@ -245,6 +246,9 @@ export function MenuCalendar() {
 												>
 													<Icon className="h-3 w-3 shrink-0" />
 													<span className="truncate">{meal.name}</span>
+													{meal.diet && meal.diet !== "STANDARD" && (
+														<Leaf className="h-3 w-3 shrink-0 text-green-600" />
+													)}
 												</div>
 											);
 										})}

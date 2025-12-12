@@ -12,6 +12,9 @@ interface SessionPayload {
   surname: string;
 }
 
+const VALID_DIET_TYPES = ["STANDARD", "VEGETARIAN", "VEGAN", "GLUTEN_FREE", "LACTOSE_FREE", "CUSTOM"] as const;
+type DietType = typeof VALID_DIET_TYPES[number];
+
 async function getSessionUser(): Promise<SessionPayload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
@@ -216,6 +219,7 @@ export async function PATCH(
       address,
       city,
       postalCode,
+      diet
     } = body;
 
     if (pesel !== undefined && pesel !== null && pesel !== '' && !validatePesel(pesel)) {
@@ -291,6 +295,9 @@ export async function PATCH(
       if (address !== undefined) updateData.address = address?.trim() || null;
       if (city !== undefined) updateData.city = city?.trim() || null;
       if (postalCode !== undefined) updateData.postalCode = postalCode ? formatPostalCode(postalCode.trim()) : null;
+      if (diet !== undefined && VALID_DIET_TYPES.includes(diet as DietType)) {
+        updateData.diet = diet;
+      }
     } else if (payload.role === "HEADTEACHER" || payload.role === "ADMIN") {
       if (name !== undefined) updateData.name = name.trim();
       if (surname !== undefined) updateData.surname = surname.trim();
@@ -309,6 +316,9 @@ export async function PATCH(
       if (address !== undefined) updateData.address = address?.trim() || null;
       if (city !== undefined) updateData.city = city?.trim() || null;
       if (postalCode !== undefined) updateData.postalCode = postalCode ? formatPostalCode(postalCode.trim()) : null;
+      if (diet !== undefined && VALID_DIET_TYPES.includes(diet as DietType)) {
+        updateData.diet = diet;
+      }
     } else {
       return NextResponse.json({ error: "Brak uprawnień" }, { status: 403 });
     }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/session";
+import { DietType, Prisma } from "@prisma/client";
 
 async function getAuthUser() {
 	const cookieStore = await cookies();
@@ -9,6 +10,8 @@ async function getAuthUser() {
 	if (!token) return null;
 	return await verifyToken(token);
 }
+
+const VALID_DIET_TYPES: DietType[] = ["STANDARD", "VEGETARIAN", "VEGAN", "GLUTEN_FREE", "LACTOSE_FREE", "CUSTOM"];
 
 export async function GET(request: Request) {
 	try {
@@ -22,24 +25,29 @@ export async function GET(request: Request) {
 		const month = searchParams.get("month");
 		const year = searchParams.get("year");
 		const groupId = searchParams.get("groupId");
+		const diet = searchParams.get("diet");
 
-		let dateFilter = {};
+		const where: Prisma.MealPlanWhereInput = {};
+
 		if (month && year) {
 			const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
 			const endDate = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59);
-			dateFilter = {
-				date: {
-					gte: startDate,
-					lte: endDate,
-				},
+			where.date = {
+				gte: startDate,
+				lte: endDate,
 			};
 		}
 
+		if (groupId) {
+			where.groupId = groupId;
+		}
+
+		if (diet && VALID_DIET_TYPES.includes(diet as DietType)) {
+			where.diet = diet as DietType;
+		}
+
 		const meals = await prisma.mealPlan.findMany({
-			where: {
-				...dateFilter,
-				...(groupId ? { groupId } : {}),
-			},
+			where,
 			include: {
 				group: {
 					select: {
@@ -72,13 +80,32 @@ export async function POST(request: Request) {
 		}
 
 		const body = await request.json();
-		const { date, mealType, name, description, allergens, groupId } = body;
+		const { date, mealType, name, description, allergens, groupId, diet } = body;
 
 		if (!date || !mealType || !name) {
 			return NextResponse.json(
 				{ error: "Data, typ posiłku i nazwa są wymagane" },
 				{ status: 400 }
 			);
+		}
+
+		// Check for diet conflicts if groupId is specified
+		if (groupId) {
+			const childrenWithSpecialDiets = await prisma.child.findMany({
+				where: {
+					groupId,
+					diet: { not: "STANDARD" }
+				},
+				select: { diet: true }
+			});
+
+			if (childrenWithSpecialDiets.length > 0 && (!diet || diet === "STANDARD")) {
+				const uniqueDiets = [...new Set(childrenWithSpecialDiets.map(c => c.diet))];
+				return NextResponse.json({
+					warning: `W grupie są dzieci z dietami specjalnymi: ${uniqueDiets.join(", ")}. Rozważ dodanie wariantów posiłku.`,
+					dietsInGroup: uniqueDiets
+				}, { status: 200 });
+			}
 		}
 
 		const meal = await prisma.mealPlan.create({
@@ -89,6 +116,7 @@ export async function POST(request: Request) {
 				description: description || null,
 				allergens: allergens || [],
 				groupId: groupId || null,
+				diet: diet && VALID_DIET_TYPES.includes(diet) ? diet : "STANDARD",
 			},
 			include: {
 				group: {

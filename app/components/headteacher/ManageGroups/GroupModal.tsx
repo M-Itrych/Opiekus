@@ -11,7 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserPlus, UserMinus, Loader2, X } from "lucide-react";
+import { UserPlus, UserMinus, Loader2, X, Edit, Leaf } from "lucide-react";
+import { ChildEditModal } from "./ChildEditModal";
 
 interface GroupModalProps {
   groupId?: string | null;
@@ -24,6 +25,7 @@ interface Child {
   id: string;
   name: string;
   surname: string;
+  diet?: string;
 }
 
 interface Staff {
@@ -42,6 +44,9 @@ interface GroupDetails {
   children: Child[];
   staff: Staff[];
   roomId: string | null;
+  breakfastPrice: number;
+  lunchPrice: number;
+  snackPrice: number;
 }
 
 export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalProps) {
@@ -53,6 +58,9 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
   const [ageRange, setAgeRange] = useState("");
   const [maxCapacity, setMaxCapacity] = useState("25");
   const [roomId, setRoomId] = useState<string | null>(null);
+  const [breakfastPrice, setBreakfastPrice] = useState("5.00");
+  const [lunchPrice, setLunchPrice] = useState("12.00");
+  const [snackPrice, setSnackPrice] = useState("4.00");
 
 
   const [groupChildren, setGroupChildren] = useState<Child[]>([]);
@@ -64,6 +72,7 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
 
   const [selectedChildToAdd, setSelectedChildToAdd] = useState<string>("");
   const [selectedTeacherToAdd, setSelectedTeacherToAdd] = useState<string>("");
+  const [editingChildId, setEditingChildId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -80,6 +89,9 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
     setAgeRange("");
     setMaxCapacity("25");
     setRoomId(null);
+    setBreakfastPrice("5.00");
+    setLunchPrice("12.00");
+    setSnackPrice("4.00");
     setGroupChildren([]);
     setGroupStaff([]);
     setActiveTab("details");
@@ -118,6 +130,9 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
       setAgeRange(data.ageRange);
       setMaxCapacity(data.maxCapacity.toString());
       setRoomId(data.roomId);
+      setBreakfastPrice(data.breakfastPrice?.toFixed(2) || "5.00");
+      setLunchPrice(data.lunchPrice?.toFixed(2) || "12.00");
+      setSnackPrice(data.snackPrice?.toFixed(2) || "4.00");
       setGroupChildren(data.children);
       setGroupStaff(data.staff);
     } catch (error) {
@@ -134,7 +149,10 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
         name,
         ageRange,
         maxCapacity: parseInt(maxCapacity),
-        roomId
+        roomId,
+        breakfastPrice: parseFloat(breakfastPrice),
+        lunchPrice: parseFloat(lunchPrice),
+        snackPrice: parseFloat(snackPrice),
       };
 
       const url = groupId ? `/api/groups/${groupId}` : "/api/groups";
@@ -253,9 +271,22 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
     }
   };
 
+  const handleChildEditSuccess = () => {
+    if (groupId) {
+      fetchGroupDetails(groupId);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
+    <>
+    <ChildEditModal
+      childId={editingChildId}
+      isOpen={!!editingChildId}
+      onClose={() => setEditingChildId(null)}
+      onSuccess={handleChildEditSuccess}
+    />
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         
@@ -364,6 +395,45 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div className="border-t dark:border-zinc-700 pt-4 mt-4">
+                    <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">Ceny posiłków (PLN)</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="breakfastPrice">Śniadanie</Label>
+                        <Input
+                          id="breakfastPrice"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={breakfastPrice}
+                          onChange={(e) => setBreakfastPrice(e.target.value)}
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="lunchPrice">Obiad</Label>
+                        <Input
+                          id="lunchPrice"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={lunchPrice}
+                          onChange={(e) => setLunchPrice(e.target.value)}
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="snackPrice">Podwieczorek</Label>
+                        <Input
+                          id="snackPrice"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={snackPrice}
+                          onChange={(e) => setSnackPrice(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
                   
                   <div className="pt-4 flex justify-end border-t dark:border-zinc-800 mt-4">
                     <Button onClick={handleSaveDetails} disabled={isSaving} className="bg-sky-500 hover:bg-sky-600 text-white">
@@ -404,8 +474,27 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
                     <div className="max-h-[300px] overflow-y-auto p-2 space-y-1">
                       {groupChildren.map((child) => (
                         <div key={child.id} className="flex items-center justify-between p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md text-sm transition-colors">
-                          <span className="font-medium">{child.surname} {child.name}</span>
                           <div className="flex items-center gap-2">
+                            <span className="font-medium">{child.surname} {child.name}</span>
+                            {child.diet && child.diet !== "STANDARD" && (
+                              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700">
+                                <Leaf className="h-3 w-3" />
+                                {child.diet === "VEGETARIAN" ? "Wege" : 
+                                 child.diet === "VEGAN" ? "Vegan" :
+                                 child.diet === "GLUTEN_FREE" ? "Bezglut." :
+                                 child.diet === "LACTOSE_FREE" ? "Bez lakt." : "Inna"}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                              onClick={() => setEditingChildId(child.id)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
                              <Select onValueChange={(val) => handleMoveChild(child.id, val)}>
                               <SelectTrigger className="h-8 w-[140px] text-xs">
                                  <SelectValue placeholder="Przenieś do..." />
@@ -485,5 +574,6 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/session";
 import { validatePesel, calculateAge, formatPostalCode } from "@/lib/utils";
+import { Prisma } from "@prisma/client";
 
 interface SessionPayload {
   id: string;
@@ -11,6 +12,9 @@ interface SessionPayload {
   name: string;
   surname: string;
 }
+
+const VALID_DIET_TYPES = ["STANDARD", "VEGETARIAN", "VEGAN", "GLUTEN_FREE", "LACTOSE_FREE", "CUSTOM"] as const;
+type DietType = typeof VALID_DIET_TYPES[number];
 
 async function getSessionUser(): Promise<SessionPayload | null> {
   const cookieStore = await cookies();
@@ -119,6 +123,7 @@ export async function POST(req: Request) {
       address,
       city,
       postalCode,
+      diet,
     } = body;
     let { parentId, groupId } = body;
 
@@ -225,7 +230,8 @@ export async function POST(req: Request) {
         address: address?.trim() || null,
         city: city?.trim() || null,
         postalCode: postalCode ? formatPostalCode(postalCode.trim()) : null,
-      },
+        diet: (diet && VALID_DIET_TYPES.includes(diet as DietType)) ? diet : "STANDARD",
+      } as Prisma.ChildUncheckedCreateInput,
       include: {
         parent: {
           select: {

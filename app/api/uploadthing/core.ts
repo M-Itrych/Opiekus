@@ -34,6 +34,35 @@ const auth = async () => {
   }
 };
 
+const authWithParent = async () => {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("session")?.value;
+
+    if (!token) {
+      return null;
+    }
+
+    const payload = await verifyToken(token);
+    
+    if (!payload) {
+      return null;
+    }
+
+    const userRole = payload.role as string;
+    const userId = payload.id as string;
+
+    if (!["HEADTEACHER", "ADMIN", "TEACHER", "PARENT"].includes(userRole)) {
+      return null;
+    }
+
+    return { id: userId, role: userRole };
+  } catch (error) {
+    console.error("Auth error:", error);
+    return null;
+  }
+};
+
 export const ourFileRouter = {
   imageUploader: f({
     image: {
@@ -81,6 +110,25 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       console.log("Document upload complete for userId:", metadata.userId);
+      console.log("file url", file.url);
+      return { 
+        uploadedBy: metadata.userId,
+        fileUrl: file.url,
+        fileName: file.name,
+      };
+    }),
+
+  medicalDocumentUploader: f({
+    pdf: { maxFileSize: "10MB", maxFileCount: 1 },
+    image: { maxFileSize: "5MB", maxFileCount: 1 },
+  })
+    .middleware(async () => {
+      const user = await authWithParent();
+      if (!user) throw new UploadThingError("Unauthorized");
+      return { userId: user.id, role: user.role };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log("Medical document upload complete for userId:", metadata.userId);
       console.log("file url", file.url);
       return { 
         uploadedBy: metadata.userId,

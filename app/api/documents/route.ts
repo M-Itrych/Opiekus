@@ -79,7 +79,7 @@ export async function GET(req: Request) {
 						},
 					},
 				},
-			} as any,
+			},
 		});
 
 		return NextResponse.json(documents);
@@ -130,11 +130,11 @@ export async function POST(request: Request) {
 						},
 					},
 				},
-			} as any,
+			},
 		});
 
 		if (groupIdsArray.length > 0) {
-			await (prisma as any).documentGroup.createMany({
+			await prisma.documentGroup.createMany({
 				data: groupIdsArray.map((groupId: string) => ({
 					documentId: document.id,
 					groupId: groupId.trim(),
@@ -154,7 +154,7 @@ export async function POST(request: Request) {
 							},
 						},
 					},
-				} as any,
+				},
 			});
 
 			return NextResponse.json(documentWithGroups, { status: 201 });

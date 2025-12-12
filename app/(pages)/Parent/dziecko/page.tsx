@@ -5,6 +5,11 @@ import { Edit, Save, Cancel, Download, Add, Person } from '@mui/icons-material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { Loader2, FileText } from 'lucide-react';
+import MedicalDocumentsSection from '@/app/components/parent/MedicalDocuments/MedicalDocumentsSection';
+import ChronicDiseasesSection from '@/app/components/parent/ChronicDiseases/ChronicDiseasesSection';
+import MedicationsSection from '@/app/components/parent/Medications/MedicationsSection';
+import RecommendationsSection from '@/app/components/parent/Recommendations/RecommendationsSection';
+import BehavioralInfoSection from '@/app/components/parent/BehavioralInfo/BehavioralInfoSection';
 
 interface Child {
   id: string;
@@ -15,6 +20,11 @@ interface Child {
   hasDataConsent: boolean;
   allergies: string[];
   specialNeeds: string | null;
+  pesel: string | null;
+  birthDate: string | null;
+  address: string | null;
+  city: string | null;
+  postalCode: string | null;
   group: {
     id: string;
     name: string;
@@ -38,6 +48,11 @@ interface ChildFormData {
   specialNeeds: string;
   hasImageConsent: boolean;
   hasDataConsent: boolean;
+  pesel: string;
+  birthDate: string;
+  address: string;
+  city: string;
+  postalCode: string;
 }
 
 const emptyFormData: ChildFormData = {
@@ -48,6 +63,11 @@ const emptyFormData: ChildFormData = {
   specialNeeds: '',
   hasImageConsent: false,
   hasDataConsent: false,
+  pesel: '',
+  birthDate: '',
+  address: '',
+  city: '',
+  postalCode: '',
 };
 
 export default function DzieckoPage() {
@@ -114,6 +134,11 @@ export default function DzieckoPage() {
         specialNeeds: selectedChild.specialNeeds || '',
         hasImageConsent: selectedChild.hasImageConsent,
         hasDataConsent: selectedChild.hasDataConsent,
+        pesel: selectedChild.pesel || '',
+        birthDate: selectedChild.birthDate ? selectedChild.birthDate.split('T')[0] : '',
+        address: selectedChild.address || '',
+        city: selectedChild.city || '',
+        postalCode: selectedChild.postalCode || '',
       });
       setIsEditing(true);
     }
@@ -130,11 +155,16 @@ export default function DzieckoPage() {
         body: JSON.stringify({
           name: formData.name.trim(),
           surname: formData.surname.trim(),
-          age: parseInt(formData.age),
+          age: formData.birthDate ? undefined : parseInt(formData.age),
           allergies: formData.allergies.split(',').map(a => a.trim()).filter(Boolean),
           specialNeeds: formData.specialNeeds.trim() || null,
           hasImageConsent: formData.hasImageConsent,
           hasDataConsent: formData.hasDataConsent,
+          pesel: formData.pesel.trim() || null,
+          birthDate: formData.birthDate || null,
+          address: formData.address.trim() || null,
+          city: formData.city.trim() || null,
+          postalCode: formData.postalCode.trim() || null,
         }),
       });
 
@@ -165,8 +195,8 @@ export default function DzieckoPage() {
   };
 
   const handleAddChild = async () => {
-    if (!formData.name || !formData.surname || !formData.age) {
-      setError('Imię, nazwisko i wiek są wymagane');
+    if (!formData.name || !formData.surname || !formData.birthDate) {
+      setError('Imię, nazwisko i data urodzenia są wymagane');
       return;
     }
 
@@ -178,11 +208,15 @@ export default function DzieckoPage() {
         body: JSON.stringify({
           name: formData.name.trim(),
           surname: formData.surname.trim(),
-          age: parseInt(formData.age),
+          birthDate: formData.birthDate,
           allergies: formData.allergies.split(',').map(a => a.trim()).filter(Boolean),
           specialNeeds: formData.specialNeeds.trim() || null,
           hasImageConsent: formData.hasImageConsent,
           hasDataConsent: formData.hasDataConsent,
+          pesel: formData.pesel.trim() || null,
+          address: formData.address.trim() || null,
+          city: formData.city.trim() || null,
+          postalCode: formData.postalCode.trim() || null,
         }),
       });
 
@@ -203,8 +237,25 @@ export default function DzieckoPage() {
     }
   };
 
+  const formatPostalCode = (value: string): string => {
+    // Usuń wszystkie znaki niebędące cyframi
+    const digits = value.replace(/\D/g, '');
+    
+    // Jeśli są 2 lub więcej cyfr, dodaj myślnik po 2 cyfrach
+    if (digits.length >= 2) {
+      return `${digits.slice(0, 2)}-${digits.slice(2, 5)}`;
+    }
+    
+    return digits;
+  };
+
   const handleInputChange = (field: keyof ChildFormData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handlePostalCodeChange = (value: string) => {
+    const formatted = formatPostalCode(value);
+    handleInputChange('postalCode', formatted);
   };
 
   if (isLoading) {
@@ -315,15 +366,68 @@ export default function DzieckoPage() {
 
             <div className="bg-white p-4 rounded-lg border border-gray-200">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Wiek *
+                Data urodzenia *
               </label>
               <input
-                type="number"
-                value={formData.age}
-                onChange={(e) => handleInputChange('age', e.target.value)}
+                type="date"
+                value={formData.birthDate}
+                onChange={(e) => handleInputChange('birthDate', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-                min="0"
-                max="18"
+              />
+            </div>
+
+            <div className="bg-white p-4 rounded-lg border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                PESEL
+              </label>
+              <input
+                type="text"
+                value={formData.pesel}
+                onChange={(e) => handleInputChange('pesel', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                placeholder="00000000000"
+                maxLength={11}
+              />
+            </div>
+
+            <div className="bg-white p-4 rounded-lg border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Adres zamieszkania
+              </label>
+              <input
+                type="text"
+                value={formData.address}
+                onChange={(e) => handleInputChange('address', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                placeholder="ul. Przykładowa 1/2"
+              />
+            </div>
+
+            <div className="bg-white p-4 rounded-lg border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Miasto
+              </label>
+              <input
+                type="text"
+                value={formData.city}
+                onChange={(e) => handleInputChange('city', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                placeholder="Warszawa"
+              />
+            </div>
+
+            <div className="bg-white p-4 rounded-lg border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Kod pocztowy
+              </label>
+              <input
+                type="text"
+                value={formData.postalCode}
+                onChange={(e) => handlePostalCodeChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                placeholder="00-000"
+                maxLength={6}
+                pattern="[0-9]{2}-[0-9]{3}"
               />
             </div>
 
@@ -384,8 +488,7 @@ export default function DzieckoPage() {
             </div>
           </div>
           <p className="mt-4 text-sm text-gray-500">
-            * Pola wymagane. Grupa zostanie przydzielona przez dyrektora przedszkola.
-          </p>
+            * Pola wymagane. Grupa zostanie przydzielona przez dyrektora przedszkola.</p>
         </div>
       )}
 
@@ -460,19 +563,46 @@ export default function DzieckoPage() {
 
             <div className="bg-white p-4 rounded-lg border border-gray-200">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Wiek
+                Data urodzenia
               </label>
               {isEditing ? (
                 <input
-                  type="number"
-                  value={formData.age}
-                  onChange={(e) => handleInputChange('age', e.target.value)}
+                  type="date"
+                  value={formData.birthDate}
+                  onChange={(e) => handleInputChange('birthDate', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-                  min="0"
-                  max="18"
                 />
               ) : (
-                <p className="text-gray-900">{selectedChild.age}</p>
+                <p className="text-gray-900">
+                  {selectedChild.birthDate 
+                    ? new Date(selectedChild.birthDate).toLocaleDateString('pl-PL')
+                    : 'Nie podano'}
+                </p>
+              )}
+            </div>
+
+            <div className="bg-white p-4 rounded-lg border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Wiek
+              </label>
+              <p className="text-gray-900">{selectedChild.age} lat</p>
+            </div>
+
+            <div className="bg-white p-4 rounded-lg border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                PESEL
+              </label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={formData.pesel}
+                  onChange={(e) => handleInputChange('pesel', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  placeholder="00000000000"
+                  maxLength={11}
+                />
+              ) : (
+                <p className="text-gray-900">{selectedChild.pesel || 'Nie podano'}</p>
               )}
             </div>
 
@@ -483,6 +613,58 @@ export default function DzieckoPage() {
               <p className="text-gray-900">
                 {selectedChild.group?.name || 'Nieprzypisana (oczekuje na decyzję dyrektora)'}
               </p>
+            </div>
+
+            <div className="bg-white p-4 rounded-lg border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Adres zamieszkania
+              </label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={formData.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  placeholder="ul. Przykładowa 1/2"
+                />
+              ) : (
+                <p className="text-gray-900">{selectedChild.address || 'Nie podano'}</p>
+              )}
+            </div>
+
+            <div className="bg-white p-4 rounded-lg border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Miasto
+              </label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={formData.city}
+                  onChange={(e) => handleInputChange('city', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  placeholder="Warszawa"
+                />
+              ) : (
+                <p className="text-gray-900">{selectedChild.city || 'Nie podano'}</p>
+              )}
+            </div>
+
+            <div className="bg-white p-4 rounded-lg border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Kod pocztowy
+              </label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={formData.postalCode}
+                  onChange={(e) => handlePostalCodeChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  placeholder="00-000"
+                  maxLength={6}
+                />
+              ) : (
+                <p className="text-gray-900">{selectedChild.postalCode || 'Nie podano'}</p>
+              )}
             </div>
             
             <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -677,6 +859,25 @@ export default function DzieckoPage() {
               ))}
             </ul>
           )}
+        </div>
+      )}
+
+      {/* Sekcje medyczne i behawioralne */}
+      {selectedChild && !isAddingChild && !isEditing && (
+        <div className="mt-8 space-y-6">
+          <h2 className="text-xl font-bold text-gray-800">Dane medyczne i behawioralne</h2>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <MedicalDocumentsSection childId={selectedChild.id} canEdit={true} />
+            <ChronicDiseasesSection childId={selectedChild.id} canEdit={true} />
+          </div>
+          
+          <MedicationsSection childId={selectedChild.id} canEdit={true} />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <RecommendationsSection childId={selectedChild.id} canEdit={false} userRole="PARENT" />
+            <BehavioralInfoSection childId={selectedChild.id} canEdit={false} userRole="PARENT" />
+          </div>
         </div>
       )}
     </div>

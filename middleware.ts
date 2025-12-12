@@ -37,6 +37,9 @@ export async function middleware(request: NextRequest) {
 		'/next.svg',
 		'/vercel.svg',
 		'/window.svg',
+		'/manifest.webmanifest',  // PWA manifest
+		'/sw.js',  // Service Worker
+		'/global',  // Public assets (logo, icons)
 	];
 
 	// Case insensitive check for paths starting with public paths
@@ -44,7 +47,7 @@ export async function middleware(request: NextRequest) {
 		pathname.toLowerCase().startsWith(path.toLowerCase())
 	);
 	
-	const isStaticFile = pathname.match(/\.(ico|svg|png|jpg|jpeg|css|js)$/);
+	const isStaticFile = pathname.match(/\.(ico|svg|png|jpg|jpeg|css|js|webmanifest|json)$/);
 
 	if (isPublicPath || isStaticFile) {
 		return NextResponse.next();

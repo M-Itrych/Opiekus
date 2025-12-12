@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/session";
+import { validatePesel, calculateAge, formatPostalCode } from "@/lib/utils";
 
 interface SessionPayload {
   id: string;
@@ -113,6 +114,11 @@ export async function POST(req: Request) {
       hasDataConsent,
       allergies,
       specialNeeds,
+      pesel,
+      birthDate,
+      address,
+      city,
+      postalCode,
     } = body;
     let { parentId, groupId } = body;
 
@@ -120,9 +126,41 @@ export async function POST(req: Request) {
       parentId = user.id;
       groupId = null;
     }
-    if (!name || !surname || age === undefined || !parentId) {
+
+    // Walidacja PESEL jeśli podany
+    if (pesel && !validatePesel(pesel)) {
       return NextResponse.json(
-        { error: "Imię, nazwisko i wiek są wymagane" },
+        { error: "Nieprawidłowy numer PESEL" },
+        { status: 400 }
+      );
+    }
+
+    // Sprawdź czy PESEL nie jest już używany
+    if (pesel) {
+      const existingChild = await prisma.child.findUnique({
+        where: { pesel },
+        select: { id: true },
+      });
+      if (existingChild) {
+        return NextResponse.json(
+          { error: "Dziecko z tym numerem PESEL już istnieje w systemie" },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Oblicz wiek z daty urodzenia lub użyj podanego wieku
+    let calculatedAge = age !== undefined ? parseInt(age) : 0;
+    if (birthDate) {
+      const parsedBirthDate = new Date(birthDate);
+      if (!isNaN(parsedBirthDate.getTime())) {
+        calculatedAge = calculateAge(parsedBirthDate);
+      }
+    }
+
+    if (!name || !surname || (age === undefined && !birthDate) || !parentId) {
+      return NextResponse.json(
+        { error: "Imię, nazwisko i data urodzenia (lub wiek) są wymagane" },
         { status: 400 }
       );
     }
@@ -166,13 +204,18 @@ export async function POST(req: Request) {
       data: {
         name: name.trim(),
         surname: surname.trim(),
-        age: parseInt(age),
+        age: calculatedAge,
         parentId,
         groupId: groupId || null,
         hasImageConsent: hasImageConsent ?? false,
         hasDataConsent: hasDataConsent ?? false,
         allergies: allergies || [],
         specialNeeds: specialNeeds || null,
+        pesel: pesel?.trim() || null,
+        birthDate: birthDate ? new Date(birthDate) : null,
+        address: address?.trim() || null,
+        city: city?.trim() || null,
+        postalCode: postalCode ? formatPostalCode(postalCode.trim()) : null,
       },
       include: {
         parent: {

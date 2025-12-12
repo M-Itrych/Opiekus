@@ -44,7 +44,6 @@ export default function BehavioralInfoSection({
     date: new Date().toISOString().split('T')[0],
   });
 
-  // Only TEACHER, HEADTEACHER, and ADMIN can add/edit behavioral info
   const canManage = ['TEACHER', 'HEADTEACHER', 'ADMIN'].includes(userRole);
 
   const fetchBehavioralInfos = useCallback(async () => {

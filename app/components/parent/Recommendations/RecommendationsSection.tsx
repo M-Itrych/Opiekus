@@ -47,7 +47,6 @@ export default function RecommendationsSection({
     date: new Date().toISOString().split('T')[0],
   });
 
-  // Only TEACHER, HEADTEACHER, and ADMIN can add/edit recommendations
   const canManage = ['TEACHER', 'HEADTEACHER', 'ADMIN'].includes(userRole);
 
   const fetchRecommendations = useCallback(async () => {

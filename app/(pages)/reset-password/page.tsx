@@ -59,7 +59,6 @@ function ResetPasswordContent() {
 
       setSuccess(true);
       
-      // Przekieruj do logowania po 3 sekundach
       setTimeout(() => {
         router.push("/Login");
       }, 3000);

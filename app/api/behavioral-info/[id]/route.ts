@@ -36,7 +36,6 @@ async function verifyAccessToBehavioralInfo(
       where: { id: info.childId, groupId: staff.groupId },
     });
     const canRead = !!child;
-    // Teacher can only modify their own entries
     const canModify = canRead && info.authorId === user.id;
     return { canRead, canModify };
   }
@@ -45,7 +44,6 @@ async function verifyAccessToBehavioralInfo(
     const child = await prisma.child.findFirst({
       where: { id: info.childId, parentId: user.id },
     });
-    // Parents can only read behavioral info, not modify them
     return { canRead: !!child, canModify: false };
   }
 

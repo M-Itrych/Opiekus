@@ -72,7 +72,6 @@ function LoginContent() {
       setForgotPasswordMessage(data.message || "Jeśli podany email istnieje w systemie, wysłano instrukcje resetowania hasła");
       setForgotPasswordEmail("");
       
-      // Zamknij modal po 3 sekundach
       setTimeout(() => {
         setShowForgotPassword(false);
         setForgotPasswordMessage("");

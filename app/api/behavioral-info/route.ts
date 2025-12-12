@@ -127,7 +127,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Nieautoryzowany dostęp" }, { status: 401 });
     }
 
-    // Only TEACHER, HEADTEACHER and ADMIN can create behavioral info
     if (!["TEACHER", "HEADTEACHER", "ADMIN"].includes(user.role)) {
       return NextResponse.json({ error: "Brak uprawnień do dodawania informacji behawioralnych" }, { status: 403 });
     }

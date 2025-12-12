@@ -161,7 +161,7 @@ export async function POST(request: Request) {
     }
 
     let parsedExpiryDate: Date | null = null;
-    if (expiryDate && expiryDate.trim() !== '') {
+    if (expiryDate && (typeof expiryDate === 'string' ? expiryDate.trim() !== '' : expiryDate)) {
       parsedExpiryDate = new Date(expiryDate);
       if (Number.isNaN(parsedExpiryDate.getTime())) {
         return NextResponse.json({ error: "Nieprawidłowa data wygaśnięcia" }, { status: 400 });

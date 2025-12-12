@@ -5,10 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/**
- * Walidacja numeru PESEL
- * Sprawdza długość (11 znaków), czy zawiera tylko cyfry oraz sumę kontrolną
- */
+
 export function validatePesel(pesel: string): boolean {
   if (!pesel || pesel.length !== 11) return false;
   if (!/^\d{11}$/.test(pesel)) return false;
@@ -24,9 +21,6 @@ export function validatePesel(pesel: string): boolean {
   return checkDigit === parseInt(pesel[10]);
 }
 
-/**
- * Obliczanie wieku na podstawie daty urodzenia
- */
 export function calculateAge(birthDate: Date): number {
   const today = new Date();
   let age = today.getFullYear() - birthDate.getFullYear();
@@ -39,25 +33,17 @@ export function calculateAge(birthDate: Date): number {
   return age;
 }
 
-/**
- * Maskowanie numeru PESEL dla bezpieczeństwa
- * Format: XXX-XXX-XX-123 (pokazuje tylko ostatnie 3 cyfry)
- */
+
 export function formatPeselMasked(pesel: string): string {
   if (!pesel || pesel.length !== 11) return pesel;
   return `XXX-XXX-XX-${pesel.slice(-3)}`;
 }
 
-/**
- * Walidacja kodu pocztowego (format XX-XXX)
- */
+
 export function validatePostalCode(postalCode: string): boolean {
   return /^\d{2}-\d{3}$/.test(postalCode);
 }
 
-/**
- * Formatowanie kodu pocztowego (dodaje myślnik jeśli brak)
- */
 export function formatPostalCode(postalCode: string): string {
   const digits = postalCode.replace(/\D/g, '');
   if (digits.length === 5) {

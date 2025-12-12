@@ -149,13 +149,26 @@ export default function DzieckoPage() {
     
     try {
       setIsSaving(true);
+      
+      let ageValue: number | undefined;
+      if (formData.birthDate && formData.birthDate.trim() !== '') {
+        ageValue = undefined;
+      } else {
+        const parsedAge = parseInt(formData.age);
+        if (!isNaN(parsedAge) && parsedAge > 0) {
+          ageValue = parsedAge;
+        } else {
+          ageValue = selectedChild.age;
+        }
+      }
+      
       const response = await fetch(`/api/children/${selectedChild.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name.trim(),
           surname: formData.surname.trim(),
-          age: formData.birthDate ? undefined : parseInt(formData.age),
+          age: ageValue,
           allergies: formData.allergies.split(',').map(a => a.trim()).filter(Boolean),
           specialNeeds: formData.specialNeeds.trim() || null,
           hasImageConsent: formData.hasImageConsent,
@@ -238,15 +251,13 @@ export default function DzieckoPage() {
   };
 
   const formatPostalCode = (value: string): string => {
-    // Usuń wszystkie znaki niebędące cyframi
     const digits = value.replace(/\D/g, '');
     
-    // Jeśli są 2 lub więcej cyfr, dodaj myślnik po 2 cyfrach
-    if (digits.length >= 2) {
-      return `${digits.slice(0, 2)}-${digits.slice(2, 5)}`;
+    if (digits.length === 5) {
+      return `${digits.slice(0, 2)}-${digits.slice(2)}`;
     }
     
-    return digits;
+    return value;
   };
 
   const handleInputChange = (field: keyof ChildFormData, value: string | boolean) => {

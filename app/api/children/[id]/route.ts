@@ -36,8 +36,6 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const includeParam = searchParams.get("include");
     const includes = includeParam ? includeParam.split(",") : [];
-
-    // Build dynamic include object based on query params
     const includeConfig: Record<string, unknown> = {
       parent: {
         select: {
@@ -66,7 +64,6 @@ export async function GET(
       },
     };
 
-    // Optional includes for medical/behavioral data
     if (includes.includes("medicalDocuments")) {
       includeConfig.medicalDocuments = {
         orderBy: { uploadDate: "desc" },
@@ -107,7 +104,6 @@ export async function GET(
       };
     }
 
-    // Include all medical data at once
     if (includes.includes("medical")) {
       includeConfig.medicalDocuments = {
         orderBy: { uploadDate: "desc" },
@@ -222,7 +218,6 @@ export async function PATCH(
       postalCode,
     } = body;
 
-    // Walidacja PESEL jeśli podany
     if (pesel !== undefined && pesel !== null && pesel !== '' && !validatePesel(pesel)) {
       return NextResponse.json(
         { error: "Nieprawidłowy numer PESEL" },
@@ -230,7 +225,6 @@ export async function PATCH(
       );
     }
 
-    // Sprawdź czy PESEL nie jest już używany przez inne dziecko
     if (pesel) {
       const existingChildWithPesel = await prisma.child.findUnique({
         where: { pesel },
@@ -246,16 +240,33 @@ export async function PATCH(
 
     const updateData: Record<string, unknown> = {};
 
-    // Oblicz wiek z daty urodzenia jeśli podana
+    let birthDateProvided = false;
     if (birthDate !== undefined) {
-      if (birthDate) {
+      if (birthDate && (typeof birthDate === 'string' ? birthDate.trim() !== '' : birthDate)) {
         const parsedBirthDate = new Date(birthDate);
-        if (!isNaN(parsedBirthDate.getTime())) {
-          updateData.birthDate = parsedBirthDate;
-          updateData.age = calculateAge(parsedBirthDate);
+        if (isNaN(parsedBirthDate.getTime())) {
+          return NextResponse.json(
+            { error: "Nieprawidłowa data urodzenia" },
+            { status: 400 }
+          );
         }
+        if (parsedBirthDate.getFullYear() > 9999) {
+          return NextResponse.json(
+            { error: "Rok daty urodzenia nie może przekraczać 9999" },
+            { status: 400 }
+          );
+        }
+        updateData.birthDate = parsedBirthDate;
+        updateData.age = calculateAge(parsedBirthDate);
+        birthDateProvided = true;
       } else {
         updateData.birthDate = null;
+        if (age !== undefined) {
+          const parsedAge = parseInt(age);
+          if (!isNaN(parsedAge) && parsedAge > 0) {
+            updateData.age = parsedAge;
+          }
+        }
       }
     }
 
@@ -266,7 +277,12 @@ export async function PATCH(
 
       if (name !== undefined) updateData.name = name.trim();
       if (surname !== undefined) updateData.surname = surname.trim();
-      if (age !== undefined && birthDate === undefined) updateData.age = parseInt(age);
+      if (age !== undefined && !birthDateProvided) {
+        const parsedAge = parseInt(age);
+        if (!isNaN(parsedAge) && parsedAge > 0) {
+          updateData.age = parsedAge;
+        }
+      }
       if (hasImageConsent !== undefined) updateData.hasImageConsent = hasImageConsent;
       if (hasDataConsent !== undefined) updateData.hasDataConsent = hasDataConsent;
       if (allergies !== undefined) updateData.allergies = allergies;
@@ -278,7 +294,12 @@ export async function PATCH(
     } else if (payload.role === "HEADTEACHER" || payload.role === "ADMIN") {
       if (name !== undefined) updateData.name = name.trim();
       if (surname !== undefined) updateData.surname = surname.trim();
-      if (age !== undefined && birthDate === undefined) updateData.age = parseInt(age);
+      if (age !== undefined && !birthDateProvided) {
+        const parsedAge = parseInt(age);
+        if (!isNaN(parsedAge) && parsedAge > 0) {
+          updateData.age = parsedAge;
+        }
+      }
       if (groupId !== undefined) updateData.groupId = groupId === "null" ? null : groupId;
       if (hasImageConsent !== undefined) updateData.hasImageConsent = hasImageConsent;
       if (hasDataConsent !== undefined) updateData.hasDataConsent = hasDataConsent;

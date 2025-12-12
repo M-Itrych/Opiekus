@@ -127,7 +127,6 @@ export async function POST(req: Request) {
       groupId = null;
     }
 
-    // Walidacja PESEL jeśli podany
     if (pesel && !validatePesel(pesel)) {
       return NextResponse.json(
         { error: "Nieprawidłowy numer PESEL" },
@@ -135,7 +134,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Sprawdź czy PESEL nie jest już używany
     if (pesel) {
       const existingChild = await prisma.child.findUnique({
         where: { pesel },
@@ -149,16 +147,27 @@ export async function POST(req: Request) {
       }
     }
 
-    // Oblicz wiek z daty urodzenia lub użyj podanego wieku
-    let calculatedAge = age !== undefined ? parseInt(age) : 0;
+    let calculatedAge: number | undefined;
     if (birthDate) {
       const parsedBirthDate = new Date(birthDate);
-      if (!isNaN(parsedBirthDate.getTime())) {
-        calculatedAge = calculateAge(parsedBirthDate);
+      if (isNaN(parsedBirthDate.getTime())) {
+        return NextResponse.json(
+          { error: "Nieprawidłowa data urodzenia" },
+          { status: 400 }
+        );
       }
+      if (parsedBirthDate.getFullYear() > 9999) {
+        return NextResponse.json(
+          { error: "Rok daty urodzenia nie może przekraczać 9999" },
+          { status: 400 }
+        );
+      }
+      calculatedAge = calculateAge(parsedBirthDate);
+    } else if (age !== undefined) {
+      calculatedAge = parseInt(age);
     }
 
-    if (!name || !surname || (age === undefined && !birthDate) || !parentId) {
+    if (!name || !surname || calculatedAge === undefined || !parentId) {
       return NextResponse.json(
         { error: "Imię, nazwisko i data urodzenia (lub wiek) są wymagane" },
         { status: 400 }

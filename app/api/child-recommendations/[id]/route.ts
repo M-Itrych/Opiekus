@@ -45,7 +45,6 @@ async function verifyAccessToRecommendation(
       where: { id: recommendation.childId, groupId: staff.groupId },
     });
     const canRead = !!child;
-    // Teacher can only modify their own recommendations
     const canModify = canRead && recommendation.authorId === user.id;
     return { canRead, canModify };
   }
@@ -54,7 +53,6 @@ async function verifyAccessToRecommendation(
     const child = await prisma.child.findFirst({
       where: { id: recommendation.childId, parentId: user.id },
     });
-    // Parents can only read recommendations, not modify them
     return { canRead: !!child, canModify: false };
   }
 

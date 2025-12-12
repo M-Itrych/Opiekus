@@ -2,15 +2,13 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { verifyToken } from './lib/session';
 
-// Define which roles can access which paths
 const rolePathMap: Record<string, string[]> = {
 	PARENT: ['/Parent'],
 	TEACHER: ['/Teacher'],
 	HEADTEACHER: ['/HeadTeacher'],
-	ADMIN: ['/HeadTeacher', '/Teacher', '/Parent'], // Admin can access everything
+	ADMIN: ['/HeadTeacher', '/Teacher', '/Parent'],
 };
 
-// Define the default redirect path for each role
 const roleDefaultPath: Record<string, string> = {
 	PARENT: '/Parent',
 	TEACHER: '/Teacher',
@@ -21,13 +19,12 @@ const roleDefaultPath: Record<string, string> = {
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
-	// Paths that don't require authentication
 	const publicPaths = [
 		'/Login',
 		'/Register',
 		'/reset-password',
 		'/api/auth',
-		'/api/uploadthing',  // Required for UploadThing callbacks
+		'/api/uploadthing',
 		'/_next',
 		'/static',
 		'/logo',
@@ -37,12 +34,11 @@ export async function middleware(request: NextRequest) {
 		'/next.svg',
 		'/vercel.svg',
 		'/window.svg',
-		'/manifest.webmanifest',  // PWA manifest
-		'/sw.js',  // Service Worker
-		'/global',  // Public assets (logo, icons)
+		'/manifest.webmanifest',
+		'/sw.js',
+		'/global',
 	];
 
-	// Case insensitive check for paths starting with public paths
 	const isPublicPath = publicPaths.some(path => 
 		pathname.toLowerCase().startsWith(path.toLowerCase())
 	);
@@ -53,7 +49,6 @@ export async function middleware(request: NextRequest) {
 		return NextResponse.next();
 	}
 
-	// API routes (except auth) require authentication but role check is done in the route itself
 	if (pathname.startsWith('/api/')) {
 		const token = request.cookies.get('session')?.value;
 		if (!token) {
@@ -80,29 +75,24 @@ export async function middleware(request: NextRequest) {
 
 	const userRole = payload.role as string;
 
-	// Check if user is trying to access a role-specific path
 	const protectedPaths = ['/Parent', '/Teacher', '/HeadTeacher'];
 	const accessingProtectedPath = protectedPaths.find(path => 
 		pathname.toLowerCase().startsWith(path.toLowerCase())
 	);
 
 	if (accessingProtectedPath) {
-		// Get allowed paths for this user's role
 		const allowedPaths = rolePathMap[userRole] || [];
 		
-		// Check if user can access this path (case insensitive)
 		const canAccess = allowedPaths.some(allowedPath => 
 			pathname.toLowerCase().startsWith(allowedPath.toLowerCase())
 		);
 
 		if (!canAccess) {
-			// Redirect to the user's default panel
 			const defaultPath = roleDefaultPath[userRole] || '/Login';
 			return NextResponse.redirect(new URL(defaultPath, request.url));
 		}
 	}
 
-	// Root path - redirect to appropriate panel based on role
 	if (pathname === '/') {
 		const defaultPath = roleDefaultPath[userRole] || '/Login';
 		return NextResponse.redirect(new URL(defaultPath, request.url));

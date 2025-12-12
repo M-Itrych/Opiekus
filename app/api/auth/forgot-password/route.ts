@@ -25,7 +25,6 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      // Dla bezpieczeństwa zwracamy ten sam komunikat, nawet jeśli użytkownik nie istnieje
       return NextResponse.json({
         message: 'Jeśli podany email istnieje w systemie, wysłano instrukcje resetowania hasła',
       });
@@ -43,13 +42,11 @@ export async function POST(request: Request) {
 
     const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
 
-    // Wysyłanie emaila z linkiem resetującym
     try {
       await sendPasswordResetEmail(user.email, resetUrl, user.name);
       console.log('Password reset email sent to:', user.email);
     } catch (emailError) {
       console.error('Error sending password reset email:', emailError);
-      // W trybie deweloperskim kontynuujemy, w produkcji można zwrócić błąd
       if (process.env.NODE_ENV === 'production') {
         return NextResponse.json(
           { error: 'Błąd podczas wysyłania emaila. Spróbuj ponownie później.' },

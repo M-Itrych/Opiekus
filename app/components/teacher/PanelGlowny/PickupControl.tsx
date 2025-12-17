@@ -288,16 +288,17 @@ export default function PickupControl() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="flex flex-col gap-8">
+        {/* Oczekujące na odbiór */}
         <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 pb-2 border-b border-zinc-200 dark:border-zinc-700">
             <Clock className="h-5 w-5 text-sky-600" />
             <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
               Oczekujące na odbiór ({pendingPickups.length})
             </h3>
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {pendingPickups.map((child) => {
               const isSelected = selectedChild === child.id;
               const isSaving = saving === child.id;
@@ -401,53 +402,52 @@ export default function PickupControl() {
                 </div>
               );
             })}
-
-            {pendingPickups.length === 0 && (
-              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-8 text-center dark:border-zinc-700 dark:bg-zinc-800/50">
-                <p className="text-zinc-500 dark:text-zinc-400">
-                  Wszystkie dzieci zostały odebrane
-                </p>
-              </div>
-            )}
           </div>
+
+          {pendingPickups.length === 0 && (
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-8 text-center dark:border-zinc-700 dark:bg-zinc-800/50">
+              <p className="text-zinc-500 dark:text-zinc-400">
+                Wszystkie dzieci zostały odebrane
+              </p>
+            </div>
+          )}
         </div>
 
+        {/* Odebrane */}
         <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 pb-2 border-b border-zinc-200 dark:border-zinc-700">
             <CheckCircle className="h-5 w-5 text-green-600" />
             <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
               Odebrane ({completedPickups.length})
             </h3>
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {completedPickups.map((child) => {
               const record = pickupRecords[child.id];
               return (
                 <div
                   key={child.id}
-                  className="flex items-center justify-between rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20"
+                  className="flex flex-col gap-2 rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20"
                 >
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                      <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">
-                        {child.name} {child.surname}
-                      </h4>
-                    </div>
-                    <div className="ml-7 flex flex-col gap-1 text-sm text-zinc-600 dark:text-zinc-400">
-                      <p>
-                        Odebrane przez: <span className="font-medium">{record.pickupPerson}</span>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">
+                      {child.name} {child.surname}
+                    </h4>
+                  </div>
+                  <div className="ml-7 flex flex-col gap-1 text-sm text-zinc-600 dark:text-zinc-400">
+                    <p>
+                      Odebrane przez: <span className="font-medium">{record.pickupPerson}</span>
+                    </p>
+                    <p>
+                      Godzina: <span className="font-medium">{record.pickupTime}</span>
+                    </p>
+                    {record.notes && (
+                      <p className="text-xs text-zinc-500">
+                        Uwagi: {record.notes}
                       </p>
-                      <p>
-                        Godzina: <span className="font-medium">{record.pickupTime}</span>
-                      </p>
-                      {record.notes && (
-                        <p className="text-xs text-zinc-500">
-                          Uwagi: {record.notes}
-                        </p>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
               );

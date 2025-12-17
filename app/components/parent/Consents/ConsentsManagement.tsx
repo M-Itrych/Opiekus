@@ -11,7 +11,6 @@ import {
   Shield,
   Camera,
   Heart,
-  Mail,
 } from "lucide-react";
 import {
   Select,
@@ -24,7 +23,7 @@ import {
 interface ApiConsent {
   id: string;
   childId: string;
-  consentType: "IMAGE" | "DATA" | "MEDICAL" | "MARKETING";
+  consentType: "IMAGE" | "DATA" | "MEDICAL";
   status: "ACCEPTED" | "PENDING" | "REJECTED";
   date: string;
   expiryDate: string | null;
@@ -45,7 +44,6 @@ const consentTypes = [
   { type: "IMAGE", label: "Zgoda na wizerunek", description: "Zgoda na publikację zdjęć i filmów z dzieckiem", icon: Camera },
   { type: "DATA", label: "Przetwarzanie danych", description: "Zgoda na przetwarzanie danych osobowych", icon: Shield },
   { type: "MEDICAL", label: "Dane medyczne", description: "Zgoda na przetwarzanie informacji o stanie zdrowia", icon: Heart },
-  { type: "MARKETING", label: "Marketing", description: "Zgoda na otrzymywanie informacji marketingowych", icon: Mail },
 ];
 
 export default function ConsentsManagement() {
@@ -113,7 +111,7 @@ export default function ConsentsManagement() {
           childId: selectedChildId,
           consentType,
           status: newStatus,
-          expiryDate: newStatus === "ACCEPTED" 
+          expiryDate: newStatus === "ACCEPTED"
             ? new Date(Date.now() + 3 * 365 * 24 * 60 * 60 * 1000).toISOString() // 3 years
             : null,
         }),

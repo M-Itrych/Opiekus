@@ -15,7 +15,7 @@ import { useModal } from "@/app/components/global/Modal/ModalContext";
 interface ApiConsent {
   id: string;
   childId: string;
-  consentType: "IMAGE" | "DATA" | "MEDICAL" | "MARKETING";
+  consentType: "IMAGE" | "DATA" | "MEDICAL";
   status: "ACCEPTED" | "PENDING" | "REJECTED";
   date: string;
   expiryDate: string | null;
@@ -35,7 +35,7 @@ interface ConsentRecord {
   id: string;
   childName: string;
   parentName: string;
-  consentType: "image" | "data" | "medical" | "marketing";
+  consentType: "image" | "data" | "medical";
   status: "accepted" | "pending" | "rejected";
   date: string;
   expiryDate?: string;
@@ -134,8 +134,6 @@ export default function RODOManagement() {
         return "Zgoda na przetwarzanie danych";
       case "medical":
         return "Zgoda na dane medyczne";
-      case "marketing":
-        return "Zgoda marketingowa";
       default:
         return type;
     }
@@ -271,9 +269,6 @@ export default function RODOManagement() {
             <DropdownMenuItem onSelect={() => setSelectedType("medical")}>
               Zgoda na dane medyczne
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => setSelectedType("marketing")}>
-              Zgoda marketingowa
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -317,10 +312,10 @@ export default function RODOManagement() {
               <div className="flex items-center gap-2">
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium ${consent.status === "accepted"
-                      ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                      : consent.status === "rejected"
-                        ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                        : "bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400"
+                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                    : consent.status === "rejected"
+                      ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                      : "bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400"
                     }`}
                 >
                   {getStatusLabel(consent.status)}

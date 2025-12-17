@@ -2,23 +2,25 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Download, FileText, Calendar, BarChart, Shield, Users, Loader2, RefreshCcw, Plus } from "lucide-react";
+import { Download, FileText, Calendar, BarChart, Shield, Users, Loader2, RefreshCcw, Plus, Eye, X, Trash2, FileDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import { downloadReportPDF } from "./ReportPDF";
 import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 interface ApiReport {
   id: string;
-  name: string;
+  title: string;
+  content: string;
   reportType: string;
-  description: string | null;
-  fileUrl: string | null;
-  authorId: string;
+  periodStart: string | null;
+  periodEnd: string | null;
   createdAt: string;
   author: {
     id: string;
@@ -33,7 +35,10 @@ export default function ReportsList() {
   const [reports, setReports] = useState<ApiReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [generating, setGenerating] = useState(false);
+  const [generating, setGenerating] = useState<string | null>(null);
+  const [viewingReport, setViewingReport] = useState<ApiReport | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [downloadingPdf, setDownloadingPdf] = useState<string | null>(null);
 
   const fetchReports = useCallback(async () => {
     try {
@@ -91,35 +96,25 @@ export default function ReportsList() {
   };
 
   const generateReport = async (reportType: string) => {
-    setGenerating(true);
+    setGenerating(reportType);
     try {
-      const reportNames: Record<string, string> = {
-        rodo: "Raport RODO - Zgody rodziców",
-        obecnosc: `Raport obecności - ${new Date().toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })}`,
-        finansowy: `Raport finansowy - ${new Date().toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })}`,
-        statystyki: `Statystyki grup - ${new Date().getFullYear()}`,
-        sygnalisci: `Rejestr sygnalistów - ${new Date().getFullYear()}`,
-      };
-
-      const res = await fetch('/api/reports', {
+      const res = await fetch('/api/reports/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: reportNames[reportType] || `Raport ${reportType}`,
           reportType,
-          description: `Automatycznie wygenerowany raport typu ${getTypeLabel(reportType)}`,
         }),
       });
 
       if (!res.ok) throw new Error('Błąd generowania raportu');
 
       await fetchReports();
-      showModal('success', `Raport "${reportNames[reportType]}" został wygenerowany`);
+      alert(`Raport "${reportNames[reportType]}" został wygenerowany`);
     } catch (err) {
       console.error(err);
-      showModal('error', 'Wystąpił błąd podczas generowania raportu');
+      alert('Wystąpił błąd podczas generowania raportu');
     } finally {
-      setGenerating(false);
+      setGenerating(null);
     }
   };
 
@@ -127,7 +122,7 @@ export default function ReportsList() {
     if (report.fileUrl) {
       window.open(report.fileUrl, '_blank');
     } else {
-      showModal('warning', 'Plik raportu nie jest jeszcze dostępny do pobrania');
+      alert('Plik raportu nie jest jeszcze dostępny do pobrania');
     }
   };
 
@@ -171,6 +166,10 @@ export default function ReportsList() {
 
   return (
     <div className="flex flex-col gap-6">
+      {viewingReport && (
+        <ReportViewerModal report={viewingReport} onClose={() => setViewingReport(null)} />
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
@@ -183,27 +182,49 @@ export default function ReportsList() {
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2" disabled={generating}>
-                <Plus className="h-4 w-4" />
-                Generuj raport
-                <ChevronDown className="h-4 w-4" />
+              <Button variant="outline" className="flex items-center gap-2" disabled={generating !== null}>
+                {generating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Generowanie...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4" />
+                    Generuj raport
+                    <ChevronDown className="h-4 w-4" />
+                  </>
+                )}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onSelect={() => generateReport("rodo")}>
-                RODO
+              <DropdownMenuItem
+                onSelect={() => generateReport("rodo")}
+                disabled={generating !== null}
+              >
+                <Shield className="mr-2 h-4 w-4" />
+                RODO (Zgody)
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => generateReport("obecnosc")}>
+              <DropdownMenuItem
+                onSelect={() => generateReport("obecnosc")}
+                disabled={generating !== null}
+              >
+                <Users className="mr-2 h-4 w-4" />
                 Obecność
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => generateReport("finansowy")}>
+              <DropdownMenuItem
+                onSelect={() => generateReport("finansowy")}
+                disabled={generating !== null}
+              >
+                <BarChart className="mr-2 h-4 w-4" />
                 Finansowy
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => generateReport("statystyki")}>
-                Statystyki
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => generateReport("sygnalisci")}>
-                Sygnaliści
+              <DropdownMenuItem
+                onSelect={() => generateReport("statystyki")}
+                disabled={generating !== null}
+              >
+                <BarChart className="mr-2 h-4 w-4" />
+                Statystyki grup
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -230,9 +251,6 @@ export default function ReportsList() {
               <DropdownMenuItem onSelect={() => setSelectedType("statystyki")}>
                 Statystyki
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setSelectedType("sygnalisci")}>
-                Sygnaliści
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -241,8 +259,9 @@ export default function ReportsList() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {reports.length === 0 ? (
           <div className="col-span-2 rounded-xl border border-zinc-200 bg-white p-8 text-center dark:border-zinc-800 dark:bg-zinc-900">
+            <FileText className="mx-auto h-12 w-12 text-zinc-400 mb-4" />
             <p className="text-zinc-500 dark:text-zinc-400">
-              Brak raportów do wyświetlenia. Kliknij "Generuj raport", aby utworzyć nowy.
+              Brak raportów do wyświetlenia. Kliknij &quot;Generuj raport&quot;, aby utworzyć nowy.
             </p>
           </div>
         ) : (
@@ -256,7 +275,7 @@ export default function ReportsList() {
                   {getTypeIcon(report.reportType)}
                   <div>
                     <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">
-                      {report.name}
+                      {report.title}
                     </h4>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                       {getTypeLabel(report.reportType)}
@@ -265,8 +284,8 @@ export default function ReportsList() {
                 </div>
               </div>
 
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                {report.description || 'Brak opisu'}
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">
+                {report.content.substring(0, 150)}...
               </p>
 
               <div className="flex items-center justify-between pt-2 border-t border-zinc-200 dark:border-zinc-700">
@@ -279,15 +298,53 @@ export default function ReportsList() {
                     Autor: {report.author.name} {report.author.surname}
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDownload(report)}
-                  className="flex items-center gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  Pobierz
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setViewingReport(report)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={downloadingPdf === report.id}
+                      >
+                        {downloadingPdf === report.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Download className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onSelect={() => handleDownloadPdf(report)}>
+                        <FileDown className="mr-2 h-4 w-4 text-red-500" />
+                        PDF
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => handleDownload(report)}>
+                        <FileText className="mr-2 h-4 w-4 text-blue-500" />
+                        Markdown
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(report)}
+                    disabled={deleting === report.id}
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  >
+                    {deleting === report.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           ))
@@ -296,3 +353,4 @@ export default function ReportsList() {
     </div>
   );
 }
+

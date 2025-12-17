@@ -49,6 +49,14 @@ export default function ObecnosciPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [absenceReason, setAbsenceReason] = useState('');
   const [hoveredDay, setHoveredDay] = useState<string | null>(null);
+  const [modifiedKeys, setModifiedKeys] = useState<Set<string>>(new Set());
+
+  const formatDateKey = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   const [attendance, setAttendance] = useState<{ [key: string]: AttendanceData }>({});
   const [children, setChildren] = useState<Child[]>([]);
@@ -91,7 +99,7 @@ export default function ObecnosciPage() {
 
       const attendanceMap: { [key: string]: AttendanceData } = {};
       data.forEach((item) => {
-        const dateKey = new Date(item.date).toISOString().split('T')[0];
+        const dateKey = formatDateKey(new Date(item.date));
         attendanceMap[dateKey] = {
           id: item.id,
           status: item.status.toLowerCase() as DayStatus,
@@ -101,6 +109,7 @@ export default function ObecnosciPage() {
 
       setAttendance(attendanceMap);
       setHasChanges(false);
+      setModifiedKeys(new Set());
     } catch (err) {
       console.error(err);
       setError('Nie udało się pobrać danych obecności');
@@ -144,7 +153,7 @@ export default function ObecnosciPage() {
         data
           .filter((item) => item.childId === selectedChildId)
           .forEach((item) => {
-            const dateKey = new Date(item.date).toISOString().split('T')[0];
+            const dateKey = formatDateKey(new Date(item.date));
             attendanceMap[dateKey] = {
               id: item.id,
               status: item.status.toLowerCase() as DayStatus,
@@ -155,6 +164,7 @@ export default function ObecnosciPage() {
       }
 
       setHasChanges(false);
+      setModifiedKeys(new Set());
     } catch (err) {
       console.error(err);
       setError('Nie udało się pobrać danych obecności');
@@ -199,13 +209,13 @@ export default function ObecnosciPage() {
 
     for (let day = 1; day <= lastDay.getDate(); day++) {
       const date = new Date(year, month, day);
-      const dateKey = date.toISOString().split('T')[0];
+      const dateKey = formatDateKey(date);
       const attendanceData = attendance[dateKey];
       const status = attendanceData?.status || (date < new Date() ? 'present' : 'pending');
 
       days.push({
         date,
-        status: date > new Date() ? 'pending' : status,
+        status,
         reason: attendanceData?.reason,
         id: attendanceData?.id
       });
@@ -234,7 +244,7 @@ export default function ObecnosciPage() {
 
     for (let day = 1; day <= lastDay.getDate(); day++) {
       const date = new Date(year, month, day);
-      const dateKey = date.toISOString().split('T')[0];
+      const dateKey = formatDateKey(date);
 
       if (date <= today && date.getDay() !== 0 && date.getDay() !== 6) {
         const status = attendance[dateKey]?.status || 'present';
@@ -251,36 +261,6 @@ export default function ObecnosciPage() {
 
     return { present, absent, total, percentage };
   }, [selectedMonth, selectedYear, attendance]);
-
-  const handleDayClick = (day: DayData, event: React.MouseEvent) => {
-
-    if (day.date.getDay() === 0 || day.date.getDay() === 6) return;
-
-    if (event.detail === 2 && day.status === 'absent' && day.reason) {
-      handleOpenModal(day.date, day.reason);
-      return;
-    }
-
-    const dateKey = day.date.toISOString().split('T')[0];
-    const newStatus: DayStatus = day.status === 'absent' ? 'present' : 'absent';
-
-    setAttendance(prev => {
-      if (newStatus === 'present') {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { [dateKey]: _unused, ...rest } = prev;
-        return rest;
-      }
-      return {
-        ...prev,
-        [dateKey]: {
-          ...prev[dateKey],
-          status: newStatus,
-          reason: prev[dateKey]?.reason || ''
-        }
-      };
-    });
-    setHasChanges(true);
-  };
 
   const handleOpenModal = (date?: Date, existingReason?: string) => {
     setIsModalOpen(true);
@@ -308,7 +288,7 @@ export default function ObecnosciPage() {
       return;
     }
 
-    const dateKey = selected.toISOString().split('T')[0];
+    const dateKey = formatDateKey(selected);
     setAttendance(prev => ({
       ...prev,
       [dateKey]: {
@@ -317,6 +297,7 @@ export default function ObecnosciPage() {
         reason: absenceReason.trim()
       }
     }));
+    setModifiedKeys(prev => new Set(prev).add(dateKey));
     setHasChanges(true);
     handleCloseModal();
 
@@ -328,13 +309,17 @@ export default function ObecnosciPage() {
 
   const handleRemoveAbsence = () => {
     if (!selectedDate) return;
-
-    const dateKey = selectedDate.toISOString().split('T')[0];
-    setAttendance(prev => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { [dateKey]: _unused, ...rest } = prev;
-      return rest;
-    });
+    
+    const dateKey = formatDateKey(selectedDate);
+    setAttendance(prev => ({
+      ...prev,
+      [dateKey]: {
+        ...prev[dateKey],
+        status: 'present',
+        reason: undefined
+      }
+    }));
+    setModifiedKeys(prev => new Set(prev).add(dateKey));
     setHasChanges(true);
     handleCloseModal();
   };
@@ -347,15 +332,16 @@ export default function ObecnosciPage() {
 
     setIsSaving(true);
     try {
-      for (const [dateKey, data] of Object.entries(attendance)) {
-        if (data.status === 'absent') {
+      for (const dateKey of modifiedKeys) {
+        const data = attendance[dateKey];
+        if (data) {
           await fetch('/api/attendances', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               childId: selectedChildId,
               date: dateKey,
-              status: 'ABSENT',
+              status: data.status.toUpperCase(),
               reason: data.reason || '',
             }),
           });
@@ -363,6 +349,7 @@ export default function ObecnosciPage() {
       }
 
       setHasChanges(false);
+      setModifiedKeys(new Set());
       showModal('success', 'Zmiany zostały zapisane!');
       fetchAttendance();
     } catch (err) {
@@ -404,7 +391,6 @@ export default function ObecnosciPage() {
     const isToday = day.date.getTime() === today.getTime();
     const isCurrentMonth = day.date.getMonth() === selectedMonth;
     const isWeekend = day.date.getDay() === 0 || day.date.getDay() === 6;
-    const isSelectable = !isWeekend && isCurrentMonth;
 
     let baseClasses = 'w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ';
 
@@ -419,13 +405,7 @@ export default function ObecnosciPage() {
     if (isToday) {
       baseClasses += 'ring-2 ring-blue-500 ';
     }
-
-    if (isSelectable) {
-      baseClasses += 'cursor-pointer hover:bg-gray-100 ';
-    } else {
-      baseClasses += 'cursor-not-allowed text-gray-300 ';
-    }
-
+    
     if (day.status === 'absent') {
       return baseClasses + 'bg-red-100 text-red-700 hover:bg-red-200';
     } else if (day.status === 'present') {
@@ -575,18 +555,17 @@ export default function ObecnosciPage() {
 
         <div className="grid grid-cols-7 justify-items-center gap-2">
           {daysInMonth.map((day, index) => {
-            const dateKey = day.date.toISOString().split('T')[0];
+            const dateKey = formatDateKey(day.date);
             const isHovered = hoveredDay === dateKey;
             const hasReason = day.reason && day.status === 'absent';
 
             return (
               <div
                 key={index}
-                onClick={(e) => handleDayClick(day, e)}
                 onMouseEnter={() => setHoveredDay(dateKey)}
                 onMouseLeave={() => setHoveredDay(null)}
                 className={`${getDayClassName(day)} relative`}
-                title={day.reason && day.status === 'absent' ? `Podwójne kliknięcie, aby edytować powód: ${day.reason}` : ''}
+                title={day.reason && day.status === 'absent' ? `Powód nieobecności: ${day.reason}` : ''}
               >
                 {day.date.getDate()}
                 {hasReason && isHovered && (
@@ -626,9 +605,9 @@ export default function ObecnosciPage() {
       <div className="mt-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
         <h3 className="font-semibold text-blue-800 mb-2">Informacje</h3>
         <p className="text-blue-700 text-sm">
-          Kliknij na dowolny dzień roboczy w kalendarzu (również przyszły), aby zaznaczyć lub odznaczyć nieobecność,
-          lub użyj przycisku &quot;Zgłoś nieobecność&quot;, aby dodać wpis z powodem. Najedź kursorem na dzień z nieobecnością,
-          aby zobaczyć podany powód.
+          Aby zgłosić lub edytować nieobecność, użyj czerwonego przycisku &quot;Zgłoś nieobecność&quot; powyżej. 
+          Kalendarz służy do podglądu statusu i powodów nieobecności (najedź kursorem na zaznaczony dzień). 
+          Pamiętaj, aby po wprowadzeniu zmian kliknąć &quot;Zapisz zmiany&quot;.
         </p>
       </div>
 
@@ -652,8 +631,17 @@ export default function ObecnosciPage() {
                 </label>
                 <input
                   type="date"
-                  value={selectedDate ? selectedDate.toISOString().split('T')[0] : ''}
-                  onChange={(e) => setSelectedDate(new Date(e.target.value))}
+                  value={selectedDate ? formatDateKey(selectedDate) : ''}
+                  onChange={(e) => {
+                    const newDate = new Date(e.target.value);
+                    setSelectedDate(newDate);
+                    const key = formatDateKey(newDate);
+                    if (attendance[key]?.status === 'absent') {
+                      setAbsenceReason(attendance[key].reason || '');
+                    } else {
+                      setAbsenceReason('');
+                    }
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -682,7 +670,7 @@ export default function ObecnosciPage() {
               >
                 Anuluj
               </button>
-              {selectedDate && attendance[selectedDate.toISOString().split('T')[0]]?.status === 'absent' && (
+              {selectedDate && attendance[formatDateKey(selectedDate)]?.status === 'absent' && (
                 <button
                   onClick={handleRemoveAbsence}
                   className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
@@ -694,8 +682,8 @@ export default function ObecnosciPage() {
                 onClick={handleSubmitAbsence}
                 className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
               >
-                {selectedDate && attendance[selectedDate.toISOString().split('T')[0]]?.status === 'absent'
-                  ? 'Zaktualizuj'
+                {selectedDate && attendance[formatDateKey(selectedDate)]?.status === 'absent' 
+                  ? 'Zaktualizuj' 
                   : 'Zgłoś nieobecność'}
               </button>
             </div>

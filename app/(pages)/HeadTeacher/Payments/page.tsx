@@ -1,9 +1,15 @@
+"use client";
+
+import HeadTeacherLayout from "@/app/components/global/Layout/HeadTeacherLayout";
 import { PaymentsManagement } from "@/app/components/headteacher/Payments/PaymentsManagement";
 
 export default function PaymentsPage() {
     return (
-        <div className="p-4 md:p-6">
+        <HeadTeacherLayout
+            title="Płatności"
+            description="Wystawiaj i zarządzaj płatnościami dla dzieci"
+        >
             <PaymentsManagement />
-        </div>
+        </HeadTeacherLayout>
     );
 }

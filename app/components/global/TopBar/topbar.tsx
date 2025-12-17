@@ -15,6 +15,7 @@ import BarChartOutlined from "@mui/icons-material/BarChartOutlined";
 import TaskOutlined from "@mui/icons-material/TaskOutlined";
 import CalendarMonthOutlined from "@mui/icons-material/CalendarMonthOutlined";
 import ReceiptOutlined from "@mui/icons-material/ReceiptOutlined";
+import PaymentOutlined from "@mui/icons-material/PaymentOutlined";
 
 export default function Topbar() {
     const pathname = usePathname().toLowerCase();
@@ -30,7 +31,7 @@ export default function Topbar() {
             href: "/HeadTeacher/Calendar",
             Icon: CalendarMonthOutlined,
         },
-        {   
+        {
             label: "Raporty i statystyki",
             href: "/HeadTeacher/Raports",
             Icon: BarChartOutlined,
@@ -81,11 +82,16 @@ export default function Topbar() {
             Icon: ReceiptOutlined,
         },
         {
+            label: "Płatności",
+            href: "/HeadTeacher/Payments",
+            Icon: PaymentOutlined,
+        },
+        {
             label: "Dokumenty",
             href: "/HeadTeacher/Documents",
             Icon: DescriptionOutlined,
         },
-        
+
     ];
 
     return (
@@ -99,19 +105,17 @@ export default function Topbar() {
                         <Link
                             href={href}
                             key={label}
-                            className={`group relative flex items-center gap-2 whitespace-nowrap px-2 py-1 transition-colors duration-200 hover:text-primary ${
-                                isActive ? "text-sky-700" : ""
-                            }`}
+                            className={`group relative flex items-center gap-2 whitespace-nowrap px-2 py-1 transition-colors duration-200 hover:text-primary ${isActive ? "text-sky-700" : ""
+                                }`}
                         >
                             <Icon fontSize="small" />
                             <span>{label}</span>
                             <span
                                 aria-hidden
-                                className={`absolute inset-x-0 bottom-0 h-0.5 origin-center rounded-full transition-all duration-200 ${
-                                    isActive
+                                className={`absolute inset-x-0 bottom-0 h-0.5 origin-center rounded-full transition-all duration-200 ${isActive
                                         ? "scale-100 bg-sky-500"
                                         : "scale-0 bg-sky-300 group-hover:scale-100"
-                                }`}
+                                    }`}
                             />
                         </Link>
                     );

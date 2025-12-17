@@ -106,25 +106,120 @@ export default function ReportsList() {
         }),
       });
 
-      if (!res.ok) throw new Error('Błąd generowania raportu');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Błąd generowania raportu');
+      }
 
+      const newReport: ApiReport = await res.json();
       await fetchReports();
-      alert(`Raport "${reportNames[reportType]}" został wygenerowany`);
+      setViewingReport(newReport);
     } catch (err) {
       console.error(err);
-      alert('Wystąpił błąd podczas generowania raportu');
+      showModal('error', err instanceof Error ? err.message : 'Wystąpił błąd podczas generowania raportu');
     } finally {
       setGenerating(null);
     }
   };
 
   const handleDownload = (report: ApiReport) => {
-    if (report.fileUrl) {
-      window.open(report.fileUrl, '_blank');
-    } else {
-      alert('Plik raportu nie jest jeszcze dostępny do pobrania');
+    // Create a downloadable text file with the report content
+    const blob = new Blob([report.content], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${report.title.replace(/[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s-]/g, '')}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadPdf = async (report: ApiReport) => {
+    setDownloadingPdf(report.id);
+    try {
+      await downloadReportPDF(report);
+    } catch (err) {
+      console.error(err);
+      showModal('error', 'Wystąpił błąd podczas generowania PDF');
+    } finally {
+      setDownloadingPdf(null);
     }
   };
+
+  const handleDelete = async (report: ApiReport) => {
+    if (!confirm(`Czy na pewno chcesz usunąć raport "${report.title}"?`)) {
+      return;
+    }
+
+    setDeleting(report.id);
+    try {
+      const res = await fetch(`/api/reports/${report.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        throw new Error('Błąd usuwania raportu');
+      }
+
+      await fetchReports();
+    } catch (err) {
+      console.error(err);
+      showModal('error', 'Wystąpił błąd podczas usuwania raportu');
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  // Report viewer modal
+  const ReportViewerModal = ({ report, onClose }: { report: ApiReport; onClose: () => void }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-zinc-900">
+        <div className="flex items-center justify-between border-b border-zinc-200 p-4 dark:border-zinc-700">
+          <div className="flex items-center gap-3">
+            {getTypeIcon(report.reportType)}
+            <div>
+              <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">{report.title}</h3>
+              <p className="text-sm text-zinc-500">{new Date(report.createdAt).toLocaleDateString('pl-PL')}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" disabled={downloadingPdf === report.id}>
+                  {downloadingPdf === report.id ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="mr-2 h-4 w-4" />
+                  )}
+                  Pobierz
+                  <ChevronDown className="ml-1 h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onSelect={() => handleDownloadPdf(report)}>
+                  <FileDown className="mr-2 h-4 w-4 text-red-500" />
+                  Pobierz PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleDownload(report)}>
+                  <FileText className="mr-2 h-4 w-4 text-blue-500" />
+                  Pobierz Markdown
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        <div className="max-h-[calc(90vh-80px)] overflow-auto p-6">
+          <div className="prose prose-zinc dark:prose-invert max-w-none whitespace-pre-wrap font-mono text-sm">
+            {report.content}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   if (loading) {
     return (

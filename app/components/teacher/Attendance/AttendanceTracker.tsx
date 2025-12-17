@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Check, X, Clock, Loader2, Search, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 interface Child {
   id: string;
@@ -26,6 +27,7 @@ interface AttendanceTrackerProps {
 }
 
 export default function AttendanceTracker({ date = new Date() }: AttendanceTrackerProps) {
+  const { showModal } = useModal();
   const [children, setChildren] = useState<Child[]>([]);
   const [attendances, setAttendances] = useState<Record<string, AttendanceRecord>>({});
   const [loading, setLoading] = useState(true);
@@ -49,7 +51,7 @@ export default function AttendanceTracker({ date = new Date() }: AttendanceTrack
       const res = await fetch(`/api/attendances?startDate=${selectedDate}&endDate=${selectedDate}`);
       if (!res.ok) throw new Error("Failed to fetch attendances");
       const data: AttendanceRecord[] = await res.json();
-      
+
       const records: Record<string, AttendanceRecord> = {};
       data.forEach((record) => {
         records[record.childId] = record;
@@ -91,7 +93,7 @@ export default function AttendanceTracker({ date = new Date() }: AttendanceTrack
       }));
     } catch (err) {
       console.error("Error saving attendance:", err);
-      alert("Wystąpił błąd podczas zapisywania obecności");
+      showModal('error', 'Wystąpił błąd podczas zapisywania obecności');
     } finally {
       setSaving(null);
     }
@@ -189,13 +191,12 @@ export default function AttendanceTracker({ date = new Date() }: AttendanceTrack
           return (
             <div
               key={child.id}
-              className={`flex items-center justify-between rounded-xl border p-4 transition-all ${
-                status === "PRESENT"
+              className={`flex items-center justify-between rounded-xl border p-4 transition-all ${status === "PRESENT"
                   ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20"
                   : status === "ABSENT"
-                  ? "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20"
-                  : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
-              }`}
+                    ? "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20"
+                    : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
+                }`}
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sky-600 font-semibold dark:bg-sky-900/30">
@@ -206,13 +207,12 @@ export default function AttendanceTracker({ date = new Date() }: AttendanceTrack
                     {child.name} {child.surname}
                   </h3>
                   {status && (
-                    <p className={`text-xs ${
-                      status === "PRESENT" 
-                        ? "text-green-600" 
-                        : status === "ABSENT" 
-                        ? "text-red-600" 
-                        : "text-amber-600"
-                    }`}>
+                    <p className={`text-xs ${status === "PRESENT"
+                        ? "text-green-600"
+                        : status === "ABSENT"
+                          ? "text-red-600"
+                          : "text-amber-600"
+                      }`}>
                       {status === "PRESENT" ? "Obecny/a" : status === "ABSENT" ? "Nieobecny/a" : "Oczekuje"}
                     </p>
                   )}

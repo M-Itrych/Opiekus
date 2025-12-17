@@ -71,7 +71,7 @@ function LoginContent() {
 
       setForgotPasswordMessage(data.message || "Jeśli podany email istnieje w systemie, wysłano instrukcje resetowania hasła");
       setForgotPasswordEmail("");
-      
+
       setTimeout(() => {
         setShowForgotPassword(false);
         setForgotPasswordMessage("");
@@ -83,7 +83,7 @@ function LoginContent() {
     }
   };
 
-  const NameOfSchool = "Przedszkole nr 14 \"Biały Żagiel\"";
+  const NameOfSchool = process.env.NEXT_PUBLIC_SCHOOL_NAME || "Przedszkole nr 14 \"Biały Żagiel\"";
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -97,7 +97,7 @@ function LoginContent() {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-           {registered && (
+          {registered && (
             <div className="rounded-md bg-green-50 dark:bg-green-900/20 p-4">
               <p className="text-sm text-green-800 dark:text-green-400">
                 Rejestracja pomyślna. Możesz się teraz zalogować.
@@ -178,10 +178,10 @@ function LoginContent() {
             </button>
           </div>
           <div className="text-sm text-center">
-             <span className="text-gray-600 dark:text-gray-400">Nie masz konta? </span>
-             <Link href="/Register" className="font-medium text-[#005FA6] hover:text-[#005FA6]">
-               Zarejestruj się
-             </Link>
+            <span className="text-gray-600 dark:text-gray-400">Nie masz konta? </span>
+            <Link href="/Register" className="font-medium text-[#005FA6] hover:text-[#005FA6]">
+              Zarejestruj się
+            </Link>
           </div>
         </form>
       </div>
@@ -193,7 +193,7 @@ function LoginContent() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Resetowanie hasła
             </h3>
-            
+
             <form onSubmit={handleForgotPassword} className="space-y-4">
               {forgotPasswordMessage && (
                 <div className="rounded-md bg-green-50 dark:bg-green-900/20 p-4">
@@ -202,7 +202,7 @@ function LoginContent() {
                   </p>
                 </div>
               )}
-              
+
               {forgotPasswordError && (
                 <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
                   <p className="text-sm text-red-800 dark:text-red-400">

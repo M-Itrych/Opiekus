@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { 
-  BookOpen, Clock, CheckCircle, Play, Loader2, 
+import {
+  BookOpen, Clock, CheckCircle, Play, Loader2,
   ChevronLeft, Award, AlertCircle, Filter, X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 interface TrainingProgress {
   id: string;
@@ -52,6 +53,7 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function TrainingList() {
+  const { showModal } = useModal();
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
@@ -96,13 +98,13 @@ export default function TrainingList() {
       if (trainingRes.ok) {
         const updatedTraining = await trainingRes.json();
         setSelectedTraining(updatedTraining);
-        setTrainings(prev => 
+        setTrainings(prev =>
           prev.map(t => t.id === trainingId ? updatedTraining : t)
         );
       }
     } catch (err) {
       console.error("Error starting training:", err);
-      alert("Wystąpił błąd podczas rozpoczynania szkolenia");
+      showModal("error", "Wystąpił błąd podczas rozpoczynania szkolenia");
     } finally {
       setActionLoading(false);
     }
@@ -123,15 +125,15 @@ export default function TrainingList() {
       if (trainingRes.ok) {
         const updatedTraining = await trainingRes.json();
         setSelectedTraining(updatedTraining);
-        setTrainings(prev => 
+        setTrainings(prev =>
           prev.map(t => t.id === trainingId ? updatedTraining : t)
         );
       }
 
-      alert("Gratulacje! Szkolenie zostało ukończone.");
+      showModal("success", "Gratulacje! Szkolenie zostało ukończone.");
     } catch (err) {
       console.error("Error completing training:", err);
-      alert("Wystąpił błąd podczas kończenia szkolenia");
+      showModal("error", "Wystąpił błąd podczas kończenia szkolenia");
     } finally {
       setActionLoading(false);
     }
@@ -209,7 +211,7 @@ export default function TrainingList() {
         </div>
 
         <div className="prose prose-zinc dark:prose-invert max-w-none">
-          <div 
+          <div
             className="text-zinc-700 dark:text-zinc-300"
             dangerouslySetInnerHTML={{ __html: selectedTraining.content.replace(/\n/g, '<br/>') }}
           />
@@ -300,11 +302,10 @@ export default function TrainingList() {
         <Filter className="h-4 w-4 text-zinc-400" />
         <button
           onClick={() => setSelectedCategory(null)}
-          className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-            !selectedCategory
+          className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${!selectedCategory
               ? "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400"
               : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400"
-          }`}
+            }`}
         >
           Wszystkie
         </button>
@@ -312,11 +313,10 @@ export default function TrainingList() {
           <button
             key={key}
             onClick={() => setSelectedCategory(key)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              selectedCategory === key
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${selectedCategory === key
                 ? categoryColors[key]
                 : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400"
-            }`}
+              }`}
           >
             {label}
           </button>
@@ -335,21 +335,19 @@ export default function TrainingList() {
                   setSelectedTraining(training);
                   setViewMode("detail");
                 }}
-                className={`flex items-start gap-4 rounded-xl border p-4 text-left transition-all hover:shadow-md ${
-                  status === "completed"
+                className={`flex items-start gap-4 rounded-xl border p-4 text-left transition-all hover:shadow-md ${status === "completed"
                     ? "border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-900/10"
                     : status === "in_progress"
-                    ? "border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-900/10"
-                    : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
-                }`}
+                      ? "border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-900/10"
+                      : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
+                  }`}
               >
-                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${
-                  status === "completed"
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${status === "completed"
                     ? "bg-green-100 text-green-600 dark:bg-green-900/30"
                     : status === "in_progress"
-                    ? "bg-amber-100 text-amber-600 dark:bg-amber-900/30"
-                    : "bg-sky-100 text-sky-600 dark:bg-sky-900/30"
-                }`}>
+                      ? "bg-amber-100 text-amber-600 dark:bg-amber-900/30"
+                      : "bg-sky-100 text-sky-600 dark:bg-sky-900/30"
+                  }`}>
                   {status === "completed" ? (
                     <CheckCircle className="h-6 w-6" />
                   ) : status === "in_progress" ? (

@@ -79,21 +79,22 @@ const mealsOrder: Array<{ key: MealKey; label: string; Icon: typeof Restaurant }
 
 export default function ParentPage() {
   const router = useRouter();
-  
+
   const [children, setChildren] = useState<Child[]>([]);
   const [mealPlans, setMealPlans] = useState<MealPlanApi[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
-  
+
   const [loadingChildren, setLoadingChildren] = useState(true);
   const [loadingMeals, setLoadingMeals] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(true);
   const [loadingPayments, setLoadingPayments] = useState(true);
-  
+
   const [attendanceStatus, setAttendanceStatus] = useState<'none' | 'arrived' | 'pickedUp'>('none');
   const [arrivalTime, setArrivalTime] = useState<Date | null>(null);
   const [pickupTime, setPickupTime] = useState<Date | null>(null);
   const [kodOdbioru, setKodOdbioru] = useState<string>('');
+  const [loadingCode, setLoadingCode] = useState(true);
 
   const fetchChildren = useCallback(async () => {
     try {
@@ -117,15 +118,15 @@ export default function ParentPage() {
       const month = now.getMonth() + 1;
       const year = now.getFullYear();
       const day = now.getDate();
-      
+
       const res = await fetch(`/api/menu?month=${month}&year=${year}`);
       if (res.ok) {
         const data: MealPlanApi[] = await res.json();
         const todaysMeals = data.filter(meal => {
           const mealDate = new Date(meal.date);
-          return mealDate.getFullYear() === year && 
-                mealDate.getMonth() + 1 === month && 
-                mealDate.getDate() === day;
+          return mealDate.getFullYear() === year &&
+            mealDate.getMonth() + 1 === month &&
+            mealDate.getDate() === day;
         });
         setMealPlans(todaysMeals);
       }
@@ -171,7 +172,25 @@ export default function ParentPage() {
     fetchMealPlans();
     fetchMessages();
     fetchPayments();
+    fetchPickupCode();
   }, [fetchChildren, fetchMealPlans, fetchMessages, fetchPayments]);
+
+  const fetchPickupCode = async () => {
+    try {
+      setLoadingCode(true);
+      const res = await fetch('/api/pickup-code');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.length > 0) {
+          setKodOdbioru(data[0].code);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching pickup code:', err);
+    } finally {
+      setLoadingCode(false);
+    }
+  };
 
   const selectedChild = children[0];
 
@@ -210,18 +229,50 @@ export default function ParentPage() {
     month: 'long',
   });
 
-  const handleConfirmArrival = () => {
-    if (attendanceStatus === 'pickedUp') {
-      setPickupTime(null);
+  const handleConfirmArrival = async () => {
+    if (!selectedChild) return;
+    try {
+      const res = await fetch('/api/attendances', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          childId: selectedChild.id,
+          date: new Date().toISOString(),
+          status: 'PRESENT'
+        })
+      });
+      if (res.ok) {
+        if (attendanceStatus === 'pickedUp') {
+          setPickupTime(null);
+        }
+        setAttendanceStatus('arrived');
+        setArrivalTime(new Date());
+      }
+    } catch (err) {
+      console.error('Error confirming arrival:', err);
     }
-    setAttendanceStatus('arrived');
-    setArrivalTime(new Date());
   };
 
-  const handleConfirmPickup = () => {
-    if (attendanceStatus !== 'arrived') return;
-    setAttendanceStatus('pickedUp');
-    setPickupTime(new Date());
+  const handleConfirmPickup = async () => {
+    if (attendanceStatus !== 'arrived' || !selectedChild) return;
+    try {
+      const res = await fetch('/api/pickup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          childId: selectedChild.id,
+          pickupDate: new Date().toISOString().split('T')[0],
+          pickupTime: new Date().toISOString(),
+          authorizedPerson: selectedChild.parent.name + ' ' + selectedChild.parent.surname
+        })
+      });
+      if (res.ok) {
+        setAttendanceStatus('pickedUp');
+        setPickupTime(new Date());
+      }
+    } catch (err) {
+      console.error('Error confirming pickup:', err);
+    }
   };
 
   const handleResetAttendance = () => {
@@ -233,14 +284,13 @@ export default function ParentPage() {
   const formatTime = (date: Date | null) =>
     date
       ? date.toLocaleTimeString('pl-PL', {
-          hour: '2-digit',
-          minute: '2-digit',
-        })
+        hour: '2-digit',
+        minute: '2-digit',
+      })
       : null;
 
-  const odswiezKodOdbioru = () => {
-    const randomCode = Math.floor(10000 + Math.random() * 90000).toString();
-    setKodOdbioru(randomCode);
+  const refreshPickupCode = async () => {
+    await fetchPickupCode();
   };
 
   return (
@@ -253,9 +303,9 @@ export default function ParentPage() {
           </p>
         </div>
         <div className='flex flex-col items-center gap-2'>
-          <button 
-            className='inline-flex items-center gap-2 rounded-lg border cursor-pointer border-sky-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors' 
-            onClick={odswiezKodOdbioru}
+          <button
+            className='inline-flex items-center gap-2 rounded-lg border cursor-pointer border-sky-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors'
+            onClick={refreshPickupCode}
           >
             <RefreshIcon fontSize="small" />
             Odśwież kod odbioru
@@ -385,7 +435,7 @@ export default function ParentPage() {
               <ArrowForwardIosIcon fontSize="inherit" />
             </button>
           </header>
-          
+
           {loadingMeals ? (
             <div className="flex items-center justify-center py-8 text-gray-500">
               <Loader2 className="h-5 w-5 animate-spin mr-2" />

@@ -117,6 +117,7 @@ model Child {
   recommendations        ChildRecommendation[]
   behavioralInfos        BehavioralInfo[]
   mealCancellations      MealCancellation[]
+  dailyPickupCodes       DailyPickupCode[]
 
   @@index([parentId])
   @@index([groupId])
@@ -691,4 +692,21 @@ model MealCancellation {
   @@index([childId])
   @@index([date])
   @@map("meal_cancellations")
+}
+
+model DailyPickupCode {
+  id        String    @id @default(uuid())
+  childId   String
+  code      String
+  date      DateTime  @db.Date
+  isUsed    Boolean   @default(false)
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  child     Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, date])
+  @@index([childId])
+  @@index([date])
+  @@index([code])
+  @@map("daily_pickup_codes")
 }

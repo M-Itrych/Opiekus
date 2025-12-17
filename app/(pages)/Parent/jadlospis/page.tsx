@@ -6,6 +6,7 @@ import FreeBreakfast from '@mui/icons-material/FreeBreakfast';
 import LunchDining from '@mui/icons-material/LunchDining';
 import BakeryDining from '@mui/icons-material/BakeryDining';
 import { Loader2, X, AlertTriangle, Leaf, CheckCircle } from 'lucide-react';
+import { useModal } from '@/app/components/global/Modal/ModalContext';
 
 type MealKey = 'BREAKFAST' | 'LUNCH' | 'SNACK';
 
@@ -108,11 +109,12 @@ function formatDateLabel(dateString: string) {
 }
 
 export default function JadlospisPage() {
+  const { showModal } = useModal();
   const [selectedDate, setSelectedDate] = useState<string>(getTodayKey());
   const [mealPlans, setMealPlans] = useState<ApiMealPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [children, setChildren] = useState<Child[]>([]);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
   const [cancellations, setCancellations] = useState<MealCancellation[]>([]);
@@ -146,15 +148,15 @@ export default function JadlospisPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const params = new URLSearchParams({ date: selectedDate });
       if (selectedChild?.diet && selectedChild.diet !== 'STANDARD') {
         params.append('diet', selectedChild.diet);
       }
-      
+
       const res = await fetch(`/api/meal-plans?${params}`);
       if (!res.ok) throw new Error('Błąd pobierania jadłospisu');
-      
+
       const data: ApiMealPlan[] = await res.json();
       setMealPlans(data);
     } catch (err) {
@@ -196,7 +198,7 @@ export default function JadlospisPage() {
 
   const handleCancelMeal = async (mealType: string) => {
     if (!selectedChildId || !canCancelMeal(selectedDate)) return;
-    
+
     setIsCancelling(mealType);
     try {
       const res = await fetch('/api/menu/cancellations', {
@@ -211,14 +213,14 @@ export default function JadlospisPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        alert(data.error || 'Nie udało się anulować posiłku');
+        showModal('error', data.error || 'Nie udało się anulować posiłku');
         return;
       }
 
       await fetchCancellations();
     } catch (err) {
       console.error('Error cancelling meal:', err);
-      alert('Wystąpił błąd');
+      showModal('error', 'Wystąpił błąd');
     } finally {
       setIsCancelling(null);
     }
@@ -232,14 +234,14 @@ export default function JadlospisPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        alert(data.error || 'Nie udało się cofnąć anulowania');
+        showModal('error', data.error || 'Nie udało się cofnąć anulowania');
         return;
       }
 
       await fetchCancellations();
     } catch (err) {
       console.error('Error undoing cancellation:', err);
-      alert('Wystąpił błąd');
+      showModal('error', 'Wystąpił błąd');
     }
   };
 
@@ -251,7 +253,7 @@ export default function JadlospisPage() {
 
   const menuForDay = useMemo(() => {
     const menu: Record<MealKey, MealPlan> = { ...fallbackMenu };
-    
+
     mealPlans.forEach((plan) => {
       const mealKey = plan.mealType.toUpperCase() as MealKey;
       if (mealsOrder.some((m) => m.key === mealKey)) {
@@ -321,11 +323,10 @@ export default function JadlospisPage() {
               <button
                 key={child.id}
                 onClick={() => setSelectedChildId(child.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  selectedChildId === child.id
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedChildId === child.id
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 {child.name} {child.surname}
                 {child.diet !== 'STANDARD' && (
@@ -376,7 +377,7 @@ export default function JadlospisPage() {
               {showCancellations ? 'Ukryj' : 'Pokaż szczegóły'}
             </button>
           </div>
-          
+
           {showCancellations && (
             <div className="mt-3 pt-3 border-t border-amber-200 space-y-2">
               {cancellations.map((c) => (
@@ -388,7 +389,7 @@ export default function JadlospisPage() {
                     <span className="text-gray-700">
                       {new Date(c.date).toLocaleDateString('pl-PL')} - {
                         c.mealType === 'BREAKFAST' ? 'Śniadanie' :
-                        c.mealType === 'LUNCH' ? 'Obiad' : 'Podwieczorek'
+                          c.mealType === 'LUNCH' ? 'Obiad' : 'Podwieczorek'
                       }
                     </span>
                     <span className="text-xs text-gray-500 ml-2">
@@ -456,23 +457,21 @@ export default function JadlospisPage() {
             const hasData = meal.title !== 'Brak danych';
             const cancelled = isMealCancelled(key);
             const canCancel = hasData && canCancelMeal(selectedDate) && selectedChildId && !cancelled;
-            
+
             return (
               <div
                 key={key}
-                className={`bg-white border rounded-xl p-4 shadow-sm transition-shadow ${
-                  cancelled
+                className={`bg-white border rounded-xl p-4 shadow-sm transition-shadow ${cancelled
                     ? 'border-red-200 bg-red-50/30'
                     : hasData
-                    ? 'border-gray-200 hover:shadow-md'
-                    : 'border-gray-100 opacity-60'
-                }`}
+                      ? 'border-gray-200 hover:shadow-md'
+                      : 'border-gray-100 opacity-60'
+                  }`}
               >
                 <div className="flex items-center justify-between mb-2.5">
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg shrink-0 ${
-                      cancelled ? 'bg-red-100' : hasData ? 'bg-blue-50' : 'bg-gray-50'
-                    }`}>
+                    <div className={`p-2 rounded-lg shrink-0 ${cancelled ? 'bg-red-100' : hasData ? 'bg-blue-50' : 'bg-gray-50'
+                      }`}>
                       <Icon className={cancelled ? 'text-red-500' : hasData ? 'text-blue-500' : 'text-gray-400'} />
                     </div>
                     <h3 className="text-base font-semibold text-gray-800">{label}</h3>
@@ -488,14 +487,12 @@ export default function JadlospisPage() {
                     </span>
                   )}
                 </div>
-                <p className={`font-medium text-sm mb-1 ${
-                  cancelled ? 'text-gray-400 line-through' : hasData ? 'text-gray-700' : 'text-gray-400'
-                }`}>
+                <p className={`font-medium text-sm mb-1 ${cancelled ? 'text-gray-400 line-through' : hasData ? 'text-gray-700' : 'text-gray-400'
+                  }`}>
                   {meal.title}
                 </p>
-                <p className={`text-xs leading-relaxed ${
-                  cancelled ? 'text-gray-400' : hasData ? 'text-gray-600' : 'text-gray-400'
-                }`}>
+                <p className={`text-xs leading-relaxed ${cancelled ? 'text-gray-400' : hasData ? 'text-gray-600' : 'text-gray-400'
+                  }`}>
                   {meal.description}
                 </p>
 

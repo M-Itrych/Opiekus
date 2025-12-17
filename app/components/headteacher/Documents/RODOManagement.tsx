@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 interface ApiConsent {
   id: string;
@@ -41,6 +42,7 @@ interface ConsentRecord {
 }
 
 export default function RODOManagement() {
+  const { showModal } = useModal();
   const [consents, setConsents] = useState<ConsentRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -153,12 +155,12 @@ export default function RODOManagement() {
         }),
       });
 
-      if (!res.ok) throw new Error("Błąd generowania raportu");
+      if (!res.ok) throw new Error('Błąd generowania raportu');
 
-      alert("Raport RODO został wygenerowany i zapisany.");
+      showModal('success', 'Raport RODO został wygenerowany i zapisany.');
     } catch (err) {
       console.error(err);
-      alert("Nie udało się wygenerować raportu");
+      showModal('error', 'Nie udało się wygenerować raportu');
     }
   };
 
@@ -314,13 +316,12 @@ export default function RODOManagement() {
               </div>
               <div className="flex items-center gap-2">
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    consent.status === "accepted"
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${consent.status === "accepted"
                       ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
                       : consent.status === "rejected"
-                      ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                      : "bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400"
-                  }`}
+                        ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                        : "bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400"
+                    }`}
                 >
                   {getStatusLabel(consent.status)}
                 </span>

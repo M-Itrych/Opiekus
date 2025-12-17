@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, FileText, Download, Calendar, User, Loader2, RefreshCcw } from "lucide-react";
+import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 interface ApiDocument {
   id: string;
@@ -22,6 +23,7 @@ interface ApiDocument {
 }
 
 export default function DocumentArchive() {
+  const { showModal } = useModal();
   const [searchQuery, setSearchQuery] = useState("");
   const [documents, setDocuments] = useState<ApiDocument[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,15 +34,15 @@ export default function DocumentArchive() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const params = new URLSearchParams();
       if (statusFilter !== 'all') {
         params.append('status', statusFilter);
       }
-      
+
       const res = await fetch(`/api/documents?${params.toString()}`);
       if (!res.ok) throw new Error('Błąd pobierania dokumentów');
-      
+
       const data: ApiDocument[] = await res.json();
       setDocuments(data);
     } catch (err) {
@@ -80,7 +82,7 @@ export default function DocumentArchive() {
     if (doc.fileUrl) {
       window.open(doc.fileUrl, '_blank');
     } else {
-      alert('Plik nie jest dostępny do pobrania');
+      showModal('warning', 'Plik nie jest dostępny do pobrania');
     }
   };
 
@@ -200,11 +202,10 @@ export default function DocumentArchive() {
               </div>
               <div className="flex items-center gap-2">
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    doc.status === "AKTYWNY"
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${doc.status === "AKTYWNY"
                       ? "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400"
                       : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400"
-                  }`}
+                    }`}
                 >
                   {doc.status === "AKTYWNY" ? "Aktywny" : "Archiwalny"}
                 </span>

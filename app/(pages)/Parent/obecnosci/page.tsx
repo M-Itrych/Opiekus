@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { EventNote, CheckCircle, Cancel, CalendarToday, Save, ReportProblem, Close } from '@mui/icons-material';
 import { Loader2 } from 'lucide-react';
+import { useModal } from '@/app/components/global/Modal/ModalContext';
 
 type DayStatus = 'present' | 'absent' | 'pending';
 
@@ -39,6 +40,7 @@ interface Child {
 }
 
 export default function ObecnosciPage() {
+  const { showModal } = useModal();
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [isSaving, setIsSaving] = useState(false);
@@ -71,22 +73,22 @@ export default function ObecnosciPage() {
 
   const fetchAttendance = useCallback(async () => {
     if (!selectedChildId) return;
-    
+
     try {
       setLoading(true);
       setError(null);
 
       const startDate = new Date(selectedYear, selectedMonth, 1);
       const endDate = new Date(selectedYear, selectedMonth + 1, 0);
-      
+
       const res = await fetch(
         `/api/attendances?childId=${selectedChildId}&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
       );
-      
+
       if (!res.ok) throw new Error('Błąd pobierania obecności');
-      
+
       const data: ApiAttendance[] = await res.json();
-      
+
       const attendanceMap: { [key: string]: AttendanceData } = {};
       data.forEach((item) => {
         const dateKey = new Date(item.date).toISOString().split('T')[0];
@@ -96,7 +98,7 @@ export default function ObecnosciPage() {
           reason: item.reason || undefined,
         };
       });
-      
+
       setAttendance(attendanceMap);
       setHasChanges(false);
     } catch (err) {
@@ -114,29 +116,29 @@ export default function ObecnosciPage() {
 
       const startDate = new Date(selectedYear, selectedMonth, 1);
       const endDate = new Date(selectedYear, selectedMonth + 1, 0);
-      
+
       const res = await fetch(
         `/api/attendances?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
       );
-      
+
       if (!res.ok) throw new Error('Błąd pobierania obecności');
-      
+
       const data: ApiAttendance[] = await res.json();
-      
+
       const uniqueChildren: { [key: string]: Child } = {};
       data.forEach((item) => {
         if (!uniqueChildren[item.child.id]) {
           uniqueChildren[item.child.id] = item.child;
         }
       });
-      
+
       const childList = Object.values(uniqueChildren);
       setChildren(childList);
-      
+
       if (childList.length > 0 && !selectedChildId) {
         setSelectedChildId(childList[0].id);
       }
-      
+
       if (selectedChildId) {
         const attendanceMap: { [key: string]: AttendanceData } = {};
         data
@@ -151,7 +153,7 @@ export default function ObecnosciPage() {
           });
         setAttendance(attendanceMap);
       }
-      
+
       setHasChanges(false);
     } catch (err) {
       console.error(err);
@@ -186,7 +188,7 @@ export default function ObecnosciPage() {
 
     const startDayOfWeek = firstDay.getDay();
     const daysFromPrevMonth = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
-    
+
     for (let i = daysFromPrevMonth - 1; i >= 0; i--) {
       const date = new Date(year, month, -i);
       days.push({
@@ -200,7 +202,7 @@ export default function ObecnosciPage() {
       const dateKey = date.toISOString().split('T')[0];
       const attendanceData = attendance[dateKey];
       const status = attendanceData?.status || (date < new Date() ? 'present' : 'pending');
-      
+
       days.push({
         date,
         status: date > new Date() ? 'pending' : status,
@@ -233,7 +235,7 @@ export default function ObecnosciPage() {
     for (let day = 1; day <= lastDay.getDate(); day++) {
       const date = new Date(year, month, day);
       const dateKey = date.toISOString().split('T')[0];
-      
+
       if (date <= today && date.getDay() !== 0 && date.getDay() !== 6) {
         const status = attendance[dateKey]?.status || 'present';
         if (status === 'present') {
@@ -261,7 +263,7 @@ export default function ObecnosciPage() {
 
     const dateKey = day.date.toISOString().split('T')[0];
     const newStatus: DayStatus = day.status === 'absent' ? 'present' : 'absent';
-    
+
     setAttendance(prev => {
       if (newStatus === 'present') {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -294,7 +296,7 @@ export default function ObecnosciPage() {
 
   const handleSubmitAbsence = () => {
     if (!selectedDate || !absenceReason.trim()) {
-      alert('Proszę wybrać datę i podać powód nieobecności');
+      showModal('warning', 'Proszę wybrać datę i podać powód nieobecności');
       return;
     }
 
@@ -302,7 +304,7 @@ export default function ObecnosciPage() {
     selected.setHours(0, 0, 0, 0);
 
     if (selected.getDay() === 0 || selected.getDay() === 6) {
-      alert('Nie można zgłaszać nieobecności na weekend');
+      showModal('warning', 'Nie można zgłaszać nieobecności na weekend');
       return;
     }
 
@@ -317,7 +319,7 @@ export default function ObecnosciPage() {
     }));
     setHasChanges(true);
     handleCloseModal();
-    
+
     if (selected.getMonth() !== selectedMonth || selected.getFullYear() !== selectedYear) {
       setSelectedMonth(selected.getMonth());
       setSelectedYear(selected.getFullYear());
@@ -326,7 +328,7 @@ export default function ObecnosciPage() {
 
   const handleRemoveAbsence = () => {
     if (!selectedDate) return;
-    
+
     const dateKey = selectedDate.toISOString().split('T')[0];
     setAttendance(prev => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -339,7 +341,7 @@ export default function ObecnosciPage() {
 
   const handleSave = async () => {
     if (!selectedChildId) {
-      alert('Nie wybrano dziecka');
+      showModal('warning', 'Nie wybrano dziecka');
       return;
     }
 
@@ -361,11 +363,11 @@ export default function ObecnosciPage() {
       }
 
       setHasChanges(false);
-      alert('Zmiany zostały zapisane!');
+      showModal('success', 'Zmiany zostały zapisane!');
       fetchAttendance();
     } catch (err) {
       console.error(err);
-      alert('Wystąpił błąd podczas zapisywania');
+      showModal('error', 'Wystąpił błąd podczas zapisywania');
     } finally {
       setIsSaving(false);
     }
@@ -405,25 +407,25 @@ export default function ObecnosciPage() {
     const isSelectable = !isWeekend && isCurrentMonth;
 
     let baseClasses = 'w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ';
-    
+
     if (!isCurrentMonth) {
       return baseClasses + 'text-gray-300 cursor-not-allowed';
     }
-    
+
     if (isWeekend) {
       return baseClasses + 'text-gray-400 cursor-not-allowed bg-gray-50';
     }
-    
+
     if (isToday) {
       baseClasses += 'ring-2 ring-blue-500 ';
     }
-    
+
     if (isSelectable) {
       baseClasses += 'cursor-pointer hover:bg-gray-100 ';
     } else {
       baseClasses += 'cursor-not-allowed text-gray-300 ';
     }
-    
+
     if (day.status === 'absent') {
       return baseClasses + 'bg-red-100 text-red-700 hover:bg-red-200';
     } else if (day.status === 'present') {
@@ -558,7 +560,7 @@ export default function ObecnosciPage() {
           </button>
         </div>
 
-      
+
         <div className="grid grid-cols-7 justify-items-center gap-2 mb-2">
           {dayNames.map((day, index) => (
             <div
@@ -570,13 +572,13 @@ export default function ObecnosciPage() {
           ))}
         </div>
 
-      
+
         <div className="grid grid-cols-7 justify-items-center gap-2">
           {daysInMonth.map((day, index) => {
             const dateKey = day.date.toISOString().split('T')[0];
             const isHovered = hoveredDay === dateKey;
             const hasReason = day.reason && day.status === 'absent';
-            
+
             return (
               <div
                 key={index}
@@ -624,8 +626,8 @@ export default function ObecnosciPage() {
       <div className="mt-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
         <h3 className="font-semibold text-blue-800 mb-2">Informacje</h3>
         <p className="text-blue-700 text-sm">
-          Kliknij na dowolny dzień roboczy w kalendarzu (również przyszły), aby zaznaczyć lub odznaczyć nieobecność, 
-          lub użyj przycisku &quot;Zgłoś nieobecność&quot;, aby dodać wpis z powodem. Najedź kursorem na dzień z nieobecnością, 
+          Kliknij na dowolny dzień roboczy w kalendarzu (również przyszły), aby zaznaczyć lub odznaczyć nieobecność,
+          lub użyj przycisku &quot;Zgłoś nieobecność&quot;, aby dodać wpis z powodem. Najedź kursorem na dzień z nieobecnością,
           aby zobaczyć podany powód.
         </p>
       </div>
@@ -692,8 +694,8 @@ export default function ObecnosciPage() {
                 onClick={handleSubmitAbsence}
                 className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
               >
-                {selectedDate && attendance[selectedDate.toISOString().split('T')[0]]?.status === 'absent' 
-                  ? 'Zaktualizuj' 
+                {selectedDate && attendance[selectedDate.toISOString().split('T')[0]]?.status === 'absent'
+                  ? 'Zaktualizuj'
                   : 'Zgłoś nieobecność'}
               </button>
             </div>

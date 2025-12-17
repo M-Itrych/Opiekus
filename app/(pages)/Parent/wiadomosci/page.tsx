@@ -10,19 +10,15 @@ import PersonIcon from '@mui/icons-material/Person';
 import ReplyIcon from '@mui/icons-material/Reply';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { Loader2 } from 'lucide-react';
+import { useModal } from '@/app/components/global/Modal/ModalContext';
 
-interface Teacher {
+interface Recipient {
   id: string;
-  userId: string;
-  user: {
-    id: string;
-    name: string;
-    surname: string;
-  };
-  group?: {
-    id: string;
-    name: string;
-  } | null;
+  name: string;
+  surname: string;
+  email: string;
+  role: string;
+  category: string;
 }
 
 interface Message {
@@ -51,6 +47,7 @@ interface Message {
 type InboxFilter = 'all' | 'unread';
 
 export default function WiadomosciPage() {
+  const { showModal } = useModal();
   const [activeSection, setActiveSection] = useState<'inbox' | 'sent' | 'compose'>('inbox');
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [inboxMessages, setInboxMessages] = useState<Message[]>([]);
@@ -58,8 +55,8 @@ export default function WiadomosciPage() {
   const [filter, setFilter] = useState<InboxFilter>('all');
   const [selectedSentId, setSelectedSentId] = useState<string | null>(null);
 
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [selectedTeachers, setSelectedTeachers] = useState<string[]>([]);
+  const [recipients, setRecipients] = useState<Recipient[]>([]);
+  const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
 
@@ -71,7 +68,7 @@ export default function WiadomosciPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const [inboxRes, sentRes] = await Promise.all([
         fetch('/api/messages?type=inbox'),
         fetch('/api/messages?type=sent'),
@@ -98,12 +95,12 @@ export default function WiadomosciPage() {
     }
   }, [selectedMessageId]);
 
-  const fetchTeachers = useCallback(async () => {
+  const fetchRecipients = useCallback(async () => {
     try {
-      const res = await fetch('/api/staff/teachers');
-      if (!res.ok) throw new Error('Błąd pobierania nauczycieli');
+      const res = await fetch('/api/messages/recipients');
+      if (!res.ok) throw new Error('Błąd pobierania odbiorców');
       const data = await res.json();
-      setTeachers(data);
+      setRecipients(data);
     } catch (err) {
       console.error(err);
     }
@@ -111,8 +108,8 @@ export default function WiadomosciPage() {
 
   useEffect(() => {
     fetchMessages();
-    fetchTeachers();
-  }, [fetchMessages, fetchTeachers]);
+    fetchRecipients();
+  }, [fetchMessages, fetchRecipients]);
 
   const filteredMessages = useMemo(() => {
     return inboxMessages.filter((msg) => (filter === 'unread' ? !msg.isRead : true));
@@ -164,37 +161,34 @@ export default function WiadomosciPage() {
     }
   };
 
-  const handleToggleTeacher = (id: string) => {
-    setSelectedTeachers((prev) =>
-      prev.includes(id) ? prev.filter((tid) => tid !== id) : [...prev, id]
+  const handleToggleRecipient = (id: string) => {
+    setSelectedRecipients((prev) =>
+      prev.includes(id) ? prev.filter((rid) => rid !== id) : [...prev, id]
     );
   };
 
   const handleSendMessage = async () => {
-    if (selectedTeachers.length === 0) {
-      alert('Wybierz przynajmniej jednego nauczyciela.');
+    if (selectedRecipients.length === 0) {
+      showModal('warning', 'Wybierz przynajmniej jednego odbiorcę.');
       return;
     }
     if (subject.trim().length < 3) {
-      alert('Podaj temat wiadomości (minimum 3 znaki).');
+      showModal('warning', 'Podaj temat wiadomości (minimum 3 znaki).');
       return;
     }
     if (content.trim().length < 10) {
-      alert('Treść wiadomości powinna mieć co najmniej 10 znaków.');
+      showModal('warning', 'Treść wiadomości powinna mieć co najmniej 10 znaków.');
       return;
     }
 
     setSending(true);
     try {
-      for (const teacherId of selectedTeachers) {
-        const teacher = teachers.find((t) => t.id === teacherId);
-        if (!teacher) continue;
-
+      for (const recipientId of selectedRecipients) {
         const res = await fetch('/api/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            receiverId: teacher.user.id,
+            receiverId: recipientId,
             subject,
             body: content,
           }),
@@ -205,15 +199,15 @@ export default function WiadomosciPage() {
         }
       }
 
-      alert('Wiadomość została wysłana do wybranych nauczycieli.');
-      setSelectedTeachers([]);
+      showModal('success', 'Wiadomość została wysłana.');
+      setSelectedRecipients([]);
       setSubject('');
       setContent('');
       setActiveSection('sent');
       fetchMessages();
     } catch (err) {
       console.error(err);
-      alert('Wystąpił błąd podczas wysyłania wiadomości.');
+      showModal('error', 'Wystąpił błąd podczas wysyłania wiadomości.');
     } finally {
       setSending(false);
     }
@@ -284,11 +278,10 @@ export default function WiadomosciPage() {
                     setSelectedMessageId(inboxMessages[0].id);
                   }
                 }}
-                className={`rounded-md px-3 py-1.5 ${
-                  activeSection === 'inbox'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
+                className={`rounded-md px-3 py-1.5 ${activeSection === 'inbox'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'text-gray-600 hover:bg-gray-100'
+                  }`}
               >
                 Odbiorcze
               </button>
@@ -299,11 +292,10 @@ export default function WiadomosciPage() {
                     setSelectedSentId(sentMessages[0].id);
                   }
                 }}
-                className={`rounded-md px-3 py-1.5 ${
-                  activeSection === 'sent'
-                    ? 'bg-purple-100 text-purple-700'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
+                className={`rounded-md px-3 py-1.5 ${activeSection === 'sent'
+                  ? 'bg-purple-100 text-purple-700'
+                  : 'text-gray-600 hover:bg-gray-100'
+                  }`}
               >
                 Wysłane
               </button>
@@ -312,21 +304,19 @@ export default function WiadomosciPage() {
               <div className="flex items-center gap-2 text-xs text-gray-500">
                 <button
                   onClick={() => setFilter('all')}
-                  className={`rounded-md px-2 py-1 border ${
-                    filter === 'all'
-                      ? 'border-blue-300 bg-blue-50 text-blue-600'
-                      : 'border-gray-200 hover:bg-gray-50'
-                  }`}
+                  className={`rounded-md px-2 py-1 border ${filter === 'all'
+                    ? 'border-blue-300 bg-blue-50 text-blue-600'
+                    : 'border-gray-200 hover:bg-gray-50'
+                    }`}
                 >
                   Wszystkie
                 </button>
                 <button
                   onClick={() => setFilter('unread')}
-                  className={`rounded-md px-2 py-1 border ${
-                    filter === 'unread'
-                      ? 'border-blue-300 bg-blue-50 text-blue-600'
-                      : 'border-gray-200 hover:bg-gray-50'
-                  }`}
+                  className={`rounded-md px-2 py-1 border ${filter === 'unread'
+                    ? 'border-blue-300 bg-blue-50 text-blue-600'
+                    : 'border-gray-200 hover:bg-gray-50'
+                    }`}
                 >
                   Nieprzeczytane
                 </button>
@@ -344,9 +334,8 @@ export default function WiadomosciPage() {
                   <button
                     key={msg.id}
                     onClick={() => handleSelectMessage(msg.id)}
-                    className={`w-full text-left px-4 py-3 flex flex-col gap-1 transition-colors ${
-                      selectedMessageId === msg.id ? 'bg-blue-50' : 'hover:bg-gray-50'
-                    }`}
+                    className={`w-full text-left px-4 py-3 flex flex-col gap-1 transition-colors ${selectedMessageId === msg.id ? 'bg-blue-50' : 'hover:bg-gray-50'
+                      }`}
                   >
                     <div className="flex items-center justify-between text-xs text-gray-500">
                       <span>
@@ -387,9 +376,8 @@ export default function WiadomosciPage() {
                     setSelectedSentId(msg.id);
                     setSelectedMessageId(null);
                   }}
-                  className={`w-full text-left px-4 py-3 flex flex-col gap-1 transition-colors ${
-                    selectedSentId === msg.id ? 'bg-purple-50' : 'hover:bg-gray-50'
-                  }`}
+                  className={`w-full text-left px-4 py-3 flex flex-col gap-1 transition-colors ${selectedSentId === msg.id ? 'bg-purple-50' : 'hover:bg-gray-50'
+                    }`}
                 >
                   <div className="flex items-center justify-between text-xs text-gray-500">
                     <span>
@@ -432,35 +420,47 @@ export default function WiadomosciPage() {
                   Odbiorcy
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {teachers.length === 0 ? (
-                    <p className="text-sm text-gray-500 col-span-2">Brak dostępnych nauczycieli.</p>
+                  {recipients.length === 0 ? (
+                    <p className="text-sm text-gray-500 col-span-2">Brak dostępnych odbiorców.</p>
                   ) : (
-                    teachers.map((teacher) => (
-                      <label
-                        key={teacher.id}
-                        className={`flex items-start gap-2 rounded-lg border px-3 py-2 text-sm shadow-sm cursor-pointer ${
-                          selectedTeachers.includes(teacher.id)
-                            ? 'border-blue-300 bg-blue-50'
-                            : 'border-gray-200 bg-white hover:bg-gray-50'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedTeachers.includes(teacher.id)}
-                          onChange={() => handleToggleTeacher(teacher.id)}
-                          className="mt-1"
-                        />
-                        <div>
-                          <p className="font-semibold text-gray-800 flex items-center gap-1">
-                            <PersonIcon fontSize="small" className="text-blue-500" />
-                            {teacher.user.name} {teacher.user.surname}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {teacher.group?.name || 'Brak przypisanej grupy'}
-                          </p>
-                        </div>
-                      </label>
-                    ))
+                    <>
+                      {['Dyrekcja', 'Nauczyciele'].map((category) => {
+                        const categoryRecipients = recipients.filter((r) => r.category === category);
+                        if (categoryRecipients.length === 0) return null;
+                        return (
+                          <div key={category} className="col-span-2 space-y-2">
+                            <p className="text-xs font-bold text-gray-600 uppercase">{category}</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              {categoryRecipients.map((recipient) => (
+                                <label
+                                  key={recipient.id}
+                                  className={`flex items-start gap-2 rounded-lg border px-3 py-2 text-sm shadow-sm cursor-pointer ${selectedRecipients.includes(recipient.id)
+                                    ? 'border-blue-300 bg-blue-50'
+                                    : 'border-gray-200 bg-white hover:bg-gray-50'
+                                    }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedRecipients.includes(recipient.id)}
+                                    onChange={() => handleToggleRecipient(recipient.id)}
+                                    className="mt-1"
+                                  />
+                                  <div>
+                                    <p className="font-semibold text-gray-800 flex items-center gap-1">
+                                      <PersonIcon fontSize="small" className={category === 'Dyrekcja' ? 'text-purple-500' : 'text-blue-500'} />
+                                      {recipient.name} {recipient.surname}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                      {recipient.role === 'HEADTEACHER' ? 'Dyrektor' : recipient.role === 'ADMIN' ? 'Administrator' : 'Nauczyciel'}
+                                    </p>
+                                  </div>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </>
                   )}
                 </div>
               </div>
@@ -545,9 +545,9 @@ export default function WiadomosciPage() {
                         onClick={() => {
                           setSubject(`Re: ${sent.subject}`);
                           setContent(`\n\n---\nOryginał:\n${sent.body}`);
-                          const teacher = teachers.find((t) => t.user.id === sent.receiver.id);
-                          if (teacher) {
-                            setSelectedTeachers([teacher.id]);
+                          const recipient = recipients.find((r) => r.id === sent.receiver.id);
+                          if (recipient) {
+                            setSelectedRecipients([recipient.id]);
                           }
                           setActiveSection('compose');
                         }}
@@ -603,9 +603,9 @@ export default function WiadomosciPage() {
                   onClick={() => {
                     setSubject(`Re: ${selectedMessage.subject}`);
                     setContent('');
-                    const teacher = teachers.find((t) => t.user.id === selectedMessage.sender.id);
-                    if (teacher) {
-                      setSelectedTeachers([teacher.id]);
+                    const recipient = recipients.find((r) => r.id === selectedMessage.sender.id);
+                    if (recipient) {
+                      setSelectedRecipients([recipient.id]);
                     }
                     setActiveSection('compose');
                   }}

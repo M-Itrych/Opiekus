@@ -18,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 type Priority = "LOW" | "MEDIUM" | "HIGH";
 type Status = "TODO" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
@@ -75,6 +76,7 @@ function isToday(dateString: string) {
 }
 
 export default function TeacherTasksList() {
+  const { showModal } = useModal();
   const [tasks, setTasks] = useState<TaskRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -121,7 +123,7 @@ export default function TeacherTasksList() {
       );
     } catch (err) {
       console.error(err);
-      alert("Wystąpił błąd podczas aktualizacji statusu.");
+      showModal("error", "Wystąpił błąd podczas aktualizacji statusu.");
     } finally {
       setUpdatingTaskId(null);
     }
@@ -311,31 +313,31 @@ export default function TeacherTasksList() {
                   </div>
                   <div className="mt-4 flex flex-wrap items-center justify-between gap-4 text-sm text-zinc-600">
                     <div className="flex items-center gap-4">
-                        <span className="flex items-center gap-1">
+                      <span className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
                         Termin: {formatDate(task.dueDate)}
-                        </span>
+                      </span>
                     </div>
-                    
+
                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 gap-1" disabled={updatingTaskId === task.id}>
-                                {updatingTaskId === task.id ? <Loader2 className="h-3 w-3 animate-spin"/> : null}
-                                {statusLabels[task.status]}
-                                <ChevronDown className="h-3 w-3" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => updateTaskStatus(task.id, "TODO")}>
-                                Do zrobienia
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => updateTaskStatus(task.id, "IN_PROGRESS")}>
-                                W trakcie
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => updateTaskStatus(task.id, "COMPLETED")}>
-                                Zakończone
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 gap-1" disabled={updatingTaskId === task.id}>
+                          {updatingTaskId === task.id ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
+                          {statusLabels[task.status]}
+                          <ChevronDown className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => updateTaskStatus(task.id, "TODO")}>
+                          Do zrobienia
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => updateTaskStatus(task.id, "IN_PROGRESS")}>
+                          W trakcie
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => updateTaskStatus(task.id, "COMPLETED")}>
+                          Zakończone
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
                 </div>

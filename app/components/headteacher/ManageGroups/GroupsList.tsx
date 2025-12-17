@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Users, Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import { GroupModal } from "./GroupModal";
+import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 interface Group {
   id: string;
@@ -17,6 +18,7 @@ interface Group {
 }
 
 export default function GroupsList() {
+  const { showModal } = useModal();
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -74,30 +76,30 @@ export default function GroupsList() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Czy na pewno chcesz usunąć tę grupę?")) return;
-    
+
     try {
       const response = await fetch(`/api/groups/${id}`, {
         method: "DELETE",
       });
-      
+
       if (!response.ok) {
         const data = await response.json();
-        alert(data.error || "Błąd usuwania");
+        showModal('error', data.error || 'Błąd usuwania');
         return;
       }
-      
+
       fetchGroups(); // Odśwież listę
     } catch (error) {
       console.error("Error deleting group:", error);
-      alert("Wystąpił błąd");
+      showModal('error', 'Wystąpił błąd');
     }
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <GroupModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <GroupModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         groupId={selectedGroupId}
         onSuccess={handleSuccess}
       />
@@ -185,9 +187,9 @@ export default function GroupsList() {
                   <Edit className="h-4 w-4 mr-2" />
                   Edytuj
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="text-sky-600 hover:text-sky-700"
                   onClick={() => handleDelete(group.id)}
                 >

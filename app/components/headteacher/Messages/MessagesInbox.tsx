@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { 
-	Inbox, Send, Mail, Loader2, ChevronLeft, 
+import {
+	Inbox, Send, Mail, Loader2, ChevronLeft,
 	User, Clock, Plus, Search, Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 interface UserInfo {
 	id: string;
@@ -52,6 +53,7 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 export default function MessagesInbox() {
+	const { showModal } = useModal();
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [recipients, setRecipients] = useState<Recipient[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -147,7 +149,7 @@ export default function MessagesInbox() {
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({ isRead: true }),
 				});
-				setMessages(prev => 
+				setMessages(prev =>
 					prev.map(m => m.id === message.id ? { ...m, isRead: true } : m)
 				);
 			} catch (err) {
@@ -158,7 +160,7 @@ export default function MessagesInbox() {
 
 	const handleSendMessage = async () => {
 		if (!newMessage.receiverId || !newMessage.subject || !newMessage.body) {
-			alert("Wypełnij wszystkie pola");
+			showModal("warning", "Wypełnij wszystkie pola");
 			return;
 		}
 
@@ -175,10 +177,10 @@ export default function MessagesInbox() {
 			setNewMessage({ receiverId: "", subject: "", body: "" });
 			setViewMode("sent");
 			fetchMessages("sent");
-			alert("Wiadomość została wysłana!");
+			showModal("success", "Wiadomość została wysłana!");
 		} catch (err) {
 			console.error("Error sending message:", err);
-			alert("Wystąpił błąd podczas wysyłania wiadomości");
+			showModal("error", "Wystąpił błąd podczas wysyłania wiadomości");
 		} finally {
 			setSending(false);
 		}
@@ -263,8 +265,8 @@ export default function MessagesInbox() {
 							<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
 								Odbiorca
 							</label>
-							<Select 
-								value={newMessage.receiverId} 
+							<Select
+								value={newMessage.receiverId}
 								onValueChange={(v) => setNewMessage(prev => ({ ...prev, receiverId: v }))}
 							>
 								<SelectTrigger>
@@ -411,11 +413,10 @@ export default function MessagesInbox() {
 			<div className="flex gap-2 border-b border-zinc-200 dark:border-zinc-700">
 				<button
 					onClick={() => handleViewChange("inbox")}
-					className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
-						viewMode === "inbox"
+					className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${viewMode === "inbox"
 							? "border-b-2 border-sky-500 text-sky-600"
 							: "text-zinc-500 hover:text-zinc-700"
-					}`}
+						}`}
 				>
 					<Inbox className="h-4 w-4" />
 					Odebrane
@@ -427,11 +428,10 @@ export default function MessagesInbox() {
 				</button>
 				<button
 					onClick={() => handleViewChange("sent")}
-					className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
-						viewMode === "sent"
+					className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${viewMode === "sent"
 							? "border-b-2 border-sky-500 text-sky-600"
 							: "text-zinc-500 hover:text-zinc-700"
-					}`}
+						}`}
 				>
 					<Send className="h-4 w-4" />
 					Wysłane
@@ -459,11 +459,10 @@ export default function MessagesInbox() {
 							<button
 								key={message.id}
 								onClick={() => handleMessageClick(message, viewMode as "inbox" | "sent")}
-								className={`flex items-start gap-4 rounded-xl border p-4 text-left transition-all hover:shadow-md ${
-									!message.isRead && isInbox
+								className={`flex items-start gap-4 rounded-xl border p-4 text-left transition-all hover:shadow-md ${!message.isRead && isInbox
 										? "border-sky-200 bg-sky-50 dark:border-sky-800 dark:bg-sky-900/20"
 										: "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
-								}`}
+									}`}
 							>
 								<div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
 									{person.role === "PARENT" ? (
@@ -506,8 +505,8 @@ export default function MessagesInbox() {
 							{searchQuery
 								? "Nie znaleziono wiadomości pasujących do wyszukiwania"
 								: viewMode === "inbox"
-								? "Brak wiadomości w skrzynce odbiorczej"
-								: "Brak wysłanych wiadomości"}
+									? "Brak wiadomości w skrzynce odbiorczej"
+									: "Brak wysłanych wiadomości"}
 						</p>
 					</div>
 				)}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState, useCallback } from "react";
 import AttendanceSummary from "@/app/components/headteacher/PanelGlowny/AttendanceSummary";
 import AttendanceChart from "@/app/components/headteacher/PanelGlowny/AttendanceChart";
 import DayPlan from "@/app/components/headteacher/PanelGlowny/DayPlan";
@@ -7,12 +8,14 @@ import HeadTeacherLayout from "@/app/components/global/Layout/HeadTeacherLayout"
 
 type AttendanceKey = "present" | "reported" | "absent";
 
-const attendanceStatuses: Array<{
+interface AttendanceStatus {
   key: AttendanceKey;
   label: string;
   color: string;
   accent: string;
-}> = [
+}
+
+const attendanceStatuses: AttendanceStatus[] = [
   {
     key: "present",
     label: "Obecni",
@@ -33,96 +36,208 @@ const attendanceStatuses: Array<{
   },
 ];
 
-const dniDanych: Array<{
-  date: Date;
-  grupyData: Array<{
+interface Attendance {
+  id: string;
+  childId: string;
+  date: string;
+  status: "PRESENT" | "ABSENT" | "PENDING";
+  reason: string | null;
+  child: {
+    id: string;
     name: string;
-    counts: Record<AttendanceKey, number>;
-  }>;
-}> = [
-  {
-    date: new Date(),
-    grupyData: [
-      {
-        name: "Wszyscy uczniowie",
-        counts: { present: 24, reported: 6, absent: 2 },
-      },
-      {
-        name: "Grupa 1",
-        counts: { present: 12, reported: 2, absent: 1 },
-      },
-      {
-        name: "Grupa 2",
-        counts: { present: 12, reported: 4, absent: 1 },
-      },
-    ],
-  },
-  {
-    date: (() => {
-      const d = new Date();
-      d.setDate(d.getDate() - 1);
-      return d;
-    })(),
-    grupyData: [
-      {
-        name: "Wszyscy uczniowie",
-        counts: { present: 22, reported: 5, absent: 3 },
-      },
-      {
-        name: "Grupa 1",
-        counts: { present: 11, reported: 3, absent: 1 },
-      },
-      {
-        name: "Grupa 2",
-        counts: { present: 11, reported: 2, absent: 2 },
-      },
-    ],
-  },
-  {
-    date: (() => {
-      const d = new Date();
-      d.setDate(d.getDate() - 2);
-      return d;
-    })(),
-    grupyData: [
-      {
-        name: "Wszyscy uczniowie",
-        counts: { present: 26, reported: 4, absent: 1 },
-      },
-      {
-        name: "Grupa 1",
-        counts: { present: 13, reported: 1, absent: 1 },
-      },
-      {
-        name: "Grupa 2",
-        counts: { present: 13, reported: 3, absent: 0 },
-      },
-    ],
-  },
-];
+    surname: string;
+    groupId: string | null;
+  };
+}
 
-const upcomingEvents = [
-    {
-      title: "Spotkanie z rodzicami",
-      date: "2025-01-01",
-      time: "10:00",
-      description: "Omówienie wyników śródrocznych i planów na kolejny semestr.",
-    },
-    {
-      title: "Rada pedagogiczna",
-      date: "2025-01-01",
-      time: "14:00",
-      description: "Podsumowanie pierwszego półrocza oraz planowanie szkoleń.",
-    },
-    {
-      title: "Dzień otwarty",
-      date: "2025-01-01",
-      time: "16:00",
-      description: "Prezentacja oferty szkoły dla nowych rodziców i uczniów.",
-    },
-  ];
+interface Group {
+  id: string;
+  name: string;
+  ageRange: string;
+  childrenCount: number;
+  maxCapacity: number;
+  teacherName: string;
+  room: string;
+}
+
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  category: string;
+  eventDate: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  location: string | null;
+  isImportant: boolean;
+  createdAt: string;
+  author: {
+    name: string;
+    surname: string;
+  };
+  group: {
+    id: string;
+    name: string;
+  } | null;
+}
+
+interface UpcomingEvent {
+  title: string;
+  date: string;
+  time: string;
+  description: string;
+}
+
+interface GroupAttendanceData {
+  name: string;
+  counts: Record<AttendanceKey, number>;
+}
+
+interface DayData {
+  date: Date;
+  grupyData: GroupAttendanceData[];
+}
 
 export default function HeadTeacher() {
+  const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([]);
+  const [dniDanych, setDniDanych] = useState<DayData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const formatDateForAPI = (date: Date): string => {
+    return date.toISOString().split("T")[0];
+  };
+
+  const formatTimeFromDate = (dateString: string | null): string => {
+    if (!dateString) return "00:00";
+    const date = new Date(dateString);
+    return date.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const processAttendanceData = useCallback(
+    (attendances: Attendance[], groups: Group[], targetDate: Date): GroupAttendanceData[] => {
+      const dateStr = formatDateForAPI(targetDate);
+      const dayAttendances = attendances.filter((a) => a.date.startsWith(dateStr));
+
+      const groupMap = new Map<string, { name: string; counts: Record<AttendanceKey, number> }>();
+
+      groups.forEach((group) => {
+        groupMap.set(group.id, {
+          name: group.name,
+          counts: { present: 0, reported: 0, absent: 0 },
+        });
+      });
+
+      dayAttendances.forEach((attendance) => {
+        const groupId = attendance.child.groupId;
+        if (groupId && groupMap.has(groupId)) {
+          const groupData = groupMap.get(groupId)!;
+          if (attendance.status === "PRESENT") {
+            groupData.counts.present++;
+          } else if (attendance.status === "PENDING") {
+            groupData.counts.reported++;
+          } else if (attendance.status === "ABSENT") {
+            groupData.counts.absent++;
+          }
+        }
+      });
+
+      const total: Record<AttendanceKey, number> = { present: 0, reported: 0, absent: 0 };
+      groupMap.forEach((data) => {
+        total.present += data.counts.present;
+        total.reported += data.counts.reported;
+        total.absent += data.counts.absent;
+      });
+
+      return [
+        { name: "Wszyscy uczniowie", counts: total },
+        ...Array.from(groupMap.values()),
+      ];
+    },
+    []
+  );
+
+  const processAnnouncements = useCallback((announcements: Announcement[]): UpcomingEvent[] => {
+    const now = new Date();
+    const today = formatDateForAPI(now);
+
+    const upcomingAnnouncements = announcements
+      .filter((a) => {
+        if (!a.eventDate) return false;
+        const eventDateStr = a.eventDate.split("T")[0];
+        return eventDateStr >= today;
+      })
+      .sort((a, b) => {
+        const dateA = new Date(a.eventDate || a.createdAt);
+        const dateB = new Date(b.eventDate || b.createdAt);
+        return dateA.getTime() - dateB.getTime();
+      })
+      .slice(0, 5);
+
+    return upcomingAnnouncements.map((a) => ({
+      title: a.title,
+      date: a.eventDate ? a.eventDate.split("T")[0] : formatDateForAPI(new Date(a.createdAt)),
+      time: formatTimeFromDate(a.startTime || a.eventDate),
+      description: a.content.length > 100 ? a.content.substring(0, 100) + "..." : a.content,
+    }));
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        const today = new Date();
+        const threeDaysAgo = new Date();
+        threeDaysAgo.setDate(today.getDate() - 2);
+        const [attendancesRes, groupsRes, announcementsRes] = await Promise.all([
+          fetch(`/api/attendances?startDate=${formatDateForAPI(threeDaysAgo)}&endDate=${formatDateForAPI(today)}`),
+          fetch("/api/groups"),
+          fetch("/api/announcements"),
+        ]);
+
+        if (!attendancesRes.ok || !groupsRes.ok || !announcementsRes.ok) {
+          throw new Error("Failed to fetch data");
+        }
+
+        const attendances: Attendance[] = await attendancesRes.json();
+        const groups: Group[] = await groupsRes.json();
+        const announcements: Announcement[] = await announcementsRes.json();
+
+        const processedDays: DayData[] = [];
+        for (let i = 0; i < 3; i++) {
+          const date = new Date();
+          date.setDate(today.getDate() - i);
+          processedDays.push({
+            date,
+            grupyData: processAttendanceData(attendances, groups, date),
+          });
+        }
+        setDniDanych(processedDays);
+
+        const events = processAnnouncements(announcements);
+        setUpcomingEvents(events);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setDniDanych([]);
+        setUpcomingEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [processAttendanceData, processAnnouncements]);
+
+  if (loading) {
+    return (
+      <HeadTeacherLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </HeadTeacherLayout>
+    );
+  }
+
   return (
     <HeadTeacherLayout>
       <DayPlan upcomingEvents={upcomingEvents} />

@@ -9,6 +9,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { Loader2 } from 'lucide-react';
+import { useModal } from '@/app/components/global/Modal/ModalContext';
 
 interface ApiPayment {
   id: string;
@@ -27,6 +28,7 @@ interface ApiPayment {
 }
 
 export default function PlatnosciPage() {
+  const { showModal } = useModal();
   const [payments, setPayments] = useState<ApiPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,10 +38,10 @@ export default function PlatnosciPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const res = await fetch('/api/payments');
       if (!res.ok) throw new Error('Błąd pobierania płatności');
-      
+
       const data: ApiPayment[] = await res.json();
       setPayments(data);
     } catch (err) {
@@ -88,15 +90,13 @@ export default function PlatnosciPage() {
       if (!res.ok) throw new Error('Błąd przetwarzania płatności');
 
       await fetchPayments();
-      alert(
-        `Opłata została zarejestrowana. Kwota: ${payment.amount.toLocaleString('pl-PL', {
-          style: 'currency',
-          currency: 'PLN',
-        })}`
-      );
+      showModal('success', `Opłata została zarejestrowana. Kwota: ${payment.amount.toLocaleString('pl-PL', {
+        style: 'currency',
+        currency: 'PLN',
+      })}`);
     } catch (err) {
       console.error(err);
-      alert('Wystąpił błąd podczas przetwarzania płatności');
+      showModal('error', 'Wystąpił błąd podczas przetwarzania płatności');
     } finally {
       setIsProcessing(null);
     }
@@ -214,11 +214,10 @@ export default function PlatnosciPage() {
                     </td>
                     <td className="px-5 py-4">
                       <span
-                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                          payment.status === 'PENDING'
+                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${payment.status === 'PENDING'
                             ? 'border border-blue-200 bg-blue-50 text-blue-600'
                             : 'border border-amber-200 bg-amber-50 text-amber-600'
-                        }`}
+                          }`}
                       >
                         {payment.status === 'PENDING' ? (
                           <>
@@ -243,9 +242,9 @@ export default function PlatnosciPage() {
                         {isProcessing === payment.id
                           ? 'Przetwarzanie...'
                           : `Zapłać ${payment.amount.toLocaleString('pl-PL', {
-                              style: 'currency',
-                              currency: 'PLN',
-                            })}`}
+                            style: 'currency',
+                            currency: 'PLN',
+                          })}`}
                       </button>
                     </td>
                   </tr>
@@ -294,12 +293,12 @@ export default function PlatnosciPage() {
                     <td className="px-5 py-4 text-gray-600">
                       {payment.paidDate
                         ? new Date(payment.paidDate).toLocaleString('pl-PL', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
                         : '-'}
                     </td>
                     <td className="px-5 py-4 font-semibold text-gray-900">

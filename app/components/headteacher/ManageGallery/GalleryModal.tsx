@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2, X, Trash2, Image as ImageIcon, Edit2, ZoomIn, Upload } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing";
+import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 
 interface GalleryModalProps {
@@ -50,6 +51,7 @@ interface GroupOption {
 }
 
 export function GalleryModal({ galleryId, isOpen, onClose, onSuccess }: GalleryModalProps) {
+  const { showModal } = useModal();
   const [activeTab, setActiveTab] = useState("details");
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -112,7 +114,7 @@ export function GalleryModal({ galleryId, isOpen, onClose, onSuccess }: GalleryM
           setNewPhotoCaption("");
         } catch (err) {
           console.error("Error adding photo:", err);
-          alert("Błąd podczas dodawania zdjęcia");
+          showModal('error', 'Błąd podczas dodawania zdjęcia');
         }
       }
 
@@ -121,7 +123,7 @@ export function GalleryModal({ galleryId, isOpen, onClose, onSuccess }: GalleryM
     },
     onUploadError: (error) => {
       console.error("Upload error:", error);
-      alert(`Błąd przesyłania: ${error.message}`);
+      showModal('error', `Błąd przesyłania: ${error.message}`);
       setIsUploading(false);
       setUploadProgress(0);
     },
@@ -190,7 +192,7 @@ export function GalleryModal({ galleryId, isOpen, onClose, onSuccess }: GalleryM
       setGalleryPhotos(data.photos || []);
     } catch (error) {
       console.error(error);
-      alert("Błąd podczas ładowania galerii");
+      showModal('error', 'Błąd podczas ładowania galerii');
     } finally {
       setIsLoading(false);
     }
@@ -220,7 +222,7 @@ export function GalleryModal({ galleryId, isOpen, onClose, onSuccess }: GalleryM
         onSuccess();
       } else {
         if (newPhotos.length === 0) {
-          alert("Dodaj przynajmniej jedno zdjęcie");
+          showModal('warning', 'Dodaj przynajmniej jedno zdjęcie');
           setIsSaving(false);
           return;
         }
@@ -247,8 +249,8 @@ export function GalleryModal({ galleryId, isOpen, onClose, onSuccess }: GalleryM
       }
     } catch (error) {
       console.error(error);
-      const message = error instanceof Error ? error.message : "Błąd zapisu";
-      alert(message);
+      const message = error instanceof Error ? error.message : 'Błąd zapisu';
+      showModal('error', message);
     } finally {
       setIsSaving(false);
     }
@@ -266,11 +268,11 @@ export function GalleryModal({ galleryId, isOpen, onClose, onSuccess }: GalleryM
         setGalleryPhotos(galleryPhotos.filter((p) => p.id !== photoId));
       } else {
         const error = await response.json();
-        alert(error.error || "Błąd usuwania");
+        showModal('error', error.error || 'Błąd usuwania');
       }
     } catch (error) {
       console.error(error);
-      alert("Błąd podczas usuwania zdjęcia");
+      showModal('error', 'Błąd podczas usuwania zdjęcia');
     }
   };
 
@@ -293,11 +295,11 @@ export function GalleryModal({ galleryId, isOpen, onClose, onSuccess }: GalleryM
         setEditingCaption(null);
       } else {
         const error = await response.json();
-        alert(error.error || "Błąd aktualizacji opisu");
+        showModal('error', error.error || 'Błąd aktualizacji opisu');
       }
     } catch (error) {
       console.error(error);
-      alert("Błąd podczas aktualizacji opisu");
+      showModal('error', 'Błąd podczas aktualizacji opisu');
     }
   };
 
@@ -371,21 +373,19 @@ export function GalleryModal({ galleryId, isOpen, onClose, onSuccess }: GalleryM
                 <div className="flex space-x-1 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
                   <button
                     onClick={() => setActiveTab("details")}
-                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
-                      activeTab === "details"
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${activeTab === "details"
                         ? "bg-white dark:bg-zinc-700 shadow text-zinc-900 dark:text-zinc-100"
                         : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400"
-                    }`}
+                      }`}
                   >
                     Szczegóły
                   </button>
                   <button
                     onClick={() => setActiveTab("photos")}
-                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
-                      activeTab === "photos"
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${activeTab === "photos"
                         ? "bg-white dark:bg-zinc-700 shadow text-zinc-900 dark:text-zinc-100"
                         : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400"
-                    }`}
+                      }`}
                   >
                     Zdjęcia ({galleryId ? galleryPhotos.length : newPhotos.length})
                   </button>

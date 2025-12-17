@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { UserPlus, UserMinus, Loader2, X, Edit, Leaf } from "lucide-react";
 import { ChildEditModal } from "./ChildEditModal";
+import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 interface GroupModalProps {
   groupId?: string | null;
@@ -50,6 +51,7 @@ interface GroupDetails {
 }
 
 export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalProps) {
+  const { showModal } = useModal();
   const [activeTab, setActiveTab] = useState("details");
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -67,8 +69,8 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
   const [groupStaff, setGroupStaff] = useState<Staff[]>([]);
   const [availableTeachers, setAvailableTeachers] = useState<Staff[]>([]);
   const [unassignedChildren, setUnassignedChildren] = useState<Child[]>([]);
-  const [allGroups, setAllGroups] = useState<{id: string, name: string}[]>([]);
-  const [rooms, setRooms] = useState<{id: string, name: string}[]>([]);
+  const [allGroups, setAllGroups] = useState<{ id: string, name: string }[]>([]);
+  const [rooms, setRooms] = useState<{ id: string, name: string }[]>([]);
 
   const [selectedChildToAdd, setSelectedChildToAdd] = useState<string>("");
   const [selectedTeacherToAdd, setSelectedTeacherToAdd] = useState<string>("");
@@ -105,13 +107,13 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
         fetch("/api/groups"),
         fetch("/api/rooms")
       ]);
-      
+
       if (teachersRes.ok) setAvailableTeachers(await teachersRes.json());
       if (childrenRes.ok) setUnassignedChildren(await childrenRes.json());
       if (groupsRes.ok) setAllGroups(await groupsRes.json());
       if (roomsRes.ok) {
         const roomsData = await roomsRes.json();
-        setRooms(roomsData.map((room: {id: string, name: string}) => ({ id: room.id, name: room.name })));
+        setRooms(roomsData.map((room: { id: string, name: string }) => ({ id: room.id, name: room.name })));
       }
 
     } catch (error) {
@@ -124,7 +126,7 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
     try {
       const response = await fetch(`/api/groups/${id}`);
       if (!response.ok) throw new Error("Failed to fetch group");
-      
+
       const data: GroupDetails = await response.json();
       setName(data.name);
       setAgeRange(data.ageRange);
@@ -167,7 +169,7 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
       if (!response.ok) throw new Error("Failed to save");
 
       if (!groupId) {
-    
+
         onSuccess();
         onClose();
       } else {
@@ -176,7 +178,7 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
       }
     } catch (error) {
       console.error(error);
-      alert("Błąd zapisu");
+      showModal('error', 'Błąd zapisu');
     } finally {
       setIsSaving(false);
     }
@@ -281,299 +283,296 @@ export function GroupModal({ groupId, isOpen, onClose, onSuccess }: GroupModalPr
 
   return (
     <>
-    <ChildEditModal
-      childId={editingChildId}
-      isOpen={!!editingChildId}
-      onClose={() => setEditingChildId(null)}
-      onSuccess={handleChildEditSuccess}
-    />
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
-        
-        <div className="flex items-center justify-between p-6 border-b dark:border-zinc-800">
-          <div>
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-              {groupId ? "Edycja grupy" : "Nowa grupa"}
-            </h2>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-              Zarządzaj danymi grupy, dziećmi i kadrą.
-            </p>
-          </div>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
+      <ChildEditModal
+        childId={editingChildId}
+        isOpen={!!editingChildId}
+        onClose={() => setEditingChildId(null)}
+        onSuccess={handleChildEditSuccess}
+      />
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
 
-        <div className="flex-1 overflow-y-auto p-6">
-          {isLoading ? (
-            <div className="flex justify-center py-10">
-              <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+          <div className="flex items-center justify-between p-6 border-b dark:border-zinc-800">
+            <div>
+              <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+                {groupId ? "Edycja grupy" : "Nowa grupa"}
+              </h2>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                Zarządzaj danymi grupy, dziećmi i kadrą.
+              </p>
             </div>
-          ) : (
-            <div className="space-y-6">
-              <div className="flex space-x-1 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
-                <button
-                  onClick={() => setActiveTab("details")}
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
-                    activeTab === "details"
-                      ? "bg-white dark:bg-zinc-700 shadow text-zinc-900 dark:text-zinc-100"
-                      : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400"
-                  }`}
-                >
-                  Szczegóły
-                </button>
-                <button
-                  onClick={() => setActiveTab("children")}
-                  disabled={!groupId}
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
-                    activeTab === "children"
-                      ? "bg-white dark:bg-zinc-700 shadow text-zinc-900 dark:text-zinc-100"
-                      : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                  }`}
-                >
-                  Dzieci
-                </button>
-                <button
-                  onClick={() => setActiveTab("staff")}
-                  disabled={!groupId}
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
-                    activeTab === "staff"
-                      ? "bg-white dark:bg-zinc-700 shadow text-zinc-900 dark:text-zinc-100"
-                      : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                  }`}
-                >
-                  Kadra
-                </button>
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6">
+            {isLoading ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
               </div>
-
-              {activeTab === "details" && (
-                <div className="space-y-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="name">Nazwa grupy</Label>
-                    <Input
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="np. Biedronki"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="ageRange">Przedział wiekowy</Label>
-                    <Input
-                      id="ageRange"
-                      value={ageRange}
-                      onChange={(e) => setAgeRange(e.target.value)}
-                      placeholder="np. 3-4 lata"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="capacity">Limit miejsc</Label>
-                    <Input
-                      id="capacity"
-                      type="number"
-                      value={maxCapacity}
-                      onChange={(e) => setMaxCapacity(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="grid gap-2">
-                    <Label htmlFor="room">Sala</Label>
-                    <Select
-                      value={roomId || "none"}
-                      onValueChange={(value) => setRoomId(value === "none" ? null : value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Wybierz salę" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Brak sali</SelectItem>
-                        {rooms.map((room) => (
-                          <SelectItem key={room.id} value={room.id}>
-                            {room.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="border-t dark:border-zinc-700 pt-4 mt-4">
-                    <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">Ceny posiłków (PLN)</h4>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="breakfastPrice">Śniadanie</Label>
-                        <Input
-                          id="breakfastPrice"
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={breakfastPrice}
-                          onChange={(e) => setBreakfastPrice(e.target.value)}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="lunchPrice">Obiad</Label>
-                        <Input
-                          id="lunchPrice"
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={lunchPrice}
-                          onChange={(e) => setLunchPrice(e.target.value)}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="snackPrice">Podwieczorek</Label>
-                        <Input
-                          id="snackPrice"
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={snackPrice}
-                          onChange={(e) => setSnackPrice(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="pt-4 flex justify-end border-t dark:border-zinc-800 mt-4">
-                    <Button onClick={handleSaveDetails} disabled={isSaving} className="bg-sky-500 hover:bg-sky-600 text-white">
-                      {isSaving ? "Zapisywanie..." : "Zapisz zmiany"}
-                    </Button>
-                  </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex space-x-1 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
+                  <button
+                    onClick={() => setActiveTab("details")}
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${activeTab === "details"
+                        ? "bg-white dark:bg-zinc-700 shadow text-zinc-900 dark:text-zinc-100"
+                        : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400"
+                      }`}
+                  >
+                    Szczegóły
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("children")}
+                    disabled={!groupId}
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${activeTab === "children"
+                        ? "bg-white dark:bg-zinc-700 shadow text-zinc-900 dark:text-zinc-100"
+                        : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                      }`}
+                  >
+                    Dzieci
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("staff")}
+                    disabled={!groupId}
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${activeTab === "staff"
+                        ? "bg-white dark:bg-zinc-700 shadow text-zinc-900 dark:text-zinc-100"
+                        : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                      }`}
+                  >
+                    Kadra
+                  </button>
                 </div>
-              )}
 
-              {activeTab === "children" && (
-                <div className="space-y-4">
-                  <div className="flex gap-2">
-                    <Select value={selectedChildToAdd} onValueChange={setSelectedChildToAdd}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Wybierz dziecko do dodania" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {unassignedChildren.length === 0 ? (
-                          <SelectItem value="none" disabled>Brak nieprzypisanych dzieci</SelectItem>
-                        ) : (
-                          unassignedChildren.map((child) => (
-                            <SelectItem key={child.id} value={child.id}>
-                              {child.surname} {child.name}
-                            </SelectItem>
-                          ))
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <Button onClick={handleAddChild} disabled={!selectedChildToAdd} className="bg-sky-500 hover:bg-sky-600 text-white">
-                      <UserPlus className="h-4 w-4" />
-                    </Button>
-                  </div>
-
-                  <div className="border dark:border-zinc-700 rounded-md">
-                    <div className="bg-zinc-50 dark:bg-zinc-800 p-2 border-b dark:border-zinc-700">
-                      <h4 className="text-sm font-medium">Lista dzieci ({groupChildren.length})</h4>
+                {activeTab === "details" && (
+                  <div className="space-y-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="name">Nazwa grupy</Label>
+                      <Input
+                        id="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="np. Biedronki"
+                      />
                     </div>
-                    <div className="max-h-[300px] overflow-y-auto p-2 space-y-1">
-                      {groupChildren.map((child) => (
-                        <div key={child.id} className="flex items-center justify-between p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md text-sm transition-colors">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{child.surname} {child.name}</span>
-                            {child.diet && child.diet !== "STANDARD" && (
-                              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700">
-                                <Leaf className="h-3 w-3" />
-                                {child.diet === "VEGETARIAN" ? "Wege" : 
-                                 child.diet === "VEGAN" ? "Vegan" :
-                                 child.diet === "GLUTEN_FREE" ? "Bezglut." :
-                                 child.diet === "LACTOSE_FREE" ? "Bez lakt." : "Inna"}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                              onClick={() => setEditingChildId(child.id)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                             <Select onValueChange={(val) => handleMoveChild(child.id, val)}>
-                              <SelectTrigger className="h-8 w-[140px] text-xs">
-                                 <SelectValue placeholder="Przenieś do..." />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {allGroups.filter(g => g.id !== groupId).map(g => (
+                    <div className="grid gap-2">
+                      <Label htmlFor="ageRange">Przedział wiekowy</Label>
+                      <Input
+                        id="ageRange"
+                        value={ageRange}
+                        onChange={(e) => setAgeRange(e.target.value)}
+                        placeholder="np. 3-4 lata"
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="capacity">Limit miejsc</Label>
+                      <Input
+                        id="capacity"
+                        type="number"
+                        value={maxCapacity}
+                        onChange={(e) => setMaxCapacity(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="room">Sala</Label>
+                      <Select
+                        value={roomId || "none"}
+                        onValueChange={(value) => setRoomId(value === "none" ? null : value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Wybierz salę" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Brak sali</SelectItem>
+                          {rooms.map((room) => (
+                            <SelectItem key={room.id} value={room.id}>
+                              {room.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="border-t dark:border-zinc-700 pt-4 mt-4">
+                      <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">Ceny posiłków (PLN)</h4>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="breakfastPrice">Śniadanie</Label>
+                          <Input
+                            id="breakfastPrice"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={breakfastPrice}
+                            onChange={(e) => setBreakfastPrice(e.target.value)}
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="lunchPrice">Obiad</Label>
+                          <Input
+                            id="lunchPrice"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={lunchPrice}
+                            onChange={(e) => setLunchPrice(e.target.value)}
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="snackPrice">Podwieczorek</Label>
+                          <Input
+                            id="snackPrice"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={snackPrice}
+                            onChange={(e) => setSnackPrice(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 flex justify-end border-t dark:border-zinc-800 mt-4">
+                      <Button onClick={handleSaveDetails} disabled={isSaving} className="bg-sky-500 hover:bg-sky-600 text-white">
+                        {isSaving ? "Zapisywanie..." : "Zapisz zmiany"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "children" && (
+                  <div className="space-y-4">
+                    <div className="flex gap-2">
+                      <Select value={selectedChildToAdd} onValueChange={setSelectedChildToAdd}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Wybierz dziecko do dodania" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {unassignedChildren.length === 0 ? (
+                            <SelectItem value="none" disabled>Brak nieprzypisanych dzieci</SelectItem>
+                          ) : (
+                            unassignedChildren.map((child) => (
+                              <SelectItem key={child.id} value={child.id}>
+                                {child.surname} {child.name}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <Button onClick={handleAddChild} disabled={!selectedChildToAdd} className="bg-sky-500 hover:bg-sky-600 text-white">
+                        <UserPlus className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <div className="border dark:border-zinc-700 rounded-md">
+                      <div className="bg-zinc-50 dark:bg-zinc-800 p-2 border-b dark:border-zinc-700">
+                        <h4 className="text-sm font-medium">Lista dzieci ({groupChildren.length})</h4>
+                      </div>
+                      <div className="max-h-[300px] overflow-y-auto p-2 space-y-1">
+                        {groupChildren.map((child) => (
+                          <div key={child.id} className="flex items-center justify-between p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md text-sm transition-colors">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{child.surname} {child.name}</span>
+                              {child.diet && child.diet !== "STANDARD" && (
+                                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700">
+                                  <Leaf className="h-3 w-3" />
+                                  {child.diet === "VEGETARIAN" ? "Wege" :
+                                    child.diet === "VEGAN" ? "Vegan" :
+                                      child.diet === "GLUTEN_FREE" ? "Bezglut." :
+                                        child.diet === "LACTOSE_FREE" ? "Bez lakt." : "Inna"}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                onClick={() => setEditingChildId(child.id)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Select onValueChange={(val) => handleMoveChild(child.id, val)}>
+                                <SelectTrigger className="h-8 w-[140px] text-xs">
+                                  <SelectValue placeholder="Przenieś do..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {allGroups.filter(g => g.id !== groupId).map(g => (
                                     <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                onClick={() => handleRemoveChild(child.id)}
+                              >
+                                <UserMinus className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        {groupChildren.length === 0 && (
+                          <p className="text-center text-zinc-500 py-8 text-sm">Brak przypisanych dzieci</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "staff" && (
+                  <div className="space-y-4">
+                    <div className="flex gap-2">
+                      <Select value={selectedTeacherToAdd} onValueChange={setSelectedTeacherToAdd}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Wybierz nauczyciela" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableTeachers.map((staff) => (
+                            <SelectItem key={staff.id} value={staff.id}>
+                              {staff.user.surname} {staff.user.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button onClick={handleAddTeacher} disabled={!selectedTeacherToAdd} className="bg-sky-500 hover:bg-sky-600 text-white">
+                        <UserPlus className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <div className="border dark:border-zinc-700 rounded-md">
+                      <div className="bg-zinc-50 dark:bg-zinc-800 p-2 border-b dark:border-zinc-700">
+                        <h4 className="text-sm font-medium">Przypisana kadra</h4>
+                      </div>
+                      <div className="max-h-[300px] overflow-y-auto p-2 space-y-1">
+                        {groupStaff.map((staff) => (
+                          <div key={staff.id} className="flex items-center justify-between p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md text-sm transition-colors">
+                            <span className="font-medium">{staff.user.surname} {staff.user.name}</span>
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                              onClick={() => handleRemoveChild(child.id)}
+                              onClick={() => handleRemoveTeacher(staff.id)}
                             >
                               <UserMinus className="h-4 w-4" />
                             </Button>
                           </div>
-                        </div>
-                      ))}
-                      {groupChildren.length === 0 && (
-                        <p className="text-center text-zinc-500 py-8 text-sm">Brak przypisanych dzieci</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "staff" && (
-                <div className="space-y-4">
-                  <div className="flex gap-2">
-                    <Select value={selectedTeacherToAdd} onValueChange={setSelectedTeacherToAdd}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Wybierz nauczyciela" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableTeachers.map((staff) => (
-                          <SelectItem key={staff.id} value={staff.id}>
-                            {staff.user.surname} {staff.user.name}
-                          </SelectItem>
                         ))}
-                      </SelectContent>
-                    </Select>
-                    <Button onClick={handleAddTeacher} disabled={!selectedTeacherToAdd} className="bg-sky-500 hover:bg-sky-600 text-white">
-                      <UserPlus className="h-4 w-4" />
-                    </Button>
-                  </div>
-
-                  <div className="border dark:border-zinc-700 rounded-md">
-                    <div className="bg-zinc-50 dark:bg-zinc-800 p-2 border-b dark:border-zinc-700">
-                      <h4 className="text-sm font-medium">Przypisana kadra</h4>
-                    </div>
-                     <div className="max-h-[300px] overflow-y-auto p-2 space-y-1">
-                      {groupStaff.map((staff) => (
-                        <div key={staff.id} className="flex items-center justify-between p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md text-sm transition-colors">
-                          <span className="font-medium">{staff.user.surname} {staff.user.name}</span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                            onClick={() => handleRemoveTeacher(staff.id)}
-                          >
-                            <UserMinus className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                      {groupStaff.length === 0 && (
-                        <p className="text-center text-zinc-500 py-8 text-sm">Brak przypisanej kadry</p>
-                      )}
+                        {groupStaff.length === 0 && (
+                          <p className="text-center text-zinc-500 py-8 text-sm">Brak przypisanej kadry</p>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 }

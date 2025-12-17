@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import TeacherLayout from "@/app/components/global/Layout/TeacherLayout";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { 
-  ChevronRight, Users, CheckCircle, Clock, 
+import {
+  ChevronRight, Users, CheckCircle, Clock,
   Activity, Loader2, AlertTriangle, Calendar
 } from "lucide-react";
 
@@ -31,13 +31,14 @@ export default function Teacher() {
   const [attendances, setAttendances] = useState<AttendanceRecord[]>([]);
   const [pickups, setPickups] = useState<PickupRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   const today = new Date().toISOString().split("T")[0];
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       const childrenRes = await fetch("/api/groups/children");
       if (childrenRes.ok) {
         const childrenData = await childrenRes.json();
@@ -65,6 +66,11 @@ export default function Teacher() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   const presentCount = attendances.filter(a => a.status === "PRESENT").length;
   const absentCount = attendances.filter(a => a.status === "ABSENT").length;
@@ -159,7 +165,7 @@ export default function Teacher() {
               </Link>
             </Button>
           </div>
-          
+
           <div className="grid grid-cols-3 gap-3">
             <div className="rounded-xl bg-green-50 p-3 text-center dark:bg-green-900/20">
               <p className="text-xl font-bold text-green-600">{presentCount}</p>
@@ -202,7 +208,7 @@ export default function Teacher() {
               </Link>
             </Button>
           </div>
-          
+
           <div className="text-sm text-zinc-500 dark:text-zinc-400">
             <p>Liczba dzieci w grupie: <span className="font-semibold text-zinc-900 dark:text-zinc-100">{children.length}</span></p>
           </div>
@@ -248,7 +254,7 @@ export default function Teacher() {
               </Link>
             </Button>
           </div>
-          
+
           <div className="text-sm text-zinc-500 dark:text-zinc-400">
             <p>Rejestruj posiłki, drzemki i aktywności dla dzieci obecnych w grupie.</p>
           </div>
@@ -283,7 +289,7 @@ export default function Teacher() {
               </Link>
             </Button>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl bg-teal-50 p-3 text-center dark:bg-teal-900/20">
               <p className="text-xl font-bold text-teal-600">{awaitingPickup > 0 ? awaitingPickup : 0}</p>
@@ -297,24 +303,7 @@ export default function Teacher() {
         </section>
       </div>
 
-      <section className="rounded-2xl border border-zinc-200 bg-gradient-to-r from-sky-500 to-indigo-600 p-6 shadow-sm">
-        <div className="flex items-center justify-between text-white">
-          <div className="flex items-center gap-4">
-            <Calendar className="h-8 w-8" />
-            <div>
-              <p className="text-lg font-semibold">
-                {new Date().toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-              </p>
-              <p className="text-sm opacity-80">
-                Dzień pracy w przedszkolu
-              </p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-3xl font-bold">{new Date().toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })}</p>
-          </div>
-        </div>
-      </section>
+
     </TeacherLayout>
   );
 }

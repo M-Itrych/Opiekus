@@ -29,6 +29,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 type RoomStatus = "AVAILABLE" | "OCCUPIED" | "MAINTENANCE";
 
@@ -67,6 +68,7 @@ const defaultFormState = {
 };
 
 export default function RoomsList() {
+  const { showModal } = useModal();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -205,7 +207,7 @@ export default function RoomsList() {
       }
       await fetchRooms();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Nieznany błąd");
+      showModal('error', err instanceof Error ? err.message : 'Nieznany błąd');
     }
   };
 
@@ -304,9 +306,8 @@ export default function RoomsList() {
                     </div>
                   </div>
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      STATUS_META[room.status].badgeClass
-                    }`}
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${STATUS_META[room.status].badgeClass
+                      }`}
                   >
                     {STATUS_META[room.status].label}
                   </span>

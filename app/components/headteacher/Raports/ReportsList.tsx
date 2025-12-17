@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 interface ApiReport {
   id: string;
@@ -27,6 +28,7 @@ interface ApiReport {
 }
 
 export default function ReportsList() {
+  const { showModal } = useModal();
   const [selectedType, setSelectedType] = useState<string>("all");
   const [reports, setReports] = useState<ApiReport[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,15 +39,15 @@ export default function ReportsList() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const params = new URLSearchParams();
       if (selectedType !== 'all') {
         params.append('reportType', selectedType);
       }
-      
+
       const res = await fetch(`/api/reports?${params.toString()}`);
       if (!res.ok) throw new Error('Błąd pobierania raportów');
-      
+
       const data: ApiReport[] = await res.json();
       setReports(data);
     } catch (err) {
@@ -110,12 +112,12 @@ export default function ReportsList() {
       });
 
       if (!res.ok) throw new Error('Błąd generowania raportu');
-      
+
       await fetchReports();
-      alert(`Raport "${reportNames[reportType]}" został wygenerowany`);
+      showModal('success', `Raport "${reportNames[reportType]}" został wygenerowany`);
     } catch (err) {
       console.error(err);
-      alert('Wystąpił błąd podczas generowania raportu');
+      showModal('error', 'Wystąpił błąd podczas generowania raportu');
     } finally {
       setGenerating(false);
     }
@@ -125,7 +127,7 @@ export default function ReportsList() {
     if (report.fileUrl) {
       window.open(report.fileUrl, '_blank');
     } else {
-      alert('Plik raportu nie jest jeszcze dostępny do pobrania');
+      showModal('warning', 'Plik raportu nie jest jeszcze dostępny do pobrania');
     }
   };
 

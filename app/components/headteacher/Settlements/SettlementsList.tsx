@@ -26,6 +26,7 @@ import {
   Receipt,
   DollarSign,
 } from "lucide-react";
+import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 interface Cancellation {
   id: string;
@@ -71,6 +72,7 @@ const MEAL_LABELS: Record<string, string> = {
 };
 
 export default function SettlementsList() {
+  const { showModal } = useModal();
   const [settlements, setSettlements] = useState<ChildSettlement[]>([]);
   const [summary, setSummary] = useState<SettlementsSummary | null>(null);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -213,7 +215,7 @@ export default function SettlementsList() {
       if (!response.ok) throw new Error("Nie udało się wygenerować zwrotów");
 
       const data = await response.json();
-      alert(`Utworzono ${data.payments?.length || 0} zwrotów`);
+      showModal('success', `Utworzono ${data.payments?.length || 0} zwrotów`);
 
       await fetchSettlements();
       setSelectedCancellations(new Set());

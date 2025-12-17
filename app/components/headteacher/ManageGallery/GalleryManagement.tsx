@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GalleryModal } from "./GalleryModal";
+import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 interface GalleryItem {
   id: string;
@@ -35,6 +36,7 @@ interface GalleryItem {
 }
 
 export default function GalleryManagement() {
+  const { showModal } = useModal();
   const [galleries, setGalleries] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -81,14 +83,14 @@ export default function GalleryManagement() {
 
       if (!response.ok) {
         const error = await response.json();
-        alert(error.error || "Błąd usuwania");
+        showModal('error', error.error || 'Błąd usuwania');
         return;
       }
 
       fetchGalleries();
     } catch (error) {
       console.error("Error deleting gallery:", error);
-      alert("Wystąpił błąd");
+      showModal('error', 'Wystąpił błąd');
     }
   };
 

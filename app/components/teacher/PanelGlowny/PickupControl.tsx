@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { CheckCircle, Clock, User, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 interface PickupRecord {
   id: string;
@@ -53,6 +54,7 @@ interface Child {
 }
 
 export default function PickupControl() {
+  const { showModal } = useModal();
   const [children, setChildren] = useState<Child[]>([]);
   const [pickupRecords, setPickupRecords] = useState<Record<string, PickupRecord>>({});
   const [authorizedPersonsMap, setAuthorizedPersonsMap] = useState<Record<string, AuthorizedPerson[]>>({});
@@ -89,11 +91,11 @@ export default function PickupControl() {
     try {
       const today = new Date().toISOString().split('T')[0];
       const res = await fetch(`/api/pickup?date=${today}`);
-      
+
       if (!res.ok) throw new Error('Failed to fetch pickups');
-      
+
       const data: ApiPickupRecord[] = await res.json();
-      
+
       const records: Record<string, PickupRecord> = {};
       data.forEach((record) => {
         records[record.childId] = {
@@ -108,7 +110,7 @@ export default function PickupControl() {
           notes: record.notes || undefined,
         };
       });
-      
+
       setPickupRecords(records);
     } catch (err) {
       console.error('Error fetching pickups:', err);
@@ -119,7 +121,7 @@ export default function PickupControl() {
     const loadData = async () => {
       setLoading(true);
       const [childrenData] = await Promise.all([fetchChildren(), fetchTodayPickups()]);
-      
+
       const personsMap: Record<string, AuthorizedPerson[]> = {};
       await Promise.all(
         childrenData.map(async (child: Child) => {
@@ -128,7 +130,7 @@ export default function PickupControl() {
         })
       );
       setAuthorizedPersonsMap(personsMap);
-      
+
       setLoading(false);
     };
     loadData();
@@ -136,7 +138,7 @@ export default function PickupControl() {
 
   const getAuthorizedPersons = (child: Child): { id: string; name: string; relation: string }[] => {
     const persons: { id: string; name: string; relation: string }[] = [];
-    
+
     if (child.parent) {
       persons.push({
         id: child.parent.id,
@@ -144,7 +146,7 @@ export default function PickupControl() {
         relation: "Rodzic",
       });
     }
-    
+
     const dbPersons = authorizedPersonsMap[child.id] || [];
     dbPersons.forEach((person) => {
       persons.push({
@@ -153,7 +155,7 @@ export default function PickupControl() {
         relation: person.relation,
       });
     });
-    
+
     return persons;
   };
 
@@ -178,7 +180,7 @@ export default function PickupControl() {
       });
 
       if (!res.ok) throw new Error('Failed to save pickup');
-      
+
       const savedRecord: ApiPickupRecord = await res.json();
 
       setPickupRecords((prev) => ({
@@ -199,7 +201,7 @@ export default function PickupControl() {
       setVerificationCode("");
     } catch (err) {
       console.error('Error saving pickup:', err);
-      alert('Wystąpił błąd podczas zapisywania odbioru');
+      showModal('error', 'Wystąpił błąd podczas zapisywania odbioru');
     } finally {
       setSaving(null);
     }
@@ -228,7 +230,7 @@ export default function PickupControl() {
         });
 
         if (!res.ok) throw new Error('Failed to save pickup');
-        
+
         const savedRecord: ApiPickupRecord = await res.json();
 
         setPickupRecords((prev) => ({
@@ -250,7 +252,7 @@ export default function PickupControl() {
         setVerificationCode("");
       } catch (err) {
         console.error('Error saving pickup:', err);
-        alert('Wystąpił błąd podczas zapisywania odbioru');
+        showModal('error', 'Wystąpił błąd podczas zapisywania odbioru');
       } finally {
         setSaving(null);
       }
@@ -304,11 +306,10 @@ export default function PickupControl() {
               return (
                 <div
                   key={child.id}
-                  className={`flex flex-col gap-3 rounded-xl border p-4 transition-all ${
-                    isSelected
-                      ? "border-sky-500 bg-sky-50 dark:border-sky-400 dark:bg-sky-900/20"
-                      : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
-                  }`}
+                  className={`flex flex-col gap-3 rounded-xl border p-4 transition-all ${isSelected
+                    ? "border-sky-500 bg-sky-50 dark:border-sky-400 dark:bg-sky-900/20"
+                    : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
+                    }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">

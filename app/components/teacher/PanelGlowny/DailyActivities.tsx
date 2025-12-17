@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Check, ChevronDown } from "lucide-react";
+import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 interface Child {
   id: string;
@@ -51,6 +52,7 @@ const predefinedActivities = [
 ];
 
 export default function DailyActivities() {
+  const { showModal } = useModal();
   const [children, setChildren] = useState<Child[]>([]);
   const [activities, setActivities] = useState<Record<string, ChildActivity>>({});
   const [loading, setLoading] = useState(true);
@@ -91,7 +93,7 @@ export default function DailyActivities() {
     try {
       const res = await fetch(`/api/activities?date=${selectedDate}`);
       if (!res.ok) return;
-      
+
       const data = await res.json();
       if (data && data.length > 0) {
         setActivities(prev => {
@@ -164,8 +166,8 @@ export default function DailyActivities() {
   const handleSaveAll = async () => {
     setSaving(true);
     try {
-      const childrenToSave = selectedChild === "all" 
-        ? Object.values(activities) 
+      const childrenToSave = selectedChild === "all"
+        ? Object.values(activities)
         : [activities[selectedChild]];
 
       for (const childActivity of childrenToSave) {
@@ -182,10 +184,10 @@ export default function DailyActivities() {
           });
         }
       }
-      alert("Zapisano aktywności!");
+      showModal('success', 'Zapisano aktywności!');
     } catch (err) {
       console.error("Error saving activities:", err);
-      alert("Wystąpił błąd podczas zapisywania");
+      showModal('error', 'Wystąpił błąd podczas zapisywania');
     } finally {
       setSaving(false);
     }

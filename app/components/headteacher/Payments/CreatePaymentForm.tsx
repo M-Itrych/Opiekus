@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +11,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Save, X } from "lucide-react";
+import { Loader2, Save, X, User, Users } from "lucide-react";
 import { useModal } from "@/app/components/global/Modal/ModalContext";
 
 interface Child {
@@ -57,6 +57,8 @@ const statusOptions = [
     { value: "CANCELLED", label: "Anulowane" },
 ];
 
+type PaymentMode = "single" | "group";
+
 export function CreatePaymentForm({
     children,
     groups,
@@ -67,8 +69,12 @@ export function CreatePaymentForm({
     const { showModal } = useModal();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Payment mode: single child or whole group
+    const [paymentMode, setPaymentMode] = useState<PaymentMode>("single");
+
     // Form state
     const [childId, setChildId] = useState(editingPayment?.childId || "");
+    const [selectedGroupId, setSelectedGroupId] = useState("");
     const [amount, setAmount] = useState(
         editingPayment ? String(editingPayment.amount) : ""
     );
@@ -82,7 +88,7 @@ export function CreatePaymentForm({
     );
     const [status, setStatus] = useState(editingPayment?.status || "PENDING");
 
-    // Group filter for children select
+    // Group filter for children select (single mode only)
     const [groupFilter, setGroupFilter] = useState("ALL");
 
     const filteredChildren =
@@ -90,11 +96,31 @@ export function CreatePaymentForm({
             ? children
             : children.filter((c) => c.groupId === groupFilter);
 
+    // Children in selected group (group mode)
+    const childrenInGroup = selectedGroupId
+        ? children.filter((c) => c.groupId === selectedGroupId)
+        : [];
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!childId || !amount || !description || !dueDate) {
+        if (!amount || !description || !dueDate) {
             showModal("error", "Wypełnij wszystkie wymagane pola");
+            return;
+        }
+
+        if (paymentMode === "single" && !childId) {
+            showModal("error", "Wybierz dziecko");
+            return;
+        }
+
+        if (paymentMode === "group" && !selectedGroupId) {
+            showModal("error", "Wybierz grupę");
+            return;
+        }
+
+        if (paymentMode === "group" && childrenInGroup.length === 0) {
+            showModal("error", "Wybrana grupa nie ma żadnych dzieci");
             return;
         }
 
@@ -107,34 +133,84 @@ export function CreatePaymentForm({
         setIsSubmitting(true);
 
         try {
-            const url = editingPayment
-                ? `/api/payments/${editingPayment.id}`
-                : "/api/payments";
-            const method = editingPayment ? "PUT" : "POST";
+            if (editingPayment) {
+                // Editing existing payment - single child only
+                const res = await fetch(`/api/payments/${editingPayment.id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        childId,
+                        amount: parsedAmount,
+                        description: description.trim(),
+                        dueDate,
+                        status,
+                    }),
+                });
 
-            const res = await fetch(url, {
-                method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    childId,
-                    amount: parsedAmount,
-                    description: description.trim(),
-                    dueDate,
-                    status,
-                }),
-            });
+                if (!res.ok) {
+                    const error = await res.json();
+                    throw new Error(error.error || "Błąd zapisu");
+                }
 
-            if (!res.ok) {
-                const error = await res.json();
-                throw new Error(error.error || "Błąd zapisu");
+                showModal("success", "Płatność została zaktualizowana");
+            } else if (paymentMode === "single") {
+                // Create payment for single child
+                const res = await fetch("/api/payments", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        childId,
+                        amount: parsedAmount,
+                        description: description.trim(),
+                        dueDate,
+                        status,
+                    }),
+                });
+
+                if (!res.ok) {
+                    const error = await res.json();
+                    throw new Error(error.error || "Błąd zapisu");
+                }
+
+                showModal("success", "Płatność została wystawiona");
+            } else {
+                // Create payments for all children in group
+                const results = await Promise.allSettled(
+                    childrenInGroup.map((child) =>
+                        fetch("/api/payments", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                childId: child.id,
+                                amount: parsedAmount,
+                                description: description.trim(),
+                                dueDate,
+                                status: "PENDING",
+                            }),
+                        })
+                    )
+                );
+
+                const successful = results.filter(
+                    (r) => r.status === "fulfilled"
+                ).length;
+                const failed = results.filter(
+                    (r) => r.status === "rejected"
+                ).length;
+
+                if (failed > 0) {
+                    showModal(
+                        "warning",
+                        `Wystawiono ${successful} płatności. ${failed} nie udało się utworzyć.`
+                    );
+                } else {
+                    showModal(
+                        "success",
+                        `Wystawiono ${successful} płatności dla grupy ${groups.find((g) => g.id === selectedGroupId)?.name}`
+                    );
+                }
             }
 
-            showModal(
-                "success",
-                editingPayment
-                    ? "Płatność została zaktualizowana"
-                    : "Płatność została wystawiona"
-            );
             onSuccess();
         } catch (err) {
             console.error(err);
@@ -158,47 +234,123 @@ export function CreatePaymentForm({
                 </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Group filter (only for selection, not saved) */}
+            {/* Payment mode toggle - only for new payments */}
+            {!editingPayment && (
                 <div className="space-y-2">
-                    <Label htmlFor="groupFilter">Filtruj po grupie</Label>
-                    <Select value={groupFilter} onValueChange={setGroupFilter}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Wszystkie grupy" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="ALL">Wszystkie grupy</SelectItem>
-                            {groups.map((group) => (
-                                <SelectItem key={group.id} value={group.id}>
-                                    {group.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <Label>Tryb wystawiania</Label>
+                    <div className="flex gap-2">
+                        <Button
+                            type="button"
+                            variant={paymentMode === "single" ? "default" : "outline"}
+                            onClick={() => setPaymentMode("single")}
+                            className={
+                                paymentMode === "single"
+                                    ? "bg-blue-600 hover:bg-blue-700"
+                                    : ""
+                            }
+                        >
+                            <User className="h-4 w-4 mr-2" />
+                            Pojedyncze dziecko
+                        </Button>
+                        <Button
+                            type="button"
+                            variant={paymentMode === "group" ? "default" : "outline"}
+                            onClick={() => setPaymentMode("group")}
+                            className={
+                                paymentMode === "group"
+                                    ? "bg-blue-600 hover:bg-blue-700"
+                                    : ""
+                            }
+                        >
+                            <Users className="h-4 w-4 mr-2" />
+                            Cała grupa
+                        </Button>
+                    </div>
                 </div>
+            )}
 
-                {/* Child selection */}
-                <div className="space-y-2">
-                    <Label htmlFor="childId">
-                        Dziecko <span className="text-red-500">*</span>
-                    </Label>
-                    <Select
-                        value={childId}
-                        onValueChange={setChildId}
-                        disabled={!!editingPayment}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Wybierz dziecko" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {filteredChildren.map((child) => (
-                                <SelectItem key={child.id} value={child.id}>
-                                    {child.name} {child.surname}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Single child mode */}
+                {paymentMode === "single" && !editingPayment && (
+                    <>
+                        {/* Group filter */}
+                        <div className="space-y-2">
+                            <Label htmlFor="groupFilter">Filtruj po grupie</Label>
+                            <Select value={groupFilter} onValueChange={setGroupFilter}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Wszystkie grupy" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="ALL">Wszystkie grupy</SelectItem>
+                                    {groups.map((group) => (
+                                        <SelectItem key={group.id} value={group.id}>
+                                            {group.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Child selection */}
+                        <div className="space-y-2">
+                            <Label htmlFor="childId">
+                                Dziecko <span className="text-red-500">*</span>
+                            </Label>
+                            <Select value={childId} onValueChange={setChildId}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Wybierz dziecko" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {filteredChildren.map((child) => (
+                                        <SelectItem key={child.id} value={child.id}>
+                                            {child.name} {child.surname}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </>
+                )}
+
+                {/* Group mode */}
+                {paymentMode === "group" && !editingPayment && (
+                    <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="selectedGroupId">
+                            Grupa <span className="text-red-500">*</span>
+                        </Label>
+                        <Select
+                            value={selectedGroupId}
+                            onValueChange={setSelectedGroupId}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Wybierz grupę" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {groups.map((group) => (
+                                    <SelectItem key={group.id} value={group.id}>
+                                        {group.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {selectedGroupId && (
+                            <p className="text-sm text-gray-500">
+                                Płatność zostanie wystawiona dla{" "}
+                                <strong>{childrenInGroup.length}</strong> dzieci w tej grupie
+                            </p>
+                        )}
+                    </div>
+                )}
+
+                {/* Editing mode - show child info */}
+                {editingPayment && (
+                    <div className="space-y-2 md:col-span-2">
+                        <Label>Dziecko</Label>
+                        <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-200 text-gray-700">
+                            {editingPayment.child.name} {editingPayment.child.surname}
+                        </div>
+                    </div>
+                )}
 
                 {/* Amount */}
                 <div className="space-y-2">
@@ -279,12 +431,18 @@ export function CreatePaymentForm({
                     {isSubmitting ? (
                         <>
                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Zapisywanie...
+                            {paymentMode === "group" && !editingPayment
+                                ? `Wystawianie ${childrenInGroup.length} płatności...`
+                                : "Zapisywanie..."}
                         </>
                     ) : (
                         <>
                             <Save className="h-4 w-4 mr-2" />
-                            {editingPayment ? "Zapisz zmiany" : "Wystaw płatność"}
+                            {editingPayment
+                                ? "Zapisz zmiany"
+                                : paymentMode === "group"
+                                    ? `Wystaw dla ${childrenInGroup.length || "grupy"} dzieci`
+                                    : "Wystaw płatność"}
                         </>
                     )}
                 </Button>

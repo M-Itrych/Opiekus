@@ -309,7 +309,7 @@ export default function ObecnosciPage() {
 
   const handleRemoveAbsence = () => {
     if (!selectedDate) return;
-    
+
     const dateKey = formatDateKey(selectedDate);
     setAttendance(prev => ({
       ...prev,
@@ -405,7 +405,7 @@ export default function ObecnosciPage() {
     if (isToday) {
       baseClasses += 'ring-2 ring-blue-500 ';
     }
-    
+
     if (day.status === 'absent') {
       return baseClasses + 'bg-red-100 text-red-700 hover:bg-red-200';
     } else if (day.status === 'present') {
@@ -605,14 +605,14 @@ export default function ObecnosciPage() {
       <div className="mt-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
         <h3 className="font-semibold text-blue-800 mb-2">Informacje</h3>
         <p className="text-blue-700 text-sm">
-          Aby zgłosić lub edytować nieobecność, użyj czerwonego przycisku &quot;Zgłoś nieobecność&quot; powyżej. 
-          Kalendarz służy do podglądu statusu i powodów nieobecności (najedź kursorem na zaznaczony dzień). 
+          Aby zgłosić lub edytować nieobecność, użyj czerwonego przycisku &quot;Zgłoś nieobecność&quot; powyżej.
+          Kalendarz służy do podglądu statusu i powodów nieobecności (najedź kursorem na zaznaczony dzień).
           Pamiętaj, aby po wprowadzeniu zmian kliknąć &quot;Zapisz zmiany&quot;.
         </p>
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 backdrop-blur bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-800">Zgłoś nieobecność</h2>
@@ -682,8 +682,8 @@ export default function ObecnosciPage() {
                 onClick={handleSubmitAbsence}
                 className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
               >
-                {selectedDate && attendance[formatDateKey(selectedDate)]?.status === 'absent' 
-                  ? 'Zaktualizuj' 
+                {selectedDate && attendance[formatDateKey(selectedDate)]?.status === 'absent'
+                  ? 'Zaktualizuj'
                   : 'Zgłoś nieobecność'}
               </button>
             </div>

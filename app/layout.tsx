@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ModalProvider } from "@/app/components/global/Modal/ModalContext";
+import MobileWarningModal from "@/app/components/global/MobileWarningModal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,12 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Opiekus - System zarządzania przedszkolem",
+  title: "Opiekuś - System zarządzania przedszkolem",
   description: "Aplikacja do zarządzania przedszkolem - komunikacja z rodzicami, dokumenty, obecności",
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Opiekus',
+    title: 'Opiekuś',
   },
 };
 
@@ -44,6 +45,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ModalProvider>
+          <MobileWarningModal />
           {children}
         </ModalProvider>
       </body>

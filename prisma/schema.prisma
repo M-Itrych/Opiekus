@@ -439,6 +439,7 @@ enum ConsentType {
   IMAGE
   DATA
   MEDICAL
+  MARKETING
 }
 
 enum ConsentStatus {

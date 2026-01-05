@@ -57,8 +57,8 @@ export default function TeacherTopbar() {
     ];
 
     return (
-        <header className="fixed left-[80px] top-0 right-0 z-10 border-b border-zinc-200 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/80">
-            <nav className="flex w-full items-center gap-4 overflow-x-auto px-6 py-4 text-sm scrollbar-hide md:gap-6">
+        <header className="fixed left-0 sm:left-[80px] top-0 right-0 z-10 border-b border-zinc-200 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/80">
+            <nav className="flex w-full items-center gap-2 sm:gap-4 overflow-x-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm scrollbar-hide md:gap-6">
                 {topbarItems.map(({ href, Icon, label }) => {
                     const normalizedHref = href.toLowerCase();
                     const isActive = pathname === normalizedHref || pathname.startsWith(normalizedHref + "/");
@@ -67,12 +67,12 @@ export default function TeacherTopbar() {
                         <Link
                             href={href}
                             key={label}
-                            className={`group relative flex items-center gap-2 whitespace-nowrap px-2 py-1 transition-colors duration-200 hover:text-primary ${
+                            className={`group relative flex items-center gap-1.5 sm:gap-2 whitespace-nowrap px-1.5 sm:px-2 py-1 transition-colors duration-200 hover:text-primary ${
                                 isActive ? "text-sky-700" : "text-zinc-600"
                             }`}
                         >
                             <Icon fontSize="small" />
-                            <span>{label}</span>
+                            <span className="hidden sm:inline">{label}</span>
                             <span
                                 aria-hidden
                                 className={`absolute inset-x-0 bottom-0 h-0.5 origin-center rounded-full transition-all duration-200 ${

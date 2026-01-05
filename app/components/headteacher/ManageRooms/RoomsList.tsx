@@ -220,18 +220,18 @@ export default function RoomsList() {
 
     if (!items.length) {
       return (
-        <span className="text-sm text-zinc-500 dark:text-zinc-400">
+        <span className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
           Brak informacji o wyposażeniu
         </span>
       );
     }
 
     return (
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5 sm:gap-2">
         {items.map((item, idx) => (
           <span
             key={`${item}-${idx}`}
-            className="rounded-md bg-zinc-100 px-2 py-1 text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+            className="rounded-md bg-zinc-100 px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
           >
             {item}
           </span>
@@ -241,72 +241,73 @@ export default function RoomsList() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-4 sm:gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
         <div>
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+          <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             Zarządzanie salami
           </h3>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="mt-1 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
             Rezerwacja sal, harmonogram wykorzystania, konserwacja i wyposażenie
           </p>
         </div>
-        <Button className="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white" onClick={openCreateModal}>
-          <Plus className="h-4 w-4" />
-          Dodaj salę
+        <Button className="flex items-center gap-1.5 sm:gap-2 bg-sky-500 hover:bg-sky-600 text-white text-xs sm:text-sm w-full sm:w-auto" onClick={openCreateModal}>
+          <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+          <span className="hidden sm:inline">Dodaj salę</span>
+          <span className="sm:hidden">Dodaj</span>
         </Button>
       </div>
 
       <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+        <Search className="pointer-events-none absolute left-2 sm:left-3 top-1/2 h-3 w-3 sm:h-4 sm:w-4 -translate-y-1/2 text-zinc-400" />
         <Input
           type="text"
           placeholder="Szukaj sal..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
+          className="pl-8 sm:pl-10 text-sm"
         />
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-100 bg-red-50 px-4 py-2 text-sm text-red-700">
+        <div className="rounded-lg border border-red-100 bg-red-50 px-3 sm:px-4 py-2 text-xs sm:text-sm text-red-700">
           {error}
         </div>
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center py-12 text-sm text-zinc-500">
-          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+        <div className="flex items-center justify-center py-8 sm:py-12 text-xs sm:text-sm text-zinc-500">
+          <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
           Ładowanie sal...
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
           {filteredRooms.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50/60 p-8 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-400">
+            <div className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50/60 p-6 sm:p-8 text-center text-xs sm:text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-400">
               Brak sal spełniających kryteria wyszukiwania.
             </div>
           ) : (
             filteredRooms.map((room) => (
               <div
                 key={room.id}
-                className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+                className="flex flex-col gap-3 sm:gap-4 rounded-lg sm:rounded-xl border border-zinc-200 bg-white p-3 sm:p-4 md:p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-sky-100 p-2 dark:bg-sky-900/30">
-                      <Home className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <div className="rounded-lg bg-sky-100 p-1.5 sm:p-2 dark:bg-sky-900/30 shrink-0">
+                      <Home className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600 dark:text-sky-400" />
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">
+                    <div className="min-w-0">
+                      <h4 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-100 truncate">
                         {room.name}
                       </h4>
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
                         Pojemność: {room.capacity} osób
                       </p>
                     </div>
                   </div>
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${STATUS_META[room.status].badgeClass
+                    className={`rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-medium shrink-0 ${STATUS_META[room.status].badgeClass
                       }`}
                   >
                     {STATUS_META[room.status].label}
@@ -314,43 +315,46 @@ export default function RoomsList() {
                 </div>
 
                 {room.group && (
-                  <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-                    <Users className="h-4 w-4" />
-                    <span>
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
+                    <Users className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                    <span className="truncate">
                       Grupa:{" "}
                       <span className="font-medium">{room.group.name}</span>
                     </span>
                   </div>
                 )}
 
-                <div className="flex flex-col gap-2">
-                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <div className="flex flex-col gap-1.5 sm:gap-2">
+                  <p className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-zinc-100">
                     Wyposażenie:
                   </p>
                   {renderEquipment(room.description)}
                 </div>
 
-                <div className="flex gap-2 border-t border-zinc-200 pt-2 dark:border-zinc-700">
-                  <Button variant="outline" size="sm" className="flex-1" disabled>
-                    <Calendar className="mr-2 h-4 w-4" />
-                    Kalendarz
+                <div className="flex flex-col sm:flex-row gap-2 border-t border-zinc-200 pt-2 dark:border-zinc-700">
+                  <Button variant="outline" size="sm" className="flex-1 text-xs sm:text-sm" disabled>
+                    <Calendar className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Kalendarz</span>
+                    <span className="sm:hidden">Kal.</span>
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1"
+                    className="flex-1 text-xs sm:text-sm"
                     onClick={() => openEditModal(room)}
                   >
-                    <Edit className="mr-2 h-4 w-4" />
+                    <Edit className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                     Edytuj
                   </Button>
                   <Button
                     variant="destructive"
                     size="sm"
+                    className="text-xs sm:text-sm"
                     onClick={() => handleDelete(room)}
                   >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Usuń
+                    <Trash2 className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Usuń</span>
+                    <span className="sm:hidden">×</span>
                   </Button>
                 </div>
               </div>
@@ -360,31 +364,31 @@ export default function RoomsList() {
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6 backdrop-blur-sm">
-          <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-zinc-900">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3 sm:px-4 py-4 sm:py-6 backdrop-blur-sm">
+          <div className="w-full max-w-xl rounded-xl sm:rounded-2xl bg-white p-4 sm:p-6 shadow-2xl dark:bg-zinc-900 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <h4 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
                   {editingRoom ? "Edytuj salę" : "Dodaj salę"}
                 </h4>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
                   Określ podstawowe parametry pomieszczenia i jego wyposażenie.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={closeModal}
-                className="rounded-full p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 cursor-pointer"
+                className="rounded-full p-1.5 sm:p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 cursor-pointer shrink-0"
                 aria-label="Zamknij formularz"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <form onSubmit={handleSubmit} className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
+                  <label className="text-xs sm:text-sm font-medium text-zinc-700 dark:text-zinc-200">
                     Nazwa sali
                   </label>
                   <Input
@@ -392,10 +396,11 @@ export default function RoomsList() {
                     value={formValues.name}
                     onChange={handleInputChange}
                     placeholder="np. Sala gimnastyczna"
+                    className="text-sm mt-1"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
+                  <label className="text-xs sm:text-sm font-medium text-zinc-700 dark:text-zinc-200">
                     Pojemność
                   </label>
                   <Input
@@ -403,12 +408,13 @@ export default function RoomsList() {
                     value={formValues.capacity}
                     onChange={handleInputChange}
                     placeholder="np. 25"
+                    className="text-sm mt-1"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
+                <label className="text-xs sm:text-sm font-medium text-zinc-700 dark:text-zinc-200">
                   Status
                 </label>
                 <Select
@@ -420,7 +426,7 @@ export default function RoomsList() {
                     }))
                   }
                 >
-                  <SelectTrigger className="w-full justify-between">
+                  <SelectTrigger className="w-full justify-between text-sm mt-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -434,7 +440,7 @@ export default function RoomsList() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
+                <label className="text-xs sm:text-sm font-medium text-zinc-700 dark:text-zinc-200">
                   Wyposażenie (oddzielone przecinkami)
                 </label>
                 <Textarea
@@ -443,21 +449,22 @@ export default function RoomsList() {
                   onChange={handleInputChange}
                   rows={3}
                   placeholder="np. Komputer, Projektor, Mata gimnastyczna"
+                  className="text-sm mt-1"
                 />
               </div>
 
               {formError && (
-                <div className="rounded-lg border border-red-100 bg-red-50 px-4 py-2 text-sm text-red-700">
+                <div className="rounded-lg border border-red-100 bg-red-50 px-3 sm:px-4 py-2 text-xs sm:text-sm text-red-700">
                   {formError}
                 </div>
               )}
 
-              <div className="flex items-center justify-end gap-3">
-                <Button type="button" variant="outline" onClick={closeModal}>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-end gap-2 sm:gap-3 pt-2">
+                <Button type="button" variant="outline" onClick={closeModal} className="w-full sm:w-auto text-xs sm:text-sm">
                   Anuluj
                 </Button>
-                <Button type="submit" disabled={formLoading} className="bg-sky-500 hover:bg-sky-600 text-white">
-                  {formLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button type="submit" disabled={formLoading} className="bg-sky-500 hover:bg-sky-600 text-white w-full sm:w-auto text-xs sm:text-sm">
+                  {formLoading && <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />}
                   {editingRoom ? "Zapisz zmiany" : "Dodaj salę"}
                 </Button>
               </div>

@@ -260,46 +260,46 @@ export default function TasksList() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <div className="mb-4 flex items-center justify-between">
+    <div className="flex flex-col gap-4 sm:gap-6">
+      <section className="rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-3 sm:p-4 md:p-6 shadow-sm">
+        <div className="mb-3 sm:mb-4">
           <div>
-            <h2 className="text-lg font-semibold text-zinc-900">Zadania na dziś</h2>
-            <p className="text-sm text-zinc-500">
+            <h2 className="text-base sm:text-lg font-semibold text-zinc-900">Zadania na dziś</h2>
+            <p className="text-xs sm:text-sm text-zinc-500">
               Przegląd terminów wymagających uwagi w bieżącym dniu.
             </p>
           </div>
         </div>
         {todayTasks.length === 0 ? (
-          <div className="flex items-center justify-center rounded-xl border border-dashed border-zinc-200 py-10 text-sm text-zinc-500">
+          <div className="flex items-center justify-center rounded-xl border border-dashed border-zinc-200 py-8 sm:py-10 text-xs sm:text-sm text-zinc-500">
             Brak zadań z terminem na dziś.
           </div>
         ) : (
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-2 sm:gap-3 md:grid-cols-2">
             {todayTasks.map((task) => (
               <div
                 key={task.id}
-                className="flex flex-col gap-2 rounded-xl border border-sky-100 bg-sky-50/60 p-4"
+                className="flex flex-col gap-1.5 sm:gap-2 rounded-lg sm:rounded-xl border border-sky-100 bg-sky-50/60 p-3 sm:p-4"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-sky-800">
-                    {getStatusIcon(task.status)}
-                    {task.title}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-sky-800 min-w-0">
+                    <div className="shrink-0">{getStatusIcon(task.status)}</div>
+                    <span className="truncate">{task.title}</span>
                   </div>
-                  <span className={`rounded-full px-3 py-1 text-xs font-medium ${getPriorityClass(task.priority)}`}>
+                  <span className={`rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-medium shrink-0 ${getPriorityClass(task.priority)}`}>
                     {priorityLabels[task.priority]}
                   </span>
                 </div>
-                <p className="text-sm text-sky-900/80">{task.description}</p>
-                <div className="flex flex-wrap items-center gap-4 text-xs text-sky-900/70">
+                <p className="text-xs sm:text-sm text-sky-900/80">{task.description}</p>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-sky-900/70">
                   <span className="flex items-center gap-1">
-                    <User className="h-4 w-4" />
-                    {task.assignedTo
+                    <User className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                    <span className="truncate">{task.assignedTo
                       ? `${task.assignedTo.name ?? ""} ${task.assignedTo.surname ?? ""}`.trim()
-                      : "Nieprzypisane"}
+                      : "Nieprzypisane"}</span>
                   </span>
                   <span className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
+                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
                     Termin: {formatDate(task.dueDate)}
                   </span>
                 </div>
@@ -309,36 +309,37 @@ export default function TasksList() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center justify-between">
+      <section className="rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-3 sm:p-4 md:p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
           <div>
-            <h3 className="text-lg font-semibold text-zinc-900">Zarządzanie zadaniami</h3>
-            <p className="mt-1 text-sm text-zinc-500">
+            <h3 className="text-base sm:text-lg font-semibold text-zinc-900">Zarządzanie zadaniami</h3>
+            <p className="mt-1 text-xs sm:text-sm text-zinc-500">
               Przydzielanie i śledzenie zadań dla personelu.
             </p>
           </div>
-          <Button className="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white" onClick={openModal}>
-            <Plus className="h-4 w-4" />
+          <Button className="flex items-center gap-1.5 sm:gap-2 bg-sky-500 hover:bg-sky-600 text-white text-xs sm:text-sm w-full sm:w-auto" onClick={openModal}>
+            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
             Nowe zadanie
           </Button>
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-4">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+        <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4">
+          <div className="relative flex-1 min-w-0">
+            <Search className="pointer-events-none absolute left-2 sm:left-3 top-1/2 h-3 w-3 sm:h-4 sm:w-4 -translate-y-1/2 text-zinc-400" />
             <Input
               type="text"
               placeholder="Szukaj zadań..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-8 sm:pl-10 text-sm"
             />
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
-                Status: {selectedStatus === "all" ? "Wszystkie" : statusLabels[selectedStatus.toUpperCase() as Status] ?? selectedStatus}
-                <ChevronDown className="h-4 w-4" />
+              <Button variant="outline" className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto text-xs sm:text-sm">
+                <span className="hidden sm:inline">Status: </span>
+                <span>{selectedStatus === "all" ? "Wszystkie" : statusLabels[selectedStatus.toUpperCase() as Status] ?? selectedStatus}</span>
+                <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -358,9 +359,10 @@ export default function TasksList() {
           </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
-                Priorytet: {selectedPriority === "all" ? "Wszystkie" : priorityLabels[selectedPriority.toUpperCase() as Priority] ?? selectedPriority}
-                <ChevronDown className="h-4 w-4" />
+              <Button variant="outline" className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto text-xs sm:text-sm">
+                <span className="hidden sm:inline">Priorytet: </span>
+                <span>{selectedPriority === "all" ? "Wszystkie" : priorityLabels[selectedPriority.toUpperCase() as Priority] ?? selectedPriority}</span>
+                <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -381,55 +383,55 @@ export default function TasksList() {
         </div>
 
         {error && (
-          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+          <div className="mt-3 sm:mt-4 rounded-lg border border-red-200 bg-red-50 px-3 sm:px-4 py-2 text-xs sm:text-sm text-red-700">
             {error}
           </div>
         )}
 
         {loading ? (
-          <div className="flex items-center justify-center py-12 text-zinc-500">
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          <div className="flex items-center justify-center py-8 sm:py-12 text-xs sm:text-sm text-zinc-500">
+            <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
             Ładowanie zadań...
           </div>
         ) : filteredTasks.length === 0 ? (
-          <div className="mt-6 rounded-xl border border-dashed border-zinc-200 py-10 text-center text-sm text-zinc-500">
+          <div className="mt-4 sm:mt-6 rounded-xl border border-dashed border-zinc-200 py-8 sm:py-10 text-center text-xs sm:text-sm text-zinc-500">
             Brak zadań spełniających kryteria wyszukiwania.
           </div>
         ) : (
-          <div className="mt-6 grid grid-cols-1 gap-4">
+          <div className="mt-4 sm:mt-6 grid grid-cols-1 gap-3 sm:gap-4">
             {filteredTasks.map((task) => (
               <div
                 key={task.id}
-                className="flex items-start gap-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
+                className="flex items-start gap-3 sm:gap-4 rounded-lg sm:rounded-xl border border-zinc-200 bg-white p-3 sm:p-4 md:p-5 shadow-sm"
               >
-                <div className="mt-1">{getStatusIcon(task.status)}</div>
-                <div className="flex-1">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h4 className="font-semibold text-zinc-900">{task.title}</h4>
-                      <p className="mt-1 text-sm text-zinc-600">{task.description}</p>
+                <div className="mt-0.5 sm:mt-1 shrink-0">{getStatusIcon(task.status)}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
+                    <div className="min-w-0">
+                      <h4 className="text-sm sm:text-base font-semibold text-zinc-900 truncate">{task.title}</h4>
+                      <p className="mt-1 text-xs sm:text-sm text-zinc-600">{task.description}</p>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span className={`rounded-full px-3 py-1 text-xs font-medium ${getPriorityClass(task.priority)}`}>
+                    <div className="flex flex-row sm:flex-col items-start sm:items-end gap-1.5 sm:gap-2 shrink-0">
+                      <span className={`rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-medium ${getPriorityClass(task.priority)}`}>
                         {priorityLabels[task.priority]}
                       </span>
-                      <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
+                      <span className="rounded-full bg-zinc-100 px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-medium text-zinc-700">
                         {categoryLabels[task.category]}
                       </span>
                     </div>
                   </div>
-                  <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-zinc-600">
+                  <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-zinc-600">
                     <span className="flex items-center gap-1">
-                      <User className="h-4 w-4" />
-                      {task.assignedTo
+                      <User className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                      <span className="truncate">{task.assignedTo
                         ? `${task.assignedTo.name ?? ""} ${task.assignedTo.surname ?? ""}`.trim()
-                        : "Nieprzypisane"}
+                        : "Nieprzypisane"}</span>
                     </span>
                     <span className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
+                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
                       Termin: {formatDate(task.dueDate)}
                     </span>
-                    <span className="ml-auto text-xs uppercase text-zinc-500">
+                    <span className="ml-auto text-xs uppercase text-zinc-500 shrink-0">
                       {statusLabels[task.status]}
                     </span>
                   </div>
@@ -441,38 +443,39 @@ export default function TasksList() {
       </section>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b px-6 py-4">
-              <div>
-                <h3 className="text-lg font-semibold text-zinc-900">Dodaj nowe zadanie</h3>
-                <p className="text-sm text-zinc-500">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3 sm:px-4 py-4 backdrop-blur-sm">
+          <div className="w-full max-w-2xl rounded-xl sm:rounded-2xl bg-white shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between border-b px-4 sm:px-6 py-3 sm:py-4 gap-2">
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold text-zinc-900">Dodaj nowe zadanie</h3>
+                <p className="text-xs sm:text-sm text-zinc-500">
                   Uzupełnij szczegóły i przydziel zadanie odpowiedniej osobie.
                 </p>
               </div>
               <button
                 aria-label="Zamknij"
                 onClick={closeModal}
-                className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100 cursor-pointer"
+                className="rounded-full p-1.5 sm:p-2 text-zinc-500 hover:bg-zinc-100 cursor-pointer shrink-0"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateTask} className="space-y-4 px-6 py-6">
+            <form onSubmit={handleCreateTask} className="space-y-3 sm:space-y-4 px-4 sm:px-6 py-4 sm:py-6">
               <div>
-                <label className="text-sm font-medium text-zinc-700">Temat zadania</label>
+                <label className="text-xs sm:text-sm font-medium text-zinc-700">Temat zadania</label>
                 <Input
                   name="title"
                   value={formState.title}
                   onChange={handleInputChange}
                   placeholder="Np. Przygotować raport RODO"
                   required
+                  className="text-sm mt-1"
                 />
               </div>
 
               <div>
-                <label className="text-sm font-medium text-zinc-700">Opis</label>
+                <label className="text-xs sm:text-sm font-medium text-zinc-700">Opis</label>
                 <Textarea
                   name="description"
                   value={formState.description}
@@ -480,22 +483,24 @@ export default function TasksList() {
                   rows={3}
                   placeholder="Opisz szczegóły zadania..."
                   required
+                  className="text-sm mt-1"
                 />
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium text-zinc-700">Termin wykonania</label>
+                  <label className="text-xs sm:text-sm font-medium text-zinc-700">Termin wykonania</label>
                   <Input
                     type="date"
                     name="dueDate"
                     value={formState.dueDate}
                     onChange={handleInputChange}
                     required
+                    className="text-sm mt-1"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-zinc-700">
+                  <label className="text-xs sm:text-sm font-medium text-zinc-700">
                     Priorytet
                   </label>
                   <Select
@@ -504,7 +509,7 @@ export default function TasksList() {
                       setFormState((prev) => ({ ...prev, priority: value as Priority }))
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-sm mt-1">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -516,16 +521,16 @@ export default function TasksList() {
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium text-zinc-700">Kategoria</label>
+                  <label className="text-xs sm:text-sm font-medium text-zinc-700">Kategoria</label>
                   <Select
                     value={formState.category}
                     onValueChange={(value) =>
                       setFormState((prev) => ({ ...prev, category: value as Category }))
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-sm mt-1">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -537,7 +542,7 @@ export default function TasksList() {
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-zinc-700">
+                  <label className="text-xs sm:text-sm font-medium text-zinc-700">
                     Przypisz pracownika
                   </label>
                   <Select
@@ -547,7 +552,7 @@ export default function TasksList() {
                     }
                     disabled={staffLoading || !!staffError}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-sm mt-1">
                       <SelectValue
                         placeholder={staffLoading ? "Ładowanie..." : "Wybierz osobę"}
                       />
@@ -567,14 +572,14 @@ export default function TasksList() {
               </div>
 
               {formError && (
-                <p className="text-sm text-red-600">{formError}</p>
+                <p className="text-xs sm:text-sm text-red-600">{formError}</p>
               )}
 
-              <div className="flex items-center justify-end gap-3">
-                <Button type="button" variant="outline" onClick={closeModal} disabled={submitting}>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-end gap-2 sm:gap-3 pt-2">
+                <Button type="button" variant="outline" onClick={closeModal} disabled={submitting} className="w-full sm:w-auto text-xs sm:text-sm">
                   Anuluj
                 </Button>
-                <Button type="submit" disabled={submitting} className="bg-sky-500 hover:bg-sky-600 text-white">
+                <Button type="submit" disabled={submitting} className="bg-sky-500 hover:bg-sky-600 text-white w-full sm:w-auto text-xs sm:text-sm">
                   {submitting ? "Dodawanie..." : "Dodaj zadanie"}
                 </Button>
               </div>

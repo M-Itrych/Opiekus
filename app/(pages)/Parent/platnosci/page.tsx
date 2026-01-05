@@ -104,10 +104,10 @@ export default function PlatnosciPage() {
 
   if (loading) {
     return (
-      <div className="p-4 md:p-6 min-h-[60vh] flex items-center justify-center">
+      <div className="p-3 sm:p-4 md:p-6 min-h-[60vh] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-gray-500">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <p>Ładowanie płatności...</p>
+          <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin" />
+          <p className="text-xs sm:text-sm">Ładowanie płatności...</p>
         </div>
       </div>
     );
@@ -115,12 +115,12 @@ export default function PlatnosciPage() {
 
   if (error) {
     return (
-      <div className="p-4 md:p-6 min-h-[60vh] flex items-center justify-center">
-        <div className="text-center text-red-600">
-          <p>{error}</p>
+      <div className="p-3 sm:p-4 md:p-6 min-h-[60vh] flex items-center justify-center">
+        <div className="text-center text-red-600 px-4">
+          <p className="text-xs sm:text-sm">{error}</p>
           <button
             onClick={fetchPayments}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mt-4 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs sm:text-sm"
           >
             Spróbuj ponownie
           </button>
@@ -130,26 +130,28 @@ export default function PlatnosciPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Płatności</h1>
-          <p className="text-sm text-gray-600">
+          <h1 className="text-lg sm:text-xl font-bold text-gray-800">Płatności</h1>
+          <p className="text-xs sm:text-sm text-gray-600">
             Zarządzaj czesnym, sprawdzaj nadchodzące zobowiązania oraz historię opłat za przedszkole.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <div className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-700">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-blue-700">
             <AccountBalanceWalletIcon fontSize="small" />
-            Suma zaległości:{' '}
+            <span className="hidden sm:inline">Suma zaległości:</span>
+            <span className="sm:hidden">Zaległości:</span>{' '}
             <strong className="text-blue-900">
               {totalOutstanding.toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' })}
             </strong>
           </div>
           {nearestDue && (
-            <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-700">
+            <div className="flex items-center gap-1.5 sm:gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-amber-700">
               <CalendarMonthIcon fontSize="small" />
-              Najbliższy termin:{' '}
+              <span className="hidden sm:inline">Najbliższy termin:</span>
+              <span className="sm:hidden">Termin:</span>{' '}
               <strong>
                 {new Date(nearestDue.dueDate).toLocaleDateString('pl-PL', {
                   day: '2-digit',
@@ -162,59 +164,59 @@ export default function PlatnosciPage() {
       </div>
 
       <section className="bg-white border border-gray-200 rounded-xl shadow-sm">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <PaymentIcon className="text-blue-500" />
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">Nadchodzące płatności</h2>
-              <p className="text-xs text-gray-500">
+        <header className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 border-b border-gray-100">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <PaymentIcon className="text-blue-500 shrink-0" />
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-800">Nadchodzące płatności</h2>
+              <p className="text-xs text-gray-500 hidden sm:block">
                 Opłać wybrany miesiąc online lub zaznacz jako uregulowane po wykonaniu przelewu.
               </p>
             </div>
           </div>
         </header>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-sm text-left">
+          <table className="w-full min-w-[720px] text-xs sm:text-sm text-left">
             <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
               <tr>
-                <th className="px-5 py-3">Dziecko</th>
-                <th className="px-5 py-3">Opis</th>
-                <th className="px-5 py-3">Termin płatności</th>
-                <th className="px-5 py-3">Kwota</th>
-                <th className="px-5 py-3">Status</th>
-                <th className="px-5 py-3 text-right">Akcje</th>
+                <th className="px-3 sm:px-5 py-2 sm:py-3">Dziecko</th>
+                <th className="px-3 sm:px-5 py-2 sm:py-3">Opis</th>
+                <th className="px-3 sm:px-5 py-2 sm:py-3">Termin płatności</th>
+                <th className="px-3 sm:px-5 py-2 sm:py-3">Kwota</th>
+                <th className="px-3 sm:px-5 py-2 sm:py-3">Status</th>
+                <th className="px-3 sm:px-5 py-2 sm:py-3 text-right">Akcje</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {upcomingPayments.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-6 text-center text-gray-500 text-sm">
+                  <td colSpan={6} className="px-3 sm:px-5 py-4 sm:py-6 text-center text-gray-500 text-xs sm:text-sm">
                     Brak nadchodzących płatności.
                   </td>
                 </tr>
               ) : (
                 upcomingPayments.map((payment) => (
                   <tr key={payment.id} className="hover:bg-gray-50/70 transition-colors">
-                    <td className="px-5 py-4 font-medium text-gray-800">
+                    <td className="px-3 sm:px-5 py-3 sm:py-4 font-medium text-gray-800">
                       {payment.child.name} {payment.child.surname}
                     </td>
-                    <td className="px-5 py-4 text-gray-700">{payment.description}</td>
-                    <td className="px-5 py-4 text-gray-600">
+                    <td className="px-3 sm:px-5 py-3 sm:py-4 text-gray-700">{payment.description}</td>
+                    <td className="px-3 sm:px-5 py-3 sm:py-4 text-gray-600">
                       {new Date(payment.dueDate).toLocaleDateString('pl-PL', {
                         day: '2-digit',
                         month: 'long',
                         year: 'numeric',
                       })}
                     </td>
-                    <td className="px-5 py-4 font-semibold text-gray-900">
+                    <td className="px-3 sm:px-5 py-3 sm:py-4 font-semibold text-gray-900">
                       {payment.amount.toLocaleString('pl-PL', {
                         style: 'currency',
                         currency: 'PLN',
                       })}
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="px-3 sm:px-5 py-3 sm:py-4">
                       <span
-                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${payment.status === 'PENDING'
+                        className={`inline-flex items-center gap-1 sm:gap-2 rounded-full px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-semibold ${payment.status === 'PENDING'
                             ? 'border border-blue-200 bg-blue-50 text-blue-600'
                             : 'border border-amber-200 bg-amber-50 text-amber-600'
                           }`}
@@ -232,19 +234,24 @@ export default function PlatnosciPage() {
                         )}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-right">
+                    <td className="px-3 sm:px-5 py-3 sm:py-4 text-right">
                       <button
                         onClick={() => handlePay(payment)}
                         disabled={isProcessing === payment.id}
-                        className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors disabled:cursor-not-allowed disabled:bg-blue-300"
+                        className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg bg-blue-600 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white hover:bg-blue-700 transition-colors disabled:cursor-not-allowed disabled:bg-blue-300 whitespace-nowrap"
                       >
                         <CheckCircleIcon fontSize="small" />
-                        {isProcessing === payment.id
-                          ? 'Przetwarzanie...'
-                          : `Zapłać ${payment.amount.toLocaleString('pl-PL', {
-                            style: 'currency',
-                            currency: 'PLN',
-                          })}`}
+                        <span className="hidden sm:inline">
+                          {isProcessing === payment.id
+                            ? 'Przetwarzanie...'
+                            : `Zapłać ${payment.amount.toLocaleString('pl-PL', {
+                              style: 'currency',
+                              currency: 'PLN',
+                            })}`}
+                        </span>
+                        <span className="sm:hidden">
+                          {isProcessing === payment.id ? '...' : 'Zapłać'}
+                        </span>
                       </button>
                     </td>
                   </tr>
@@ -256,41 +263,41 @@ export default function PlatnosciPage() {
       </section>
 
       <section className="bg-white border border-gray-200 rounded-xl shadow-sm">
-        <header className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-          <HistoryIcon className="text-emerald-500" />
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800">Historia płatności</h2>
-            <p className="text-xs text-gray-500">
+        <header className="flex items-center gap-2 px-3 sm:px-5 py-3 sm:py-4 border-b border-gray-100">
+          <HistoryIcon className="text-emerald-500 shrink-0" />
+          <div className="min-w-0">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-800">Historia płatności</h2>
+            <p className="text-xs text-gray-500 hidden sm:block">
               Zobacz ostatnie transakcje wraz z datą opłacenia.
             </p>
           </div>
         </header>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-sm text-left">
+          <table className="w-full min-w-[720px] text-xs sm:text-sm text-left">
             <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
               <tr>
-                <th className="px-5 py-3">Dziecko</th>
-                <th className="px-5 py-3">Opis</th>
-                <th className="px-5 py-3">Data płatności</th>
-                <th className="px-5 py-3">Kwota</th>
-                <th className="px-5 py-3">Status</th>
+                <th className="px-3 sm:px-5 py-2 sm:py-3">Dziecko</th>
+                <th className="px-3 sm:px-5 py-2 sm:py-3">Opis</th>
+                <th className="px-3 sm:px-5 py-2 sm:py-3">Data płatności</th>
+                <th className="px-3 sm:px-5 py-2 sm:py-3">Kwota</th>
+                <th className="px-3 sm:px-5 py-2 sm:py-3">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {paidPayments.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-5 py-6 text-center text-gray-500 text-sm">
+                  <td colSpan={5} className="px-3 sm:px-5 py-4 sm:py-6 text-center text-gray-500 text-xs sm:text-sm">
                     Brak zarejestrowanych płatności.
                   </td>
                 </tr>
               ) : (
                 paidPayments.map((payment) => (
                   <tr key={payment.id} className="hover:bg-gray-50/70 transition-colors">
-                    <td className="px-5 py-4 font-medium text-gray-800">
+                    <td className="px-3 sm:px-5 py-3 sm:py-4 font-medium text-gray-800">
                       {payment.child.name} {payment.child.surname}
                     </td>
-                    <td className="px-5 py-4 text-gray-700">{payment.description}</td>
-                    <td className="px-5 py-4 text-gray-600">
+                    <td className="px-3 sm:px-5 py-3 sm:py-4 text-gray-700">{payment.description}</td>
+                    <td className="px-3 sm:px-5 py-3 sm:py-4 text-gray-600">
                       {payment.paidDate
                         ? new Date(payment.paidDate).toLocaleString('pl-PL', {
                           day: '2-digit',
@@ -301,14 +308,14 @@ export default function PlatnosciPage() {
                         })
                         : '-'}
                     </td>
-                    <td className="px-5 py-4 font-semibold text-gray-900">
+                    <td className="px-3 sm:px-5 py-3 sm:py-4 font-semibold text-gray-900">
                       {payment.amount.toLocaleString('pl-PL', {
                         style: 'currency',
                         currency: 'PLN',
                       })}
                     </td>
-                    <td className="px-5 py-4">
-                      <span className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold border border-emerald-200 bg-emerald-50 text-emerald-600">
+                    <td className="px-3 sm:px-5 py-3 sm:py-4">
+                      <span className="inline-flex items-center gap-1 sm:gap-2 rounded-full px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-semibold border border-emerald-200 bg-emerald-50 text-emerald-600">
                         <CheckCircleIcon fontSize="inherit" />
                         Opłacone
                       </span>

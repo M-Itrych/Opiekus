@@ -215,10 +215,10 @@ export default function WiadomosciPage() {
 
   if (loading) {
     return (
-      <div className="p-4 md:p-6 min-h-[80vh] flex items-center justify-center">
+      <div className="p-3 sm:p-4 md:p-6 min-h-[80vh] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-gray-500">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <p>Ładowanie wiadomości...</p>
+          <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin" />
+          <p className="text-xs sm:text-sm">Ładowanie wiadomości...</p>
         </div>
       </div>
     );
@@ -226,12 +226,12 @@ export default function WiadomosciPage() {
 
   if (error) {
     return (
-      <div className="p-4 md:p-6 min-h-[80vh] flex items-center justify-center">
-        <div className="text-center text-red-600">
-          <p>{error}</p>
+      <div className="p-3 sm:p-4 md:p-6 min-h-[80vh] flex items-center justify-center">
+        <div className="text-center text-red-600 px-4">
+          <p className="text-xs sm:text-sm">{error}</p>
           <button
             onClick={fetchMessages}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mt-4 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs sm:text-sm"
           >
             Spróbuj ponownie
           </button>
@@ -241,16 +241,16 @@ export default function WiadomosciPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 min-h-[80vh] flex flex-col">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+    <div className="p-3 sm:p-4 md:p-6 min-h-[80vh] flex flex-col">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Wiadomości</h1>
-          <p className="text-sm text-gray-600">
+          <h1 className="text-lg sm:text-xl font-bold text-gray-800">Wiadomości</h1>
+          <p className="text-xs sm:text-sm text-gray-600">
             Skontaktuj się z nauczycielami lub przeglądaj otrzymane wiadomości z przedszkola.
           </p>
         </div>
         <div className="flex flex-wrap gap-2 items-center">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700">
+          <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-gray-200 bg-white text-xs sm:text-sm text-gray-700">
             <MailOutlineIcon className="text-blue-500" fontSize="small" />
             Nieprzeczytane:{' '}
             <strong className={unreadCount ? 'text-blue-600' : 'text-emerald-600'}>
@@ -259,17 +259,18 @@ export default function WiadomosciPage() {
           </div>
           <button
             onClick={() => setActiveSection('compose')}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg bg-blue-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center"
           >
             <SendIcon fontSize="small" />
-            Nowa wiadomość
+            <span className="hidden sm:inline">Nowa wiadomość</span>
+            <span className="sm:hidden">Nowa</span>
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[380px_minmax(0,1fr)] gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)] gap-3 sm:gap-4">
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col min-h-[60vh]">
-          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+          <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
               <button
                 onClick={() => {
@@ -404,12 +405,12 @@ export default function WiadomosciPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 min-h-[60vh] flex flex-col">
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 sm:p-5 min-h-[60vh] flex flex-col">
           {activeSection === 'compose' ? (
-            <div className="space-y-5">
+            <div className="space-y-4 sm:space-y-5">
               <div>
-                <h2 className="text-lg font-semibold text-gray-800 mb-1">Nowa wiadomość</h2>
-                <p className="text-sm text-gray-500">
+                <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-1">Nowa wiadomość</h2>
+                <p className="text-xs sm:text-sm text-gray-500">
                   Wybierz nauczycieli, wpisz temat i treść wiadomości. Wiadomość trafi do wskazanych
                   adresatów.
                 </p>
@@ -491,18 +492,19 @@ export default function WiadomosciPage() {
                 />
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-2">
                 <button
                   onClick={handleSendMessage}
                   disabled={sending}
-                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors disabled:bg-blue-300"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-blue-700 transition-colors disabled:bg-blue-300 w-full sm:w-auto"
                 >
                   <SendIcon fontSize="small" />
-                  {sending ? 'Wysyłanie...' : 'Wyślij wiadomość'}
+                  <span className="hidden sm:inline">{sending ? 'Wysyłanie...' : 'Wyślij wiadomość'}</span>
+                  <span className="sm:hidden">{sending ? 'Wysyłanie...' : 'Wyślij'}</span>
                 </button>
                 <button
                   onClick={() => setActiveSection('inbox')}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors w-full sm:w-auto"
                 >
                   Anuluj
                 </button>

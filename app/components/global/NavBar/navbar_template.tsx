@@ -57,7 +57,7 @@ export default function NavbarTemplate({ items }: NavbarTemplateProps) {
     };
     return (
         <div 
-            className="group fixed left-0 top-0 flex flex-col items-center p-4 w-[80px] hover:w-[240px] h-screen shadow-xl shadow-slate-900/10 bg-linear-to-b from-white to-slate-50/50 transition-all duration-300 ease-out overflow-hidden border-r border-slate-200/60 z-50"
+            className="group fixed left-0 top-0 flex flex-col items-center p-2 sm:p-4 w-[60px] sm:w-[80px] md:hover:w-[240px] h-screen shadow-xl shadow-slate-900/10 bg-linear-to-b from-white to-slate-50/50 transition-all duration-300 ease-out overflow-hidden border-r border-slate-200/60 z-50 hidden sm:flex"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >

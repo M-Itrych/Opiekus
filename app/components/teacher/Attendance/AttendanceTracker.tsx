@@ -118,78 +118,78 @@ export default function AttendanceTracker({ date = new Date() }: AttendanceTrack
 
   if (loading) {
     return (
-      <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-sky-600" />
-          <span className="ml-2 text-zinc-600">Ładowanie danych obecności...</span>
+      <section className="flex w-full flex-col gap-4 sm:gap-6 rounded-xl sm:rounded-2xl border border-zinc-200 bg-white px-3 sm:px-4 md:px-6 py-4 sm:py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="flex items-center justify-center py-6 sm:py-8">
+          <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-sky-600" />
+          <span className="ml-2 text-xs sm:text-sm text-zinc-600">Ładowanie danych obecności...</span>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <section className="flex w-full flex-col gap-4 sm:gap-6 rounded-xl sm:rounded-2xl border border-zinc-200 bg-white px-3 sm:px-4 md:px-6 py-4 sm:py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+          <h2 className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-100">
             Lista obecności
           </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
             Oznacz obecność dzieci w grupie
           </p>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 rounded-lg bg-zinc-100 px-3 py-2 dark:bg-zinc-800">
-            <Calendar className="h-4 w-4 text-zinc-500" />
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-1.5 sm:gap-2 rounded-lg bg-zinc-100 px-2 sm:px-3 py-1.5 sm:py-2 dark:bg-zinc-800">
+            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-zinc-500 shrink-0" />
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-transparent text-sm text-zinc-700 dark:text-zinc-300 outline-none"
+              className="bg-transparent text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 outline-none w-full"
             />
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
-          <div className="flex items-center gap-2">
-            <Check className="h-5 w-5 text-green-600" />
-            <span className="text-sm font-medium text-green-700 dark:text-green-400">Obecni</span>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+        <div className="rounded-lg sm:rounded-xl border border-green-200 bg-green-50 p-3 sm:p-4 dark:border-green-800 dark:bg-green-900/20">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 shrink-0" />
+            <span className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-400">Obecni</span>
           </div>
-          <p className="mt-2 text-2xl font-bold text-green-600">{presentCount}</p>
+          <p className="mt-1.5 sm:mt-2 text-xl sm:text-2xl font-bold text-green-600">{presentCount}</p>
         </div>
 
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
-          <div className="flex items-center gap-2">
-            <X className="h-5 w-5 text-red-600" />
-            <span className="text-sm font-medium text-red-700 dark:text-red-400">Nieobecni</span>
+        <div className="rounded-lg sm:rounded-xl border border-red-200 bg-red-50 p-3 sm:p-4 dark:border-red-800 dark:bg-red-900/20">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <X className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 shrink-0" />
+            <span className="text-xs sm:text-sm font-medium text-red-700 dark:text-red-400">Nieobecni</span>
           </div>
-          <p className="mt-2 text-2xl font-bold text-red-600">{absentCount}</p>
+          <p className="mt-1.5 sm:mt-2 text-xl sm:text-2xl font-bold text-red-600">{absentCount}</p>
         </div>
 
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
-          <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-amber-600" />
-            <span className="text-sm font-medium text-amber-700 dark:text-amber-400">Oczekujące</span>
+        <div className="rounded-lg sm:rounded-xl border border-amber-200 bg-amber-50 p-3 sm:p-4 dark:border-amber-800 dark:bg-amber-900/20">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 shrink-0" />
+            <span className="text-xs sm:text-sm font-medium text-amber-700 dark:text-amber-400">Oczekujące</span>
           </div>
-          <p className="mt-2 text-2xl font-bold text-amber-600">{pendingCount}</p>
+          <p className="mt-1.5 sm:mt-2 text-xl sm:text-2xl font-bold text-amber-600">{pendingCount}</p>
         </div>
       </div>
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+        <Search className="absolute left-2 sm:left-3 top-1/2 h-3 w-3 sm:h-4 sm:w-4 -translate-y-1/2 text-zinc-400" />
         <Input
           type="text"
           placeholder="Szukaj dziecka..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
+          className="pl-8 sm:pl-10 text-sm"
         />
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2 sm:gap-3">
         {filteredChildren.map((child) => {
           const attendance = attendances[child.id];
           const status = attendance?.status;
@@ -198,19 +198,19 @@ export default function AttendanceTracker({ date = new Date() }: AttendanceTrack
           return (
             <div
               key={child.id}
-              className={`flex items-center justify-between rounded-xl border p-4 transition-all ${status === "PRESENT"
+              className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 rounded-lg sm:rounded-xl border p-3 sm:p-4 transition-all ${status === "PRESENT"
                   ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20"
                   : status === "ABSENT"
                     ? "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20"
                     : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
                 }`}
             >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sky-600 font-semibold dark:bg-sky-900/30">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-sky-100 text-sky-600 font-semibold dark:bg-sky-900/30 shrink-0 text-xs sm:text-sm">
                   {child.name[0]}{child.surname[0]}
                 </div>
-                <div>
-                  <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
+                <div className="min-w-0">
+                  <h3 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-100 truncate">
                     {child.name} {child.surname}
                   </h3>
                   {status && (
@@ -226,28 +226,28 @@ export default function AttendanceTracker({ date = new Date() }: AttendanceTrack
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 {isSaving ? (
-                  <Loader2 className="h-5 w-5 animate-spin text-sky-600" />
+                  <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin text-sky-600" />
                 ) : (
                   <>
                     <Button
                       variant={status === "PRESENT" ? "default" : "outline"}
                       size="sm"
                       onClick={() => handleAttendance(child.id, "PRESENT")}
-                      className={status === "PRESENT" ? "bg-green-600 hover:bg-green-700" : ""}
+                      className={`text-xs sm:text-sm ${status === "PRESENT" ? "bg-green-600 hover:bg-green-700" : ""}`}
                     >
-                      <Check className="h-4 w-4 mr-1" />
-                      Obecny
+                      <Check className="h-3 w-3 sm:h-4 sm:w-4 mr-0.5 sm:mr-1" />
+                      <span className="hidden sm:inline">Obecny</span>
                     </Button>
                     <Button
                       variant={status === "ABSENT" ? "default" : "outline"}
                       size="sm"
                       onClick={() => handleAttendance(child.id, "ABSENT")}
-                      className={status === "ABSENT" ? "bg-red-600 hover:bg-red-700" : ""}
+                      className={`text-xs sm:text-sm ${status === "ABSENT" ? "bg-red-600 hover:bg-red-700" : ""}`}
                     >
-                      <X className="h-4 w-4 mr-1" />
-                      Nieobecny
+                      <X className="h-3 w-3 sm:h-4 sm:w-4 mr-0.5 sm:mr-1" />
+                      <span className="hidden sm:inline">Nieobecny</span>
                     </Button>
                   </>
                 )}
@@ -258,8 +258,8 @@ export default function AttendanceTracker({ date = new Date() }: AttendanceTrack
       </div>
 
       {filteredChildren.length === 0 && (
-        <div className="py-12 text-center">
-          <p className="text-zinc-500 dark:text-zinc-400">
+        <div className="py-8 sm:py-12 text-center">
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
             {children.length === 0
               ? "Brak dzieci w grupie"
               : "Nie znaleziono dzieci pasujących do wyszukiwania."}

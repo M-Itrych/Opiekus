@@ -625,40 +625,40 @@ export default function StaffList() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="flex flex-col gap-4 sm:gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-zinc-900">Zarządzanie personelem</h3>
-          <p className="text-sm text-zinc-500">
+          <h3 className="text-base sm:text-lg font-semibold text-zinc-900">Zarządzanie personelem</h3>
+          <p className="text-xs sm:text-sm text-zinc-500">
             Dodawanie, usuwanie, przydzielanie uprawnień i grup.
           </p>
         </div>
-        <Button className="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white" onClick={openCreateModal}>
-          <UserPlus className="h-4 w-4" />
+        <Button className="flex items-center gap-1.5 sm:gap-2 bg-sky-500 hover:bg-sky-600 text-white text-xs sm:text-sm w-full sm:w-auto" onClick={openCreateModal}>
+          <UserPlus className="h-3 w-3 sm:h-4 sm:w-4" />
           Dodaj pracownika
         </Button>
       </div>
 
-      <div className="flex flex-wrap gap-4">
-        <div className="relative flex-1 min-w-[240px]">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-2 sm:left-3 top-1/2 h-3 w-3 sm:h-4 sm:w-4 -translate-y-1/2 text-zinc-400" />
           <Input
             type="text"
             placeholder="Szukaj pracowników..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-8 sm:pl-10 text-sm"
           />
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="flex items-center gap-2">
-              Rola:{" "}
+            <Button variant="outline" className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto text-xs sm:text-sm">
+              <span className="hidden sm:inline">Rola: </span>
               {
                 ROLE_FILTER_OPTIONS.find((option) => option.value === roleFilter)?.label ??
                 "Wszystkie"
               }
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -675,65 +675,65 @@ export default function StaffList() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-3 sm:px-4 py-2 text-xs sm:text-sm text-red-700">
           {error}
         </div>
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center py-12 text-zinc-500">
-          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+        <div className="flex items-center justify-center py-8 sm:py-12 text-xs sm:text-sm text-zinc-500">
+          <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
           Ładowanie kadry...
         </div>
       ) : filteredStaff.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-zinc-200 py-10 text-center text-sm text-zinc-500">
+        <div className="rounded-xl border border-dashed border-zinc-200 py-8 sm:py-10 text-center text-xs sm:text-sm text-zinc-500">
           Brak pracowników spełniających kryteria wyszukiwania.
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4">
           {filteredStaff.map((member) => (
             <div
               key={member.id}
-              className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
+              className="flex flex-col gap-3 sm:gap-4 rounded-lg sm:rounded-xl border border-zinc-200 bg-white p-3 sm:p-4 md:p-5 shadow-sm"
             >
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="rounded-lg bg-sky-100 p-2">
-                    <User className="h-5 w-5 text-sky-600" />
+              <div className="flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+                  <div className="rounded-lg bg-sky-100 p-1.5 sm:p-2 shrink-0">
+                    <User className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg font-semibold text-zinc-900">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                      <span className="text-base sm:text-lg font-semibold text-zinc-900 truncate">
                         {member.user.name} {member.user.surname}
                       </span>
-                      <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">
+                      <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700 shrink-0">
                         {STAFF_ROLE_LABELS[member.staffRole]}
                       </span>
                     </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-4 text-sm text-zinc-600">
-                      <span className="flex items-center gap-1">
-                        <Mail className="h-3 w-3" />
-                        {member.user.email}
+                    <div className="mt-1 flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-zinc-600">
+                      <span className="flex items-center gap-1 truncate">
+                        <Mail className="h-3 w-3 shrink-0" />
+                        <span className="truncate">{member.user.email}</span>
                       </span>
                       {member.user.phone && (
                         <>
-                          <span>•</span>
+                          <span className="hidden sm:inline">•</span>
                           <span className="flex items-center gap-1">
-                            <Phone className="h-3 w-3" />
+                            <Phone className="h-3 w-3 shrink-0" />
                             {member.user.phone}
                           </span>
                         </>
                       )}
                       {member.group?.name && (
                         <>
-                          <span>•</span>
-                          <span>{member.group.name}</span>
+                          <span className="hidden sm:inline">•</span>
+                          <span className="truncate">{member.group.name}</span>
                         </>
                       )}
                     </div>
-                    <div className="mt-2 flex items-center gap-2 text-xs text-zinc-500">
-                      <Shield className="h-3 w-3" />
-                      <span>
+                    <div className="mt-2 flex items-start sm:items-center gap-1.5 sm:gap-2 text-xs text-zinc-500">
+                      <Shield className="h-3 w-3 shrink-0 mt-0.5 sm:mt-0" />
+                      <span className="break-words">
                         Uprawnienia:{" "}
                         {member.permissions.length
                           ? member.permissions.join(", ")
@@ -742,23 +742,23 @@ export default function StaffList() {
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2 shrink-0">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm w-full sm:w-auto"
                     onClick={() => openEditModal(member)}
                   >
-                    <Edit className="h-4 w-4" />
+                    <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                     Edytuj
                   </Button>
                   <Button
                     variant="destructive"
                     size="sm"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm w-full sm:w-auto"
                     onClick={() => handleDeleteStaff(member)}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                     Usuń
                   </Button>
                 </div>

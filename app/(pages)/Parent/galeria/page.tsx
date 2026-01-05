@@ -132,9 +132,9 @@ export default function GaleriaPage() {
 
   if (isLoading) {
     return (
-      <div className="p-4 md:p-6">
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-sky-500" />
+      <div className="p-3 sm:p-4 md:p-6">
+        <div className="flex items-center justify-center py-12 sm:py-20">
+          <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-sky-500" />
         </div>
       </div>
     );
@@ -142,10 +142,10 @@ export default function GaleriaPage() {
 
   if (error) {
     return (
-      <div className="p-4 md:p-6">
-        <div className="flex flex-col items-center justify-center py-20 bg-white border border-red-200 rounded-xl text-center">
-          <p className="text-lg font-semibold text-red-700 mb-1">{error}</p>
-          <Button onClick={fetchGalleries} className="mt-4">
+      <div className="p-3 sm:p-4 md:p-6">
+        <div className="flex flex-col items-center justify-center py-12 sm:py-20 bg-white border border-red-200 rounded-xl text-center px-4">
+          <p className="text-base sm:text-lg font-semibold text-red-700 mb-1">{error}</p>
+          <Button onClick={fetchGalleries} className="mt-4 text-xs sm:text-sm">
             Spróbuj ponownie
           </Button>
         </div>
@@ -190,28 +190,28 @@ export default function GaleriaPage() {
             className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between p-6 border-b dark:border-zinc-800">
-              <div>
-                <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b dark:border-zinc-800 gap-2">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-lg sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 truncate">
                   {selectedGalleryData.title}
                 </h2>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
                   {format(new Date(selectedGalleryData.date), "d MMMM yyyy", { locale: pl })}
                   {selectedGalleryData.group && ` • ${selectedGalleryData.group.name}`}
                 </p>
               </div>
-              <Button variant="ghost" size="icon" onClick={closeGallery}>
-                <ImageIcon className="h-5 w-5" />
+              <Button variant="ghost" size="icon" onClick={closeGallery} className="shrink-0">
+                <ImageIcon className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </div>
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-6">
               {selectedGalleryData.photos.length === 0 ? (
                 <div className="text-center py-12">
                   <ImageIcon className="h-12 w-12 text-zinc-400 mx-auto mb-2" />
                   <p className="text-sm text-zinc-500">Brak zdjęć w tej galerii</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {selectedGalleryData.photos.map((photo) => (
                     <div
                       key={photo.id}
@@ -246,34 +246,36 @@ export default function GaleriaPage() {
         </div>
       )}
 
-      <div className="p-4 md:p-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+      <div className="p-3 sm:p-4 md:p-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div>
-            <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">Galeria</h1>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
+            <h1 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100">Galeria</h1>
+            <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
               Zobacz zdjęcia z wydarzeń w przedszkolu i wybierz interesujący Cię miesiąc.
             </p>
           </div>
           {uniqueMonths.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
               <button
                 onClick={() => handleMonthChange("prev")}
                 disabled={monthIndex === 0}
-                className="flex items-center gap-1 px-3 py-2 border border-gray-200 dark:border-zinc-700 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-200 dark:border-zinc-700 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <NavigateBeforeIcon fontSize="small" />
-                Poprzedni
+                <span className="hidden sm:inline">Poprzedni</span>
+                <span className="sm:hidden">←</span>
               </button>
-              <div className="px-3 py-2 border border-gray-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-gray-700 dark:text-gray-300 font-medium flex items-center gap-2 text-sm">
+              <div className="px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-gray-700 dark:text-gray-300 font-medium flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
                 <EventIcon fontSize="small" />
                 {formatMonth(selectedMonth)}
               </div>
               <button
                 onClick={() => handleMonthChange("next")}
                 disabled={monthIndex === uniqueMonths.length - 1}
-                className="flex items-center gap-1 px-3 py-2 border border-gray-200 dark:border-zinc-700 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-200 dark:border-zinc-700 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Następny
+                <span className="hidden sm:inline">Następny</span>
+                <span className="sm:hidden">→</span>
                 <NavigateNextIcon fontSize="small" />
               </button>
             </div>
@@ -281,17 +283,17 @@ export default function GaleriaPage() {
         </div>
 
         {filteredGalleries.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-zinc-900 border border-dashed border-gray-200 dark:border-zinc-700 rounded-xl text-center">
-            <ImageIcon className="h-16 w-16 text-gray-300 dark:text-zinc-600 mb-4" />
-            <p className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-1">
+          <div className="flex flex-col items-center justify-center py-12 sm:py-20 bg-white dark:bg-zinc-900 border border-dashed border-gray-200 dark:border-zinc-700 rounded-xl text-center px-4">
+            <ImageIcon className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 dark:text-zinc-600 mb-3 sm:mb-4" />
+            <p className="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-300 mb-1">
               Brak galerii dla wybranego miesiąca
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
               Wybierz inny miesiąc, aby zobaczyć więcej galerii.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {filteredGalleries.map((gallery) => {
               const firstPhoto = gallery.photos[0];
               const photoCount = gallery.photos.length;
@@ -323,8 +325,8 @@ export default function GaleriaPage() {
                       </div>
                     )}
                   </div>
-                  <div className="p-4">
-                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 line-clamp-1">
+                  <div className="p-3 sm:p-4">
+                    <p className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-100 line-clamp-1">
                       {gallery.title}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">

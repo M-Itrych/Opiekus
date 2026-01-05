@@ -271,37 +271,38 @@ export default function DzieckoPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[400px]">
-        <div className="text-gray-500">Ładowanie...</div>
+      <div className="p-3 sm:p-4 md:p-6 flex items-center justify-center min-h-[400px]">
+        <div className="text-sm sm:text-base text-gray-500">Ładowanie...</div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
+    <div className="p-3 sm:p-4 md:p-6">
       {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-300 text-red-700 rounded-lg flex justify-between items-center">
-          <span>{error}</span>
-          <button onClick={() => setError(null)} className="text-red-700 hover:text-red-900">
+        <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-red-100 border border-red-300 text-red-700 rounded-lg flex justify-between items-center gap-2">
+          <span className="text-xs sm:text-sm flex-1">{error}</span>
+          <button onClick={() => setError(null)} className="text-red-700 hover:text-red-900 shrink-0">
             <Cancel fontSize="small" />
           </button>
         </div>
       )}
 
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Moje dzieci</h1>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Moje dzieci</h1>
         <button
           onClick={handleAddChildStart}
-          className="flex items-center gap-2 bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 transition-colors"
+          className="flex items-center justify-center gap-2 bg-sky-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-sky-600 transition-colors text-sm sm:text-base w-full sm:w-auto"
           disabled={isAddingChild || isEditing}
         >
           <Add fontSize="small" />
-          Dodaj dziecko
+          <span className="hidden sm:inline">Dodaj dziecko</span>
+          <span className="sm:hidden">Dodaj</span>
         </button>
       </div>
 
       {children.length > 0 && !isAddingChild && (
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <div className="flex gap-2 flex-wrap">
             {children.map((child) => (
               <button
@@ -311,7 +312,7 @@ export default function DzieckoPage() {
                     setSelectedChildId(child.id);
                   }
                 }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border transition-colors text-xs sm:text-sm ${
                   selectedChildId === child.id
                     ? 'bg-sky-500 text-white border-sky-500'
                     : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
@@ -319,7 +320,7 @@ export default function DzieckoPage() {
                 disabled={isEditing}
               >
                 <Person fontSize="small" />
-                {child.name} {child.surname}
+                <span className="truncate max-w-[120px] sm:max-w-none">{child.name} {child.surname}</span>
               </button>
             ))}
           </div>
@@ -327,14 +328,14 @@ export default function DzieckoPage() {
       )}
 
       {isAddingChild && (
-        <div className="mb-6 p-6 bg-sky-50 rounded-lg border border-sky-200">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Dodaj nowe dziecko</h2>
-            <div className="flex gap-2">
+        <div className="mb-4 sm:mb-6 p-4 sm:p-6 bg-sky-50 rounded-lg border border-sky-200">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 mb-4">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-800">Dodaj nowe dziecko</h2>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <button
                 onClick={handleAddChild}
                 disabled={isSaving}
-                className="flex items-center gap-2 bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 transition-colors disabled:bg-sky-300"
+                className="flex items-center justify-center gap-2 bg-sky-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-sky-600 transition-colors disabled:bg-sky-300 text-sm sm:text-base"
               >
                 <Save fontSize="small" />
                 {isSaving ? 'Zapisywanie...' : 'Zapisz'}
@@ -342,7 +343,7 @@ export default function DzieckoPage() {
               <button
                 onClick={handleCancel}
                 disabled={isSaving}
-                className="flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors disabled:bg-gray-300"
+                className="flex items-center justify-center gap-2 bg-gray-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors disabled:bg-gray-300 text-sm sm:text-base"
               >
                 <Cancel fontSize="small" />
                 Anuluj
@@ -350,120 +351,120 @@ export default function DzieckoPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Imię *
               </label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
               />
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Nazwisko *
               </label>
               <input
                 type="text"
                 value={formData.surname}
                 onChange={(e) => handleInputChange('surname', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
               />
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Data urodzenia *
               </label>
               <input
                 type="date"
                 value={formData.birthDate}
                 onChange={(e) => handleInputChange('birthDate', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
               />
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 PESEL
               </label>
               <input
                 type="text"
                 value={formData.pesel}
                 onChange={(e) => handleInputChange('pesel', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                 placeholder="00000000000"
                 maxLength={11}
               />
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Adres zamieszkania
               </label>
               <input
                 type="text"
                 value={formData.address}
                 onChange={(e) => handleInputChange('address', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                 placeholder="ul. Przykładowa 1/2"
               />
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Miasto
               </label>
               <input
                 type="text"
                 value={formData.city}
                 onChange={(e) => handleInputChange('city', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                 placeholder="Warszawa"
               />
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Kod pocztowy
               </label>
               <input
                 type="text"
                 value={formData.postalCode}
                 onChange={(e) => handlePostalCodeChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                 placeholder="00-000"
                 maxLength={6}
                 pattern="[0-9]{2}-[0-9]{3}"
               />
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Alergeny (oddzielone przecinkami)
               </label>
               <textarea
                 value={formData.allergies}
                 onChange={(e) => handleInputChange('allergies', e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                 placeholder="np. orzechy, mleko, gluten"
               />
             </div>
 
-            <div className="md:col-span-2 bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="md:col-span-2 bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Specjalne potrzeby
               </label>
               <textarea
                 value={formData.specialNeeds}
                 onChange={(e) => handleInputChange('specialNeeds', e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                 placeholder="Opisz specjalne potrzeby dziecka (opcjonalnie)"
               />
             </div>
@@ -505,24 +506,25 @@ export default function DzieckoPage() {
 
       {selectedChild && !isAddingChild && (
         <>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 mb-4">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-800">
               Dane dziecka: {selectedChild.name} {selectedChild.surname}
             </h2>
             {!isEditing ? (
               <button
                 onClick={handleEditStart}
-                className="flex items-center gap-2 bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 transition-colors"
+                className="flex items-center justify-center gap-2 bg-sky-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-sky-600 transition-colors text-sm sm:text-base w-full sm:w-auto"
               >
                 <Edit fontSize="small" />
-                Edytuj dane
+                <span className="hidden sm:inline">Edytuj dane</span>
+                <span className="sm:hidden">Edytuj</span>
               </button>
             ) : (
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <button
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="flex items-center gap-2 bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 transition-colors disabled:bg-sky-300"
+                  className="flex items-center justify-center gap-2 bg-sky-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-sky-600 transition-colors disabled:bg-sky-300 text-sm sm:text-base"
                 >
                   <Save fontSize="small" />
                   {isSaving ? 'Zapisywanie...' : 'Zapisz'}
@@ -530,7 +532,7 @@ export default function DzieckoPage() {
                 <button
                   onClick={handleCancel}
                   disabled={isSaving}
-                  className="flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors disabled:bg-gray-300"
+                  className="flex items-center justify-center gap-2 bg-gray-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors disabled:bg-gray-300 text-sm sm:text-base"
                 >
                   <Cancel fontSize="small" />
                   Anuluj
@@ -539,9 +541,9 @@ export default function DzieckoPage() {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Imię
               </label>
               {isEditing ? (
@@ -549,15 +551,15 @@ export default function DzieckoPage() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
               ) : (
                 <p className="text-gray-900">{selectedChild.name}</p>
               )}
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Nazwisko
               </label>
               {isEditing ? (
@@ -565,15 +567,15 @@ export default function DzieckoPage() {
                   type="text"
                   value={formData.surname}
                   onChange={(e) => handleInputChange('surname', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
               ) : (
                 <p className="text-gray-900">{selectedChild.surname}</p>
               )}
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Data urodzenia
               </label>
               {isEditing ? (
@@ -581,7 +583,7 @@ export default function DzieckoPage() {
                   type="date"
                   value={formData.birthDate}
                   onChange={(e) => handleInputChange('birthDate', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
               ) : (
                 <p className="text-gray-900">
@@ -592,15 +594,15 @@ export default function DzieckoPage() {
               )}
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Wiek
               </label>
               <p className="text-gray-900">{selectedChild.age} lat</p>
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 PESEL
               </label>
               {isEditing ? (
@@ -608,7 +610,7 @@ export default function DzieckoPage() {
                   type="text"
                   value={formData.pesel}
                   onChange={(e) => handleInputChange('pesel', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                   placeholder="00000000000"
                   maxLength={11}
                 />
@@ -617,8 +619,8 @@ export default function DzieckoPage() {
               )}
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Grupa
               </label>
               <p className="text-gray-900">
@@ -626,8 +628,8 @@ export default function DzieckoPage() {
               </p>
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Adres zamieszkania
               </label>
               {isEditing ? (
@@ -635,7 +637,7 @@ export default function DzieckoPage() {
                   type="text"
                   value={formData.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                   placeholder="ul. Przykładowa 1/2"
                 />
               ) : (
@@ -643,8 +645,8 @@ export default function DzieckoPage() {
               )}
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Miasto
               </label>
               {isEditing ? (
@@ -652,7 +654,7 @@ export default function DzieckoPage() {
                   type="text"
                   value={formData.city}
                   onChange={(e) => handleInputChange('city', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                   placeholder="Warszawa"
                 />
               ) : (
@@ -660,8 +662,8 @@ export default function DzieckoPage() {
               )}
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Kod pocztowy
               </label>
               {isEditing ? (
@@ -669,7 +671,7 @@ export default function DzieckoPage() {
                   type="text"
                   value={formData.postalCode}
                   onChange={(e) => handlePostalCodeChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                   placeholder="00-000"
                   maxLength={6}
                 />
@@ -678,8 +680,8 @@ export default function DzieckoPage() {
               )}
             </div>
             
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Alergeny
               </label>
               {isEditing ? (
@@ -687,7 +689,7 @@ export default function DzieckoPage() {
                   value={formData.allergies}
                   onChange={(e) => handleInputChange('allergies', e.target.value)}
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                   placeholder="np. orzechy, mleko, gluten"
                 />
               ) : (
@@ -699,8 +701,8 @@ export default function DzieckoPage() {
               )}
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Specjalne potrzeby
               </label>
               {isEditing ? (
@@ -708,7 +710,7 @@ export default function DzieckoPage() {
                   value={formData.specialNeeds}
                   onChange={(e) => handleInputChange('specialNeeds', e.target.value)}
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
               ) : (
                 <p className="text-gray-900">
@@ -719,30 +721,30 @@ export default function DzieckoPage() {
 
             {isEditing && (
               <>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <label className="flex items-start gap-3 cursor-pointer">
+                <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+                  <label className="flex items-start gap-2 sm:gap-3 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.hasImageConsent}
                       onChange={(e) => handleInputChange('hasImageConsent', e.target.checked)}
-                      className="mt-1 h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
+                      className="mt-1 h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500 shrink-0"
                     />
-                    <div>
-                      <span className="block text-sm font-medium text-gray-700">Zgoda na zdjęcia</span>
+                    <div className="min-w-0">
+                      <span className="block text-xs sm:text-sm font-medium text-gray-700">Zgoda na zdjęcia</span>
                       <span className="block text-xs text-gray-500 mt-1">Wyrażam zgodę na publikowanie zdjęć dziecka w galerii przedszkolnej</span>
                     </div>
                   </label>
                 </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <label className="flex items-start gap-3 cursor-pointer">
+                <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+                  <label className="flex items-start gap-2 sm:gap-3 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.hasDataConsent}
                       onChange={(e) => handleInputChange('hasDataConsent', e.target.checked)}
-                      className="mt-1 h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
+                      className="mt-1 h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500 shrink-0"
                     />
-                    <div>
-                      <span className="block text-sm font-medium text-gray-700">Zgoda na przetwarzanie danych</span>
+                    <div className="min-w-0">
+                      <span className="block text-xs sm:text-sm font-medium text-gray-700">Zgoda na przetwarzanie danych</span>
                       <span className="block text-xs text-gray-500 mt-1">Wyrażam zgodę na przetwarzanie danych osobowych dziecka</span>
                     </div>
                   </label>
@@ -751,39 +753,39 @@ export default function DzieckoPage() {
             )}
 
             {!isEditing && (
-              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     Zgoda na zdjęcia
                   </label>
                   <div className="flex items-center gap-2">
                     {selectedChild.hasImageConsent ? (
                       <>
                         <CheckCircleIcon className="text-emerald-500" fontSize="small" />
-                        <span className="text-emerald-600">Wyrażona</span>
+                        <span className="text-xs sm:text-sm text-emerald-600">Wyrażona</span>
                       </>
                     ) : (
                       <>
                         <HighlightOffIcon className="text-amber-500" fontSize="small" />
-                        <span className="text-amber-600">Niewyrażona</span>
+                        <span className="text-xs sm:text-sm text-amber-600">Niewyrażona</span>
                       </>
                     )}
                   </div>
                 </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     Zgoda na przetwarzanie danych
                   </label>
                   <div className="flex items-center gap-2">
                     {selectedChild.hasDataConsent ? (
                       <>
                         <CheckCircleIcon className="text-emerald-500" fontSize="small" />
-                        <span className="text-emerald-600">Wyrażona</span>
+                        <span className="text-xs sm:text-sm text-emerald-600">Wyrażona</span>
                       </>
                     ) : (
                       <>
                         <HighlightOffIcon className="text-amber-500" fontSize="small" />
-                        <span className="text-amber-600">Niewyrażona</span>
+                        <span className="text-xs sm:text-sm text-amber-600">Niewyrażona</span>
                       </>
                     )}
                   </div>
@@ -795,17 +797,17 @@ export default function DzieckoPage() {
       )}
 
       {children.length === 0 && !isAddingChild && (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-          <Person className="text-gray-400 mb-4" style={{ fontSize: 48 }} />
-          <h3 className="text-lg font-medium text-gray-700 mb-2">
+        <div className="text-center py-8 sm:py-12 bg-gray-50 rounded-lg border border-gray-200 px-4">
+          <Person className="text-gray-400 mb-3 sm:mb-4 mx-auto" style={{ fontSize: 48 }} />
+          <h3 className="text-base sm:text-lg font-medium text-gray-700 mb-2">
             Nie masz jeszcze dodanych dzieci
           </h3>
-          <p className="text-gray-500 mb-4">
+          <p className="text-xs sm:text-sm text-gray-500 mb-4">
             Kliknij przycisk &quot;Dodaj dziecko&quot; aby zarejestrować dziecko w systemie.
           </p>
           <button
             onClick={handleAddChildStart}
-            className="inline-flex items-center gap-2 bg-sky-500 text-white px-6 py-3 rounded-lg hover:bg-sky-600 transition-colors"
+            className="inline-flex items-center gap-2 bg-sky-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-sky-600 transition-colors text-sm sm:text-base"
           >
             <Add fontSize="small" />
             Dodaj dziecko
@@ -814,16 +816,16 @@ export default function DzieckoPage() {
       )}
 
       {selectedChild && !isAddingChild && (
-        <div className="mt-8 bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold text-gray-800">Dokumenty do pobrania</h3>
+        <div className="mt-6 sm:mt-8 bg-white p-4 sm:p-5 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-3">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800">Dokumenty do pobrania</h3>
             {!loadingDocuments && (
               <span className="text-xs text-gray-500 uppercase tracking-wide">
                 {documents.length} {documents.length === 1 ? 'plik' : 'pliki'}
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-xs sm:text-sm text-gray-600 mb-4">
             Poniżej znajdziesz dokumenty związane z pobytem dziecka w placówce. Kliknij &quot;Pobierz&quot;,
             aby zapisać dokument na swoim urządzeniu.
           </p>
@@ -839,18 +841,18 @@ export default function DzieckoPage() {
               Brak dokumentów do wyświetlenia
             </div>
           ) : (
-            <ul className="space-y-3">
+            <ul className="space-y-2 sm:space-y-3">
               {documents.map((doc) => (
                 <li
                   key={doc.id}
-                  className="flex items-center justify-between gap-4 rounded-lg border border-gray-200 px-4 py-3 hover:bg-gray-50 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 rounded-lg border border-gray-200 p-3 sm:px-4 sm:py-3 hover:bg-gray-50 transition-colors"
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
                     <FileText className="h-5 w-5 text-sky-500 mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800">{doc.title}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs sm:text-sm font-semibold text-gray-800 truncate">{doc.title}</p>
                       {doc.description && (
-                        <p className="text-xs text-gray-600 mt-0.5">{doc.description}</p>
+                        <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">{doc.description}</p>
                       )}
                       <p className="text-xs text-gray-500 mt-1">
                         Dodano: {new Date(doc.createdAt).toLocaleDateString('pl-PL')}
@@ -861,7 +863,7 @@ export default function DzieckoPage() {
                     href={doc.fileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors shrink-0"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors shrink-0 w-full sm:w-auto"
                   >
                     <Download fontSize="small" />
                     Pobierz
@@ -875,17 +877,17 @@ export default function DzieckoPage() {
 
       {/* Sekcje medyczne i behawioralne */}
       {selectedChild && !isAddingChild && !isEditing && (
-        <div className="mt-8 space-y-6">
-          <h2 className="text-xl font-bold text-gray-800">Dane medyczne i behawioralne</h2>
+        <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-6">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800">Dane medyczne i behawioralne</h2>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <MedicalDocumentsSection childId={selectedChild.id} canEdit={true} />
             <ChronicDiseasesSection childId={selectedChild.id} canEdit={true} />
           </div>
           
           <MedicationsSection childId={selectedChild.id} canEdit={true} />
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <RecommendationsSection childId={selectedChild.id} canEdit={false} userRole="PARENT" />
             <BehavioralInfoSection childId={selectedChild.id} canEdit={false} userRole="PARENT" />
           </div>

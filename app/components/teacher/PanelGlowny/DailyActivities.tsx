@@ -259,47 +259,47 @@ export default function DailyActivities() {
 
   if (loading) {
     return (
-      <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-sky-600" />
-          <span className="ml-2 text-zinc-600">Ładowanie danych...</span>
+      <section className="flex w-full flex-col gap-4 sm:gap-6 rounded-xl sm:rounded-2xl border border-zinc-200 bg-white px-3 sm:px-4 md:px-6 py-4 sm:py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="flex items-center justify-center py-6 sm:py-8">
+          <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-sky-600" />
+          <span className="ml-2 text-xs sm:text-sm text-zinc-600">Ładowanie danych...</span>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <section className="flex w-full flex-col gap-4 sm:gap-6 rounded-xl sm:rounded-2xl border border-zinc-200 bg-white px-3 sm:px-4 md:px-6 py-4 sm:py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+          <h2 className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-100">
             Aktywności dzienne
           </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
             Ewidencja posiłków, snu i aktywności
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 rounded-lg bg-zinc-100 px-3 py-2 dark:bg-zinc-800">
-            <Calendar className="h-4 w-4 text-zinc-500" />
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2 rounded-lg bg-zinc-100 px-2 sm:px-3 py-1.5 sm:py-2 dark:bg-zinc-800">
+            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-zinc-500 shrink-0" />
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-transparent text-sm text-zinc-700 dark:text-zinc-300 outline-none"
+              className="bg-transparent text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 outline-none w-full"
             />
           </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
-                <span>
+              <Button variant="outline" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                <span className="truncate max-w-[120px] sm:max-w-none">
                   {selectedChild === "all"
                     ? "Wszystkie dzieci"
                     : activities[selectedChild]?.childName}
                 </span>
-                <ChevronDown className="h-4 w-4 opacity-70" />
+                <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 opacity-70 shrink-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 rounded-xl border border-zinc-200 bg-white p-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
@@ -323,15 +323,16 @@ export default function DailyActivities() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button onClick={handleSaveAll} disabled={saving}>
+          <Button onClick={handleSaveAll} disabled={saving} className="text-xs sm:text-sm">
             {saving ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Zapisywanie...
+                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Zapisywanie...</span>
+                <span className="sm:hidden">Zapis...</span>
               </>
             ) : (
               <>
-                <Save className="h-4 w-4 mr-2" />
+                <Save className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 Zapisz
               </>
             )}
@@ -339,25 +340,25 @@ export default function DailyActivities() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-zinc-50/50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
-          <div className="flex items-center gap-2">
-            <Utensils className="h-5 w-5 text-sky-600" />
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
+        <div className="flex flex-col gap-3 sm:gap-4 rounded-lg sm:rounded-xl border border-zinc-200 bg-zinc-50/50 p-3 sm:p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Utensils className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600 shrink-0" />
+            <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
               Posiłki - Podsumowanie
             </h3>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             {mealTimes.map((meal) => {
               const count = mealStats[meal.key];
               const total = filteredActivities.length;
               return (
-                <div key={meal.key} className="flex flex-col gap-1 rounded-lg bg-white p-3 shadow-sm dark:bg-zinc-900">
+                <div key={meal.key} className="flex flex-col gap-1 rounded-lg bg-white p-2 sm:p-3 shadow-sm dark:bg-zinc-900">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                    <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400 truncate">
                       {meal.name}
                     </span>
-                    <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                    <span className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100 ml-1">
                       {count}/{total}
                     </span>
                   </div>
@@ -368,48 +369,48 @@ export default function DailyActivities() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-zinc-50/50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
-          <div className="flex items-center gap-2">
-            <Moon className="h-5 w-5 text-indigo-600" />
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Sen</h3>
+        <div className="flex flex-col gap-3 sm:gap-4 rounded-lg sm:rounded-xl border border-zinc-200 bg-zinc-50/50 p-3 sm:p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Moon className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 shrink-0" />
+            <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">Sen</h3>
           </div>
-          <div className="flex flex-col gap-3">
-            <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-zinc-900">
+          <div className="flex flex-col gap-2 sm:gap-3">
+            <div className="rounded-lg bg-white p-3 sm:p-4 shadow-sm dark:bg-zinc-900">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Dzieci śpiące</span>
-                <span className="text-2xl font-bold text-indigo-600">{napStats.total}</span>
+                <span className="text-xs sm:text-sm font-medium text-zinc-600 dark:text-zinc-400">Dzieci śpiące</span>
+                <span className="text-xl sm:text-2xl font-bold text-indigo-600">{napStats.total}</span>
               </div>
             </div>
-            <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-zinc-900">
+            <div className="rounded-lg bg-white p-3 sm:p-4 shadow-sm dark:bg-zinc-900">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Średni czas snu</span>
-                <span className="text-2xl font-bold text-indigo-600">{napStats.averageDuration} min</span>
+                <span className="text-xs sm:text-sm font-medium text-zinc-600 dark:text-zinc-400">Średni czas snu</span>
+                <span className="text-xl sm:text-2xl font-bold text-indigo-600">{napStats.averageDuration} min</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-2">
-          <Activity className="h-5 w-5 text-green-600" />
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+      <div className="flex flex-col gap-3 sm:gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 shrink-0" />
+          <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             Rejestracja dla każdego dziecka
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
           {filteredActivities.map((childActivity) => (
             <div
               key={childActivity.childId}
-              className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900"
+              className="rounded-lg sm:rounded-xl border border-zinc-200 bg-white p-3 sm:p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sky-600 font-semibold dark:bg-sky-900/30">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-sky-100 text-sky-600 font-semibold dark:bg-sky-900/30 shrink-0 text-xs sm:text-sm">
                     {childActivity.childName.split(" ").map(n => n[0]).join("")}
                   </div>
-                  <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">
+                  <h4 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-100 truncate">
                     {childActivity.childName}
                   </h4>
                 </div>
@@ -419,6 +420,7 @@ export default function DailyActivities() {
                   onClick={() => setEditingChildId(
                     editingChildId === childActivity.childId ? null : childActivity.childId
                   )}
+                  className="text-xs sm:text-sm shrink-0"
                 >
                   {editingChildId === childActivity.childId ? "Zamknij" : "Edytuj"}
                 </Button>

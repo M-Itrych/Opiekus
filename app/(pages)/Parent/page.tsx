@@ -294,53 +294,54 @@ export default function ParentPage() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Panel rodzica</h1>
-          <p className="text-sm text-gray-600">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Panel rodzica</h1>
+          <p className="text-xs sm:text-sm text-gray-600">
             Szybki przegląd najważniejszych informacji z dzisiejszego dnia.
           </p>
         </div>
-        <div className='flex flex-col items-center gap-2'>
+        <div className='flex flex-col sm:flex-row items-center gap-2 sm:gap-3'>
           <button
-            className='inline-flex items-center gap-2 rounded-lg border cursor-pointer border-sky-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors'
+            className='inline-flex items-center gap-2 rounded-lg border cursor-pointer border-sky-300 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors w-full sm:w-auto justify-center'
             onClick={refreshPickupCode}
           >
             <RefreshIcon fontSize="small" />
-            Odśwież kod odbioru
+            <span className="hidden sm:inline">Odśwież kod odbioru</span>
+            <span className="sm:hidden">Odśwież</span>
           </button>
           <div className='flex items-center gap-2'>
-            <QrCodeIcon className="h-4 w-4" />
-            <p className='text-sm text-gray-600 gap-2'>
-              Kod odbioru: <span className='font-semibold text-gray-800 text-xl'>{kodOdbioru || 'Brak kodu odbioru'}</span>
+            <QrCodeIcon className="h-4 w-4 shrink-0" />
+            <p className='text-xs sm:text-sm text-gray-600'>
+              Kod: <span className='font-semibold text-gray-800 text-lg sm:text-xl'>{kodOdbioru || 'Brak'}</span>
             </p>
           </div>
         </div>
       </div>
 
-      <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex items-center justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <div className="p-3 bg-blue-50 rounded-2xl">
+      <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
+          <div className="p-2 sm:p-3 bg-blue-50 rounded-2xl shrink-0">
             <ChildCare className="text-blue-500" fontSize="large" />
           </div>
           {loadingChildren ? (
             <div className="flex items-center gap-2 text-gray-500">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Ładowanie...
+              <span className="text-xs sm:text-sm">Ładowanie...</span>
             </div>
           ) : selectedChild ? (
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">
                 Dane dziecka
               </p>
-              <h2 className="text-xl font-bold text-gray-800">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800 truncate">
                 {selectedChild.name} {selectedChild.surname}
               </h2>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
                 Grupa: <span className="font-semibold text-gray-800">{selectedChild.group?.name || 'Nieprzypisana'}</span>
               </p>
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-gray-500 mt-2 hidden sm:block">
                 Rodzic: {selectedChild.parent.name} {selectedChild.parent.surname}
               </p>
             </div>
@@ -349,37 +350,37 @@ export default function ParentPage() {
               <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">
                 Dane dziecka
               </p>
-              <p className="text-gray-600 mt-1">Brak przypisanych dzieci</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">Brak przypisanych dzieci</p>
             </div>
           )}
         </div>
         <button
           onClick={() => router.push('/Parent/dziecko')}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+          className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors w-full sm:w-auto justify-center shrink-0"
         >
           Zobacz profil
           <ArrowForwardIosIcon fontSize="inherit" />
         </button>
       </section>
 
-      <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800">Obecność dziecka</h2>
-          <p className="text-sm text-gray-600">
+      <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 sm:p-5 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-800">Obecność dziecka</h2>
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
             Potwierdź przybycie dziecka do placówki oraz jego odbiór w ciągu dnia.
           </p>
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
-            <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+            <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 sm:px-4 py-2.5 sm:py-3">
               <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">Przybycie</p>
-              <p className="text-sm font-medium text-gray-800">
+              <p className="text-xs sm:text-sm font-medium text-gray-800 mt-1">
                 {attendanceStatus === 'arrived' || attendanceStatus === 'pickedUp'
                   ? `Potwierdzone o ${formatTime(arrivalTime)}`
                   : 'Oczekuje na potwierdzenie'}
               </p>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+            <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 sm:px-4 py-2.5 sm:py-3">
               <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">Odbiór</p>
-              <p className="text-sm font-medium text-gray-800">
+              <p className="text-xs sm:text-sm font-medium text-gray-800 mt-1">
                 {attendanceStatus === 'pickedUp'
                   ? `Potwierdzono odbiór o ${formatTime(pickupTime)}`
                   : 'Dziecko w placówce'}
@@ -388,28 +389,40 @@ export default function ParentPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col sm:flex-row md:flex-col lg:flex-row flex-wrap items-stretch sm:items-center gap-2 shrink-0">
           <button
             onClick={handleConfirmArrival}
             disabled={attendanceStatus === 'arrived' || attendanceStatus === 'pickedUp'}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed"
           >
             <LoginIcon fontSize="small" />
-            {attendanceStatus === 'arrived' || attendanceStatus === 'pickedUp'
-              ? 'Przybycie potwierdzone'
-              : 'Potwierdź przybycie'}
+            <span className="hidden sm:inline">
+              {attendanceStatus === 'arrived' || attendanceStatus === 'pickedUp'
+                ? 'Przybycie potwierdzone'
+                : 'Potwierdź przybycie'}
+            </span>
+            <span className="sm:hidden">
+              {attendanceStatus === 'arrived' || attendanceStatus === 'pickedUp'
+                ? 'Potwierdzone'
+                : 'Przybycie'}
+            </span>
           </button>
           <button
             onClick={handleConfirmPickup}
             disabled={attendanceStatus !== 'arrived'}
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors disabled:bg-emerald-300 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-emerald-700 transition-colors disabled:bg-emerald-300 disabled:cursor-not-allowed"
           >
             <LogoutIcon fontSize="small" />
-            {attendanceStatus === 'pickedUp' ? 'Odbiór potwierdzony' : 'Potwierdź odbiór'}
+            <span className="hidden sm:inline">
+              {attendanceStatus === 'pickedUp' ? 'Odbiór potwierdzony' : 'Potwierdź odbiór'}
+            </span>
+            <span className="sm:hidden">
+              {attendanceStatus === 'pickedUp' ? 'Potwierdzony' : 'Odbiór'}
+            </span>
           </button>
           <button
             onClick={handleResetAttendance}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
           >
             <RefreshIcon fontSize="small" />
             Resetuj
@@ -417,21 +430,22 @@ export default function ParentPage() {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex flex-col">
-          <header className="flex items-start justify-between gap-3 mb-4">
-            <div className="flex items-center gap-2">
-              <Restaurant className="text-blue-500" />
-              <div>
-                <h2 className="text-lg font-semibold text-gray-800">Dzisiejszy jadłospis</h2>
-                <p className="text-xs uppercase tracking-wide text-gray-500">{todayLabel}</p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+        <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 sm:p-5 flex flex-col">
+          <header className="flex items-start justify-between gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <Restaurant className="text-blue-500 shrink-0" />
+              <div className="min-w-0">
+                <h2 className="text-base sm:text-lg font-semibold text-gray-800">Dzisiejszy jadłospis</h2>
+                <p className="text-xs uppercase tracking-wide text-gray-500 truncate">{todayLabel}</p>
               </div>
             </div>
             <button
               onClick={() => router.push('/Parent/jadlospis')}
-              className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700"
+              className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 shrink-0"
             >
-              Zobacz całość
+              <span className="hidden sm:inline">Zobacz całość</span>
+              <span className="sm:hidden">Więcej</span>
               <ArrowForwardIosIcon fontSize="inherit" />
             </button>
           </header>
@@ -474,22 +488,23 @@ export default function ParentPage() {
           )}
         </section>
 
-        <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex flex-col">
-          <header className="flex items-start justify-between gap-3 mb-4">
-            <div className="flex items-center gap-2">
-              <MailOutlineIcon className="text-purple-500" />
-              <div>
-                <h2 className="text-lg font-semibold text-gray-800">Nowe wiadomości</h2>
+        <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 sm:p-5 flex flex-col">
+          <header className="flex items-start justify-between gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <MailOutlineIcon className="text-purple-500 shrink-0" />
+              <div className="min-w-0">
+                <h2 className="text-base sm:text-lg font-semibold text-gray-800">Nowe wiadomości</h2>
                 <p className="text-xs text-gray-500">
-                  Nieprzeczytane: {unreadCount || 'brak nowych wiadomości'}
+                  Nieprzeczytane: {unreadCount || 'brak'}
                 </p>
               </div>
             </div>
             <button
               onClick={() => router.push('/Parent/wiadomosci')}
-              className="inline-flex items-center gap-1 text-xs font-medium text-purple-600 hover:text-purple-700"
+              className="inline-flex items-center gap-1 text-xs font-medium text-purple-600 hover:text-purple-700 shrink-0"
             >
-              Skrzynka odbiorcza
+              <span className="hidden sm:inline">Skrzynka</span>
+              <span className="sm:hidden">Więcej</span>
               <ArrowForwardIosIcon fontSize="inherit" />
             </button>
           </header>
@@ -528,20 +543,21 @@ export default function ParentPage() {
           )}
         </section>
 
-        <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex flex-col">
-          <header className="flex items-start justify-between gap-3 mb-4">
-            <div className="flex items-center gap-2">
-              <PaymentIcon className="text-emerald-500" />
-              <div>
-                <h2 className="text-lg font-semibold text-gray-800">Saldo płatności</h2>
-                <p className="text-xs text-gray-500">Podsumowanie nadchodzących zobowiązań</p>
+        <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 sm:p-5 flex flex-col">
+          <header className="flex items-start justify-between gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <PaymentIcon className="text-emerald-500 shrink-0" />
+              <div className="min-w-0">
+                <h2 className="text-base sm:text-lg font-semibold text-gray-800">Saldo płatności</h2>
+                <p className="text-xs text-gray-500 hidden sm:block">Podsumowanie nadchodzących zobowiązań</p>
               </div>
             </div>
             <button
               onClick={() => router.push('/Parent/platnosci')}
-              className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700"
+              className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 shrink-0"
             >
-              Pokaż szczegóły
+              <span className="hidden sm:inline">Szczegóły</span>
+              <span className="sm:hidden">Więcej</span>
               <ArrowForwardIosIcon fontSize="inherit" />
             </button>
           </header>

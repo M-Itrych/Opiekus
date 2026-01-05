@@ -283,47 +283,49 @@ export default function JadlospisPage() {
   };
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+    <div className="p-3 sm:p-4 md:p-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 mb-4 sm:mb-5">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Jadłospis</h1>
-          <p className="text-gray-600 text-sm">
+          <h1 className="text-lg sm:text-xl font-bold text-gray-800">Jadłospis</h1>
+          <p className="text-gray-600 text-xs sm:text-sm">
             Sprawdź, co przygotowaliśmy dla dzieci na wybrany dzień.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
           <button
             onClick={() => handleChangeDay('prev')}
-            className="px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+            className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
           >
-            ← Wczoraj
+            <span className="hidden sm:inline">← Wczoraj</span>
+            <span className="sm:hidden">←</span>
           </button>
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => handleChangeDate(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
           />
           <button
             onClick={() => handleChangeDay('next')}
-            className="px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+            className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
           >
-            Jutro →
+            <span className="hidden sm:inline">Jutro →</span>
+            <span className="sm:hidden">→</span>
           </button>
         </div>
       </div>
 
       {/* Child selector */}
       {children.length > 1 && (
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-5">
-          <label className="text-sm text-gray-600 mb-2 block">Wybierz dziecko:</label>
+        <div className="bg-white p-3 sm:p-4 rounded-xl border border-gray-200 shadow-sm mb-4 sm:mb-5">
+          <label className="text-xs sm:text-sm text-gray-600 mb-2 block">Wybierz dziecko:</label>
           <div className="flex flex-wrap gap-2">
             {children.map((child) => (
               <button
                 key={child.id}
                 onClick={() => setSelectedChildId(child.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedChildId === child.id
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${selectedChildId === child.id
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
@@ -340,10 +342,10 @@ export default function JadlospisPage() {
 
       {/* Child diet info */}
       {selectedChild && selectedChild.diet !== 'STANDARD' && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-5">
+        <div className="bg-green-50 border border-green-200 rounded-xl p-3 sm:p-4 mb-4 sm:mb-5">
           <div className="flex items-center gap-2">
-            <Leaf className="h-5 w-5 text-green-600" />
-            <p className="text-sm text-green-700">
+            <Leaf className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 shrink-0" />
+            <p className="text-xs sm:text-sm text-green-700">
               <strong>{selectedChild.name}</strong> ma przypisaną dietę: <strong>{DIET_LABELS[selectedChild.diet] || selectedChild.diet}</strong>
             </p>
           </div>
@@ -355,12 +357,12 @@ export default function JadlospisPage() {
 
       {/* Cancellations summary */}
       {cancellations.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5">
-          <div className="flex items-center justify-between">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 sm:p-4 mb-4 sm:mb-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-600" />
+              <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 shrink-0" />
               <div>
-                <p className="text-sm font-medium text-amber-700">
+                <p className="text-xs sm:text-sm font-medium text-amber-700">
                   Anulowane posiłki: {cancellations.length}
                 </p>
                 {totalCancellationsValue > 0 && (
@@ -372,7 +374,7 @@ export default function JadlospisPage() {
             </div>
             <button
               onClick={() => setShowCancellations(!showCancellations)}
-              className="text-xs text-amber-700 hover:text-amber-800 underline"
+              className="text-xs text-amber-700 hover:text-amber-800 underline self-start sm:self-auto"
             >
               {showCancellations ? 'Ukryj' : 'Pokaż szczegóły'}
             </button>
@@ -419,12 +421,12 @@ export default function JadlospisPage() {
         </div>
       )}
 
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-5">
-        <div className="flex items-center gap-3">
-          <Restaurant className="text-blue-500" />
+      <div className="bg-white p-3 sm:p-4 rounded-xl border border-gray-200 shadow-sm mb-4 sm:mb-5">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Restaurant className="text-blue-500 shrink-0" />
           <div>
             <p className="text-xs text-gray-500 uppercase tracking-wide">Jadłospis dla dnia</p>
-            <h2 className="text-lg font-semibold text-gray-800 capitalize">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-800 capitalize">
               {formatDateLabel(selectedDate)}
             </h2>
           </div>
@@ -432,26 +434,26 @@ export default function JadlospisPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-8 sm:py-12">
           <div className="flex flex-col items-center gap-3 text-gray-500">
-            <Loader2 className="h-8 w-8 animate-spin" />
-            <p>Ładowanie jadłospisu...</p>
+            <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin" />
+            <p className="text-xs sm:text-sm">Ładowanie jadłospisu...</p>
           </div>
         </div>
       ) : error ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center text-red-600">
-            <p>{error}</p>
+        <div className="flex items-center justify-center py-8 sm:py-12">
+          <div className="text-center text-red-600 px-4">
+            <p className="text-xs sm:text-sm">{error}</p>
             <button
               onClick={fetchMealPlans}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="mt-4 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs sm:text-sm"
             >
               Spróbuj ponownie
             </button>
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
           {mealsOrder.map(({ key, label, Icon }) => {
             const meal = menuForDay[key];
             const hasData = meal.title !== 'Brak danych';
@@ -461,20 +463,20 @@ export default function JadlospisPage() {
             return (
               <div
                 key={key}
-                className={`bg-white border rounded-xl p-4 shadow-sm transition-shadow ${cancelled
+                className={`bg-white border rounded-xl p-3 sm:p-4 shadow-sm transition-shadow ${cancelled
                     ? 'border-red-200 bg-red-50/30'
                     : hasData
                       ? 'border-gray-200 hover:shadow-md'
                       : 'border-gray-100 opacity-60'
                   }`}
               >
-                <div className="flex items-center justify-between mb-2.5">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg shrink-0 ${cancelled ? 'bg-red-100' : hasData ? 'bg-blue-50' : 'bg-gray-50'
+                <div className="flex items-center justify-between mb-2 sm:mb-2.5 gap-2">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                    <div className={`p-1.5 sm:p-2 rounded-lg shrink-0 ${cancelled ? 'bg-red-100' : hasData ? 'bg-blue-50' : 'bg-gray-50'
                       }`}>
-                      <Icon className={cancelled ? 'text-red-500' : hasData ? 'text-blue-500' : 'text-gray-400'} />
+                      <Icon className={cancelled ? 'text-red-500' : hasData ? 'text-blue-500' : 'text-gray-400'} fontSize="small" />
                     </div>
-                    <h3 className="text-base font-semibold text-gray-800">{label}</h3>
+                    <h3 className="text-sm sm:text-base font-semibold text-gray-800 truncate">{label}</h3>
                   </div>
                   {cancelled && (
                     <span className="text-xs px-2 py-1 bg-red-100 text-red-600 rounded-full flex items-center gap-1">
@@ -487,7 +489,7 @@ export default function JadlospisPage() {
                     </span>
                   )}
                 </div>
-                <p className={`font-medium text-sm mb-1 ${cancelled ? 'text-gray-400 line-through' : hasData ? 'text-gray-700' : 'text-gray-400'
+                <p className={`font-medium text-xs sm:text-sm mb-1 ${cancelled ? 'text-gray-400 line-through' : hasData ? 'text-gray-700' : 'text-gray-400'
                   }`}>
                   {meal.title}
                 </p>
@@ -497,11 +499,11 @@ export default function JadlospisPage() {
                 </p>
 
                 {meal.allergens && meal.allergens.length > 0 && !cancelled && (
-                  <div className="mt-3 px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-[11px] font-semibold text-red-600 uppercase tracking-wide">
+                  <div className="mt-2 sm:mt-3 px-2 sm:px-3 py-1.5 sm:py-2 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-[10px] sm:text-[11px] font-semibold text-red-600 uppercase tracking-wide">
                       Alergeny:
                     </p>
-                    <p className="text-xs text-red-500">{meal.allergens.join(', ')}</p>
+                    <p className="text-xs text-red-500 break-words">{meal.allergens.join(', ')}</p>
                   </div>
                 )}
 
@@ -509,14 +511,17 @@ export default function JadlospisPage() {
                   <button
                     onClick={() => handleCancelMeal(key)}
                     disabled={isCancelling === key}
-                    className="mt-3 w-full px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50"
+                    className="mt-2 sm:mt-3 w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50"
                   >
                     {isCancelling === key ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" /> Anulowanie...
+                      <span className="flex items-center justify-center gap-1.5 sm:gap-2">
+                        <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" /> <span className="hidden sm:inline">Anulowanie...</span><span className="sm:hidden">...</span>
                       </span>
                     ) : (
-                      'Anuluj posiłek'
+                      <>
+                        <span className="hidden sm:inline">Anuluj posiłek</span>
+                        <span className="sm:hidden">Anuluj</span>
+                      </>
                     )}
                   </button>
                 )}
@@ -538,8 +543,8 @@ export default function JadlospisPage() {
         </div>
       )}
 
-      <div className="mt-5 bg-blue-50 border border-blue-200 rounded-xl p-4">
-        <h3 className="text-blue-800 font-semibold mb-1">Informacje dodatkowe</h3>
+      <div className="mt-4 sm:mt-5 bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4">
+        <h3 className="text-blue-800 font-semibold mb-1 text-sm sm:text-base">Informacje dodatkowe</h3>
         <ul className="text-blue-700 text-xs space-y-1 list-disc list-inside">
           <li>Jadłospis może ulec zmianie w zależności od dostępności produktów.</li>
           <li>

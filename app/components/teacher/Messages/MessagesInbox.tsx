@@ -172,10 +172,10 @@ export default function MessagesInbox() {
 
   if (loading && viewMode !== "compose") {
     return (
-      <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-sky-600" />
-          <span className="ml-2 text-zinc-600">Ładowanie wiadomości...</span>
+      <section className="flex w-full flex-col gap-4 sm:gap-6 rounded-xl sm:rounded-2xl border border-zinc-200 bg-white px-3 sm:px-4 md:px-6 py-4 sm:py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="flex items-center justify-center py-6 sm:py-8">
+          <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-sky-600" />
+          <span className="ml-2 text-xs sm:text-sm text-zinc-600">Ładowanie wiadomości...</span>
         </div>
       </section>
     );
@@ -183,26 +183,26 @@ export default function MessagesInbox() {
 
   if (viewMode === "compose") {
     return (
-      <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => setViewMode("inbox")}>
-            <ChevronLeft className="h-4 w-4 mr-1" />
+      <section className="flex w-full flex-col gap-4 sm:gap-6 rounded-xl sm:rounded-2xl border border-zinc-200 bg-white px-3 sm:px-4 md:px-6 py-4 sm:py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Button variant="ghost" size="sm" onClick={() => setViewMode("inbox")} className="text-xs sm:text-sm">
+            <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
             Powrót
           </Button>
-          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+          <h2 className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-100">
             Nowa wiadomość
           </h2>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+            <label className="block text-xs sm:text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
               Odbiorca (Rodzic)
             </label>
             <select
               value={newMessage.receiverId}
               onChange={(e) => setNewMessage(prev => ({ ...prev, receiverId: e.target.value }))}
-              className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+              className="w-full rounded-lg border border-zinc-200 bg-white px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
             >
               <option value="">Wybierz odbiorcę...</option>
               {parents.map((parent) => (
@@ -214,41 +214,44 @@ export default function MessagesInbox() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+            <label className="block text-xs sm:text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
               Temat
             </label>
             <Input
               value={newMessage.subject}
               onChange={(e) => setNewMessage(prev => ({ ...prev, subject: e.target.value }))}
               placeholder="Temat wiadomości..."
+              className="text-xs sm:text-sm"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+            <label className="block text-xs sm:text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
               Treść
             </label>
             <Textarea
               value={newMessage.body}
               onChange={(e) => setNewMessage(prev => ({ ...prev, body: e.target.value }))}
               placeholder="Napisz wiadomość..."
-              rows={8}
+              rows={6}
+              className="text-xs sm:text-sm"
             />
           </div>
 
-          <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={() => setViewMode("inbox")}>
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+            <Button variant="outline" onClick={() => setViewMode("inbox")} className="w-full sm:w-auto text-xs sm:text-sm">
               Anuluj
             </Button>
-            <Button onClick={handleSendMessage} disabled={sending}>
+            <Button onClick={handleSendMessage} disabled={sending} className="w-full sm:w-auto text-xs sm:text-sm">
               {sending ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Wysyłanie...
+                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Wysyłanie...</span>
+                  <span className="sm:hidden">Wysył...</span>
                 </>
               ) : (
                 <>
-                  <Send className="h-4 w-4 mr-2" />
+                  <Send className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                   Wyślij
                 </>
               )}
@@ -264,37 +267,37 @@ export default function MessagesInbox() {
     const otherPerson = isInbox ? selectedMessage.sender : selectedMessage.receiver;
 
     return (
-      <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="flex items-center gap-4">
+      <section className="flex w-full flex-col gap-4 sm:gap-6 rounded-xl sm:rounded-2xl border border-zinc-200 bg-white px-3 sm:px-4 md:px-6 py-4 sm:py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="flex items-center gap-2 sm:gap-4">
           <Button variant="ghost" size="sm" onClick={() => {
             setSelectedMessage(null);
             setViewMode("inbox");
-          }}>
-            <ChevronLeft className="h-4 w-4 mr-1" />
+          }} className="text-xs sm:text-sm">
+            <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
             Powrót
           </Button>
         </div>
 
-        <div className="border-b border-zinc-200 pb-4 dark:border-zinc-700">
-          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+        <div className="border-b border-zinc-200 pb-3 sm:pb-4 dark:border-zinc-700">
+          <h2 className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-100">
             {selectedMessage.subject}
           </h2>
-          <div className="mt-2 flex items-center gap-4 text-sm text-zinc-500">
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              <span>
+          <div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-2 text-xs sm:text-sm text-zinc-500">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <User className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+              <span className="truncate">
                 {isInbox ? "Od:" : "Do:"} {otherPerson.name} {otherPerson.surname}
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4" />
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Clock className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
               <span>{new Date(selectedMessage.createdAt).toLocaleString("pl-PL")}</span>
             </div>
           </div>
         </div>
 
         <div className="prose prose-zinc dark:prose-invert max-w-none">
-          <p className="whitespace-pre-wrap text-zinc-700 dark:text-zinc-300">
+          <p className="whitespace-pre-wrap text-xs sm:text-sm text-zinc-700 dark:text-zinc-300">
             {selectedMessage.body}
           </p>
         </div>
@@ -307,8 +310,8 @@ export default function MessagesInbox() {
               body: "",
             });
             setViewMode("compose");
-          }}>
-            <Mail className="h-4 w-4 mr-2" />
+          }} className="text-xs sm:text-sm">
+            <Mail className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
             Odpowiedz
           </Button>
         </div>
@@ -317,59 +320,60 @@ export default function MessagesInbox() {
   }
 
   return (
-    <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <section className="flex w-full flex-col gap-4 sm:gap-6 rounded-xl sm:rounded-2xl border border-zinc-200 bg-white px-3 sm:px-4 md:px-6 py-4 sm:py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+          <h2 className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-100">
             Wiadomości
           </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
             Komunikacja z rodzicami
           </p>
         </div>
 
-        <Button onClick={() => setViewMode("compose")}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nowa wiadomość
+        <Button onClick={() => setViewMode("compose")} className="w-full sm:w-auto text-xs sm:text-sm">
+          <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">Nowa wiadomość</span>
+          <span className="sm:hidden">Nowa</span>
         </Button>
       </div>
 
-      <div className="flex gap-2 border-b border-zinc-200 dark:border-zinc-700">
+      <div className="flex gap-1 sm:gap-2 border-b border-zinc-200 dark:border-zinc-700 overflow-x-auto">
         <button
           onClick={() => handleViewChange("inbox")}
-          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${viewMode === "inbox"
+          className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${viewMode === "inbox"
               ? "border-b-2 border-sky-500 text-sky-600"
               : "text-zinc-500 hover:text-zinc-700"
             }`}
         >
-          <Inbox className="h-4 w-4" />
-          Odebrane
+          <Inbox className="h-3 w-3 sm:h-4 sm:w-4" />
+          <span className="hidden sm:inline">Odebrane</span>
           {unreadCount > 0 && viewMode === "inbox" && (
-            <span className="rounded-full bg-sky-500 px-2 py-0.5 text-xs text-white">
+            <span className="rounded-full bg-sky-500 px-1.5 sm:px-2 py-0.5 text-xs text-white">
               {unreadCount}
             </span>
           )}
         </button>
         <button
           onClick={() => handleViewChange("sent")}
-          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${viewMode === "sent"
+          className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${viewMode === "sent"
               ? "border-b-2 border-sky-500 text-sky-600"
               : "text-zinc-500 hover:text-zinc-700"
             }`}
         >
-          <Send className="h-4 w-4" />
-          Wysłane
+          <Send className="h-3 w-3 sm:h-4 sm:w-4" />
+          <span className="hidden sm:inline">Wysłane</span>
         </button>
       </div>
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+        <Search className="absolute left-2 sm:left-3 top-1/2 h-3 w-3 sm:h-4 sm:w-4 -translate-y-1/2 text-zinc-400" />
         <Input
           type="text"
           placeholder="Szukaj wiadomości..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
+          className="pl-8 sm:pl-10 text-sm"
         />
       </div>
 
@@ -383,24 +387,24 @@ export default function MessagesInbox() {
               <button
                 key={message.id}
                 onClick={() => handleMessageClick(message)}
-                className={`flex items-start gap-4 rounded-xl border p-4 text-left transition-all hover:shadow-md ${!message.isRead && isInbox
+                className={`flex items-start gap-2 sm:gap-4 rounded-lg sm:rounded-xl border p-3 sm:p-4 text-left transition-all hover:shadow-md ${!message.isRead && isInbox
                     ? "border-sky-200 bg-sky-50 dark:border-sky-800 dark:bg-sky-900/20"
                     : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
                   }`}
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-                  <User className="h-5 w-5" />
+                <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400 shrink-0">
+                  <User className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className={`text-sm ${!message.isRead && isInbox ? "font-semibold" : ""} text-zinc-900 dark:text-zinc-100`}>
+                    <span className={`text-xs sm:text-sm ${!message.isRead && isInbox ? "font-semibold" : ""} text-zinc-900 dark:text-zinc-100 truncate`}>
                       {person.name} {person.surname}
                     </span>
-                    <span className="text-xs text-zinc-500 whitespace-nowrap">
+                    <span className="text-xs text-zinc-500 whitespace-nowrap shrink-0">
                       {formatDate(message.createdAt)}
                     </span>
                   </div>
-                  <h3 className={`text-sm ${!message.isRead && isInbox ? "font-semibold" : ""} text-zinc-800 dark:text-zinc-200 truncate`}>
+                  <h3 className={`text-xs sm:text-sm ${!message.isRead && isInbox ? "font-semibold" : ""} text-zinc-800 dark:text-zinc-200 truncate mt-0.5`}>
                     {message.subject}
                   </h3>
                   <p className="text-xs text-zinc-500 truncate mt-1">
@@ -414,9 +418,9 @@ export default function MessagesInbox() {
             );
           })
         ) : (
-          <div className="py-12 text-center">
-            <Mail className="h-12 w-12 mx-auto text-zinc-300 dark:text-zinc-600 mb-4" />
-            <p className="text-zinc-500 dark:text-zinc-400">
+          <div className="py-8 sm:py-12 text-center">
+            <Mail className="h-8 w-8 sm:h-12 sm:w-12 mx-auto text-zinc-300 dark:text-zinc-600 mb-3 sm:mb-4" />
+            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 px-4">
               {searchQuery
                 ? "Nie znaleziono wiadomości pasujących do wyszukiwania"
                 : viewMode === "inbox"

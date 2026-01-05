@@ -231,8 +231,8 @@ export default function HeadTeacher() {
   if (loading) {
     return (
       <HeadTeacherLayout>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="flex items-center justify-center min-h-[300px] sm:min-h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-primary"></div>
         </div>
       </HeadTeacherLayout>
     );

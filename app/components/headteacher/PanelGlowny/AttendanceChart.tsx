@@ -76,19 +76,19 @@ export default function AttendanceChart({
     [selectedGroup, attendanceStatuses]
   );
   return (
-    <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+    <section className="flex w-full flex-col gap-4 sm:gap-6 rounded-xl sm:rounded-2xl border border-zinc-200 bg-white px-3 sm:px-4 md:px-6 py-4 sm:py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <h2 className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-100">
           Wykres obecności
         </h2>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="flex items-center justify-between gap-2 px-4 cursor-pointer"
+              className="flex items-center justify-between gap-2 px-3 sm:px-4 cursor-pointer text-xs sm:text-sm w-full sm:w-auto"
             >
               <span>{selectedDate.toLocaleDateString()}</span>
-              <ChevronDown className="ml-2 h-4 w-4 opacity-70" />
+              <ChevronDown className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 opacity-70" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -99,27 +99,27 @@ export default function AttendanceChart({
               <DropdownMenuItem
                 key={dayData.date.toISOString()}
                 onSelect={() => setSelectedDateIndex(index)}
-                className="flex items-center justify-between cursor-pointer rounded-lg px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-sky-50 hover:text-sky-700 focus:bg-sky-50 focus:text-sky-700 dark:text-zinc-200 dark:hover:bg-sky-900/30 dark:hover:text-sky-200 dark:focus:bg-sky-900/30 dark:focus:text-sky-200"
+                className="flex items-center justify-between cursor-pointer rounded-lg px-3 py-2 text-xs sm:text-sm text-zinc-700 transition-colors hover:bg-sky-50 hover:text-sky-700 focus:bg-sky-50 focus:text-sky-700 dark:text-zinc-200 dark:hover:bg-sky-900/30 dark:hover:text-sky-200 dark:focus:bg-sky-900/30 dark:focus:text-sky-200"
               >
                 <span>{dayData.date.toLocaleDateString()}</span>
                 {index === selectedDateIndex && (
-                  <Check className="h-3.5 w-3.5 text-sky-500" />
+                  <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-sky-500" />
                 )}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+      <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+        <div className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100 w-full sm:w-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="flex w-full items-center justify-between gap-2 px-4 cursor-pointer"
+                className="flex w-full sm:w-auto items-center justify-between gap-2 px-3 sm:px-4 cursor-pointer text-xs sm:text-sm"
               >
-                <span>{selectedGroup?.name}</span>
-                <ChevronDown className="ml-2 h-4 w-4 opacity-70" />
+                <span className="truncate">{selectedGroup?.name}</span>
+                <ChevronDown className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 opacity-70 shrink-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -134,12 +134,12 @@ export default function AttendanceChart({
                   <DropdownMenuItem
                     key={name}
                     onSelect={() => setSelectedGroupName(name)}
-                    className="flex items-center justify-between  cursor-pointer rounded-lg px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-sky-50 hover:text-sky-700 focus:bg-sky-50 focus:text-sky-700 dark:text-zinc-200 dark:hover:bg-sky-900/30 dark:hover:text-sky-200 dark:focus:bg-sky-900/30 dark:focus:text-sky-200"
+                    className="flex items-center justify-between cursor-pointer rounded-lg px-3 py-2 text-xs sm:text-sm text-zinc-700 transition-colors hover:bg-sky-50 hover:text-sky-700 focus:bg-sky-50 focus:text-sky-700 dark:text-zinc-200 dark:hover:bg-sky-900/30 dark:hover:text-sky-200 dark:focus:bg-sky-900/30 dark:focus:text-sky-200"
                   >
-                    <span>{name}</span>
-                    <span className="flex items-center gap-1 text-xs font-medium text-zinc-400 dark:text-zinc-500">
+                    <span className="truncate">{name}</span>
+                    <span className="flex items-center gap-1 text-xs font-medium text-zinc-400 dark:text-zinc-500 shrink-0">
                       {total}
-                      {isActive && <Check className="h-3.5 w-3.5 text-sky-500" />}
+                      {isActive && <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-sky-500" />}
                     </span>
                   </DropdownMenuItem>
                 );
@@ -148,52 +148,55 @@ export default function AttendanceChart({
           </DropdownMenu>
         </div>
       </div>
-      <ChartContainer config={chartConfig} className="h-64 max-w-xl">
-        <BarChart
-          data={selectedStats}
-          layout="vertical"
-          margin={{ top: 12, right: 16, left: 8, bottom: 12 }}
-          barSize={20}
-          barCategoryGap={24}
-        >
-          <CartesianGrid horizontal={false} strokeDasharray="4 8" />
-          <YAxis
-            type="category"
-            dataKey="label"
-            width={160}
-            axisLine={false}
-            tickLine={false}
-          />
-          <XAxis type="number" hide domain={[0, "dataMax + 5"]} />
-          <ChartTooltip
-            cursor={{ fill: "rgba(15, 118, 110, 0.08)" }}
-            content={
-              <ChartTooltipContent
-                labelFormatter={() => "Szczegóły"}
-                formatter={(value, _name, entry) => {
-                  const key = (entry?.payload as { key?: AttendanceKey })?.key;
-                  const configEntry = key ? chartConfig[key] : undefined;
-                  const label = configEntry?.label ?? (entry?.payload as { label?: string })?.label ?? "";
+      <div className="overflow-x-auto">
+        <ChartContainer config={chartConfig} className="h-64 w-full min-w-[300px] sm:min-w-[400px] md:max-w-xl">
+          <BarChart
+            data={selectedStats}
+            layout="vertical"
+            margin={{ top: 12, right: 16, left: 8, bottom: 12 }}
+            barSize={20}
+            barCategoryGap={24}
+          >
+            <CartesianGrid horizontal={false} strokeDasharray="4 8" />
+            <YAxis
+              type="category"
+              dataKey="label"
+              width={120}
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 12 }}
+            />
+            <XAxis type="number" hide domain={[0, "dataMax + 5"]} />
+            <ChartTooltip
+              cursor={{ fill: "rgba(15, 118, 110, 0.08)" }}
+              content={
+                <ChartTooltipContent
+                  labelFormatter={() => "Szczegóły"}
+                  formatter={(value, _name, entry) => {
+                    const key = (entry?.payload as { key?: AttendanceKey })?.key;
+                    const configEntry = key ? chartConfig[key] : undefined;
+                    const label = configEntry?.label ?? (entry?.payload as { label?: string })?.label ?? "";
 
-                  return (
-                    <div className="flex w-full items-center justify-between gap-4">
-                      <span className="text-muted-foreground">{label}</span>
-                      <span className="text-foreground font-mono font-medium tabular-nums">
-                        {Number(value).toLocaleString()}
-                      </span>
-                    </div>
-                  );
-                }}
-              />
-            }
-          />
-          <Bar dataKey="value" radius={[0, 8, 8, 0]}>
-            {selectedStats.map((item) => (
-              <Cell key={item.key} fill={`var(--color-${item.key})`} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ChartContainer>
+                    return (
+                      <div className="flex w-full items-center justify-between gap-4">
+                        <span className="text-muted-foreground">{label}</span>
+                        <span className="text-foreground font-mono font-medium tabular-nums">
+                          {Number(value).toLocaleString()}
+                        </span>
+                      </div>
+                    );
+                  }}
+                />
+              }
+            />
+            <Bar dataKey="value" radius={[0, 8, 8, 0]}>
+              {selectedStats.map((item) => (
+                <Cell key={item.key} fill={`var(--color-${item.key})`} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ChartContainer>
+      </div>
     </section>
   );
 }

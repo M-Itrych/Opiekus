@@ -8,25 +8,25 @@ datasource db {
 }
 
 model User {
-  id                   String                @id @default(uuid())
-  email                String                @unique
-  password             String
-  name                 String
-  surname              String
-  phone                String?
-  role                 UserRole
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  announcements        Announcement[]
-  children             Child[]               @relation("ParentChildren")
-  messagesReceived     Message[]             @relation("ReceiverMessages")
-  messagesSent         Message[]             @relation("SenderMessages")
-  reports              Report[]
-  staff                Staff?
-  tasks                Task[]
-  recommendations      ChildRecommendation[]
-  behavioralInfos      BehavioralInfo[]
-  pushSubscriptions   PushSubscription[]
+  id                String                @id @default(uuid())
+  email             String                @unique
+  password          String
+  name              String
+  surname           String
+  phone             String?
+  role              UserRole
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  announcements     Announcement[]
+  behavioralInfos   BehavioralInfo[]
+  recommendations   ChildRecommendation[]
+  children          Child[]               @relation("ParentChildren")
+  messagesReceived  Message[]             @relation("ReceiverMessages")
+  messagesSent      Message[]             @relation("SenderMessages")
+  pushSubscriptions PushSubscription[]
+  reports           Report[]
+  staff             Staff?
+  tasks             Task[]
 
   @@map("users")
 }
@@ -48,24 +48,24 @@ model Staff {
 }
 
 model Group {
-  id             String         @id @default(uuid())
+  id             String          @id @default(uuid())
   name           String
   ageRange       String
   maxCapacity    Int
   roomId         String?
-  breakfastPrice Float          @default(5.0)
-  lunchPrice     Float          @default(12.0)
-  snackPrice     Float          @default(4.0)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  breakfastPrice Float           @default(5.0)
+  lunchPrice     Float           @default(12.0)
+  snackPrice     Float           @default(4.0)
   activities     Activity[]
   announcements  Announcement[]
   children       Child[]
+  documents      DocumentGroup[]
   galleries      Gallery[]
-  room           Room?          @relation(fields: [roomId], references: [id])
+  room           Room?           @relation(fields: [roomId], references: [id])
   mealPlans      MealPlan[]
   staff          Staff[]
-  documents      DocumentGroup[]
 
   @@map("groups")
 }
@@ -93,31 +93,31 @@ model Child {
   hasDataConsent         Boolean                 @default(false)
   allergies              String[]                @default([])
   specialNeeds           String?
-  diet                   DietType                @default(STANDARD)
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
   age                    Int
-  pesel                  String?                 @unique
-  birthDate              DateTime?
   address                String?
+  birthDate              DateTime?
   city                   String?
+  pesel                  String?                 @unique
   postalCode             String?
+  diet                   DietType                @default(STANDARD)
   activities             Activity[]
   attendances            Attendance[]
+  authorizedPersons      AuthorizedPerson[]
+  behavioralInfos        BehavioralInfo[]
+  recommendations        ChildRecommendation[]
   group                  Group?                  @relation(fields: [groupId], references: [id])
   parent                 User                    @relation("ParentChildren", fields: [parentId], references: [id])
+  chronicDiseases        ChronicDisease[]
   consents               Consent[]
+  dailyPickupCodes       DailyPickupCode[]
+  mealCancellations      MealCancellation[]
+  medicalDocuments       MedicalDocument[]
+  medications            Medication[]
   payments               Payment[]
   pickupRecords          PickupRecord[]
   recruitmentApplication RecruitmentApplication?
-  authorizedPersons      AuthorizedPerson[]
-  medicalDocuments       MedicalDocument[]
-  chronicDiseases        ChronicDisease[]
-  medications            Medication[]
-  recommendations        ChildRecommendation[]
-  behavioralInfos        BehavioralInfo[]
-  mealCancellations      MealCancellation[]
-  dailyPickupCodes       DailyPickupCode[]
 
   @@index([parentId])
   @@index([groupId])
@@ -139,17 +139,23 @@ model Attendance {
 }
 
 model Activity {
-  id          String   @id @default(uuid())
-  groupId     String
-  childId     String?
-  date        DateTime
-  title       String
-  description String?
-  activities  String[] @default([])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  child       Child?   @relation(fields: [childId], references: [id])
-  group       Group    @relation(fields: [groupId], references: [id])
+  id              String   @id @default(uuid())
+  groupId         String
+  childId         String?
+  date            DateTime
+  title           String
+  description     String?
+  activities      String[] @default([])
+  breakfast       Boolean  @default(false)
+  secondBreakfast Boolean  @default(false)
+  lunch           Boolean  @default(false)
+  snack           Boolean  @default(false)
+  napStart        String?
+  napEnd          String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  child           Child?   @relation(fields: [childId], references: [id])
+  group           Group    @relation(fields: [groupId], references: [id])
 
   @@index([groupId])
   @@index([childId])
@@ -239,13 +245,13 @@ model AnnouncementRead {
 }
 
 model Document {
-  id          String         @id @default(uuid())
+  id          String          @id @default(uuid())
   title       String
   description String?
   fileUrl     String
-  status      DocumentStatus @default(AKTYWNY)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  status      DocumentStatus  @default(AKTYWNY)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
   groups      DocumentGroup[]
 
   @@map("documents")
@@ -299,9 +305,9 @@ model MealPlan {
   name        String
   description String?
   allergens   String[] @default([])
-  diet        DietType @default(STANDARD)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  diet        DietType @default(STANDARD)
   group       Group?   @relation(fields: [groupId], references: [id])
 
   @@index([groupId])
@@ -419,6 +425,156 @@ model TrainingProgress {
   @@unique([trainingId, userId])
   @@index([userId])
   @@map("training_progress")
+}
+
+model AuthorizedPerson {
+  id        String   @id @default(uuid())
+  childId   String
+  name      String
+  surname   String
+  relation  String
+  phone     String?
+  idNumber  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  child     Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([childId])
+  @@map("authorized_persons")
+}
+
+model MedicalDocument {
+  id           String              @id @default(uuid())
+  childId      String
+  documentType MedicalDocumentType
+  title        String
+  fileUrl      String
+  description  String?
+  uploadDate   DateTime            @default(now())
+  expiryDate   DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  child        Child               @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([childId])
+  @@map("medical_documents")
+}
+
+model ChronicDisease {
+  id          String    @id @default(uuid())
+  childId     String
+  name        String
+  description String?
+  diagnosedAt DateTime?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  child       Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([childId])
+  @@map("chronic_diseases")
+}
+
+model Medication {
+  id        String    @id @default(uuid())
+  childId   String
+  name      String
+  dosage    String?
+  frequency String?
+  startDate DateTime?
+  endDate   DateTime?
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  child     Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([childId])
+  @@map("medications")
+}
+
+model ChildRecommendation {
+  id        String             @id @default(uuid())
+  childId   String
+  authorId  String
+  type      RecommendationType
+  content   String
+  date      DateTime           @default(now())
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  author    User               @relation(fields: [authorId], references: [id])
+  child     Child              @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([childId])
+  @@index([authorId])
+  @@map("child_recommendations")
+}
+
+model BehavioralInfo {
+  id        String   @id @default(uuid())
+  childId   String
+  authorId  String
+  date      DateTime @default(now())
+  behavior  String
+  context   String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  author    User     @relation(fields: [authorId], references: [id])
+  child     Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([childId])
+  @@index([date])
+  @@map("behavioral_info")
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  endpoint  String
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, endpoint])
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
+model MealCancellation {
+  id        String   @id @default(uuid())
+  childId   String
+  date      DateTime
+  mealType  String
+  reason    String?
+  refunded  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  child     Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, date, mealType])
+  @@index([childId])
+  @@index([date])
+  @@map("meal_cancellations")
+}
+
+model DailyPickupCode {
+  id        String    @id @default(uuid())
+  childId   String
+  code      String
+  date      DateTime  @db.Date
+  isUsed    Boolean   @default(false)
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  child     Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, date])
+  @@index([childId])
+  @@index([date])
+  @@index([code])
+  @@map("daily_pickup_codes")
 }
 
 enum UserRole {
@@ -549,107 +705,6 @@ enum DietType {
   CUSTOM
 }
 
-model AuthorizedPerson {
-  id           String   @id @default(uuid())
-  childId      String
-  name         String
-  surname      String
-  relation     String
-  phone        String?
-  idNumber     String?
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  child        Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
-
-  @@index([childId])
-  @@map("authorized_persons")
-}
-
-model MedicalDocument {
-  id           String              @id @default(uuid())
-  childId      String
-  documentType MedicalDocumentType
-  title        String
-  fileUrl      String
-  description  String?
-  uploadDate   DateTime            @default(now())
-  expiryDate   DateTime?
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
-  child        Child               @relation(fields: [childId], references: [id], onDelete: Cascade)
-
-  @@index([childId])
-  @@map("medical_documents")
-}
-
-model ChronicDisease {
-  id          String    @id @default(uuid())
-  childId     String
-  name        String
-  description String?
-  diagnosedAt DateTime?
-  notes       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  child       Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
-
-  @@index([childId])
-  @@map("chronic_diseases")
-}
-
-model Medication {
-  id        String    @id @default(uuid())
-  childId   String
-  name      String
-  dosage    String?
-  frequency String?
-  startDate DateTime?
-  endDate   DateTime?
-  notes     String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  child     Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
-
-  @@index([childId])
-  @@map("medications")
-}
-
-model ChildRecommendation {
-  id        String             @id @default(uuid())
-  childId   String
-  authorId  String
-  type      RecommendationType
-  content   String
-  date      DateTime           @default(now())
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
-  child     Child              @relation(fields: [childId], references: [id], onDelete: Cascade)
-  author    User               @relation(fields: [authorId], references: [id])
-
-  @@index([childId])
-  @@index([authorId])
-  @@map("child_recommendations")
-}
-
-model BehavioralInfo {
-  id        String   @id @default(uuid())
-  childId   String
-  authorId  String
-  date      DateTime @default(now())
-  behavior  String
-  context   String?
-  notes     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  child     Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
-  author    User     @relation(fields: [authorId], references: [id])
-
-  @@index([childId])
-  @@index([date])
-  @@map("behavioral_info")
-}
-
 enum MedicalDocumentType {
   BIRTH_CERTIFICATE
   VACCINATION_CARD
@@ -660,53 +715,4 @@ enum MedicalDocumentType {
 enum RecommendationType {
   PSYCHOLOGIST
   PEDAGOGUE
-}
-
-model PushSubscription {
-  id             String   @id @default(uuid())
-  userId         String
-  endpoint       String
-  p256dh         String
-  auth           String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, endpoint])
-  @@index([userId])
-  @@map("push_subscriptions")
-}
-
-model MealCancellation {
-  id        String   @id @default(uuid())
-  childId   String
-  date      DateTime
-  mealType  String
-  reason    String?
-  refunded  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  child     Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
-
-  @@unique([childId, date, mealType])
-  @@index([childId])
-  @@index([date])
-  @@map("meal_cancellations")
-}
-
-model DailyPickupCode {
-  id        String    @id @default(uuid())
-  childId   String
-  code      String
-  date      DateTime  @db.Date
-  isUsed    Boolean   @default(false)
-  usedAt    DateTime?
-  createdAt DateTime  @default(now())
-  child     Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
-
-  @@unique([childId, date])
-  @@index([childId])
-  @@index([date])
-  @@index([code])
-  @@map("daily_pickup_codes")
 }

@@ -67,8 +67,20 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const childId = normalizeQueryParam(searchParams.get("childId"));
   const groupId = normalizeQueryParam(searchParams.get("groupId"));
+  const date = normalizeQueryParam(searchParams.get("date"));
 
   const where: Prisma.ActivityWhereInput = {};
+
+  if (date) {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+    where.date = {
+      gte: startOfDay,
+      lte: endOfDay,
+    };
+  }
 
   if (user.role === "PARENT") {
     const childIds = await getParentChildIds(user.id as string);
@@ -107,7 +119,18 @@ export async function POST(req: Request) {
   }
 
   const payload = await req.json();
-  const { title, description, date, activities: activitiesList } = payload;
+  const {
+    title,
+    description,
+    date,
+    activities: activitiesList,
+    breakfast,
+    secondBreakfast,
+    lunch,
+    snack,
+    napStart,
+    napEnd
+  } = payload;
   const requestedGroupId = normalizeBodyId(payload.groupId);
   const requestedChildId = normalizeBodyId(payload.childId);
 
@@ -139,20 +162,54 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Brak przypisanej grupy" }, { status: 400 });
   }
 
-  const activity = await prisma.activity.create({
-    data: {
-      title,
-      description: description || null,
-      date: new Date(date),
-      groupId: targetGroupId,
-      childId: requestedChildId,
-      activities: activitiesList || [],
-    },
-    include: {
-      child: { select: { id: true, name: true, surname: true } },
-      group: { select: { id: true, name: true } },
-    },
-  });
+  const activityData = {
+    title,
+    description: description || null,
+    date: new Date(date),
+    groupId: targetGroupId,
+    childId: requestedChildId,
+    activities: activitiesList || [],
+    breakfast: !!breakfast,
+    secondBreakfast: !!secondBreakfast,
+    lunch: !!lunch,
+    snack: !!snack,
+    napStart: napStart || null,
+    napEnd: napEnd || null,
+  };
+
+  let activity;
+  if (requestedChildId) {
+    const activityDataForSearch = new Date(date);
+    const startOfDay = new Date(activityDataForSearch);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(activityDataForSearch);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const existingActivity = await prisma.activity.findFirst({
+      where: {
+        childId: requestedChildId,
+        date: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+    });
+
+    if (existingActivity) {
+      activity = await prisma.activity.update({
+        where: { id: existingActivity.id },
+        data: activityData,
+      });
+    } else {
+      activity = await prisma.activity.create({
+        data: activityData,
+      });
+    }
+  } else {
+    activity = await prisma.activity.create({
+      data: activityData,
+    });
+  }
 
   return NextResponse.json(activity, { status: 201 });
 }

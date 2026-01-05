@@ -95,17 +95,42 @@ export default function DailyActivities() {
       if (!res.ok) return;
 
       const data = await res.json();
-      if (data && data.length > 0) {
-        setActivities(prev => {
-          const updated = { ...prev };
-          data.forEach((activity: { childId: string; activities: string[]; title: string }) => {
+
+      setActivities(prev => {
+        const updated = { ...prev };
+        // Najpierw resetujemy aktywności do stanu początkowego dla wybranej daty
+        Object.keys(updated).forEach(id => {
+          updated[id] = {
+            ...updated[id],
+            breakfast: false,
+            secondBreakfast: false,
+            lunch: false,
+            snack: false,
+            napStart: "",
+            napEnd: "",
+            activities: [],
+          };
+        });
+
+        // Potem nakładamy dane z bazy
+        if (data && data.length > 0) {
+          data.forEach((activity: any) => {
             if (updated[activity.childId]) {
-              updated[activity.childId].activities = activity.activities || [];
+              updated[activity.childId] = {
+                ...updated[activity.childId],
+                activities: activity.activities || [],
+                breakfast: !!activity.breakfast,
+                secondBreakfast: !!activity.secondBreakfast,
+                lunch: !!activity.lunch,
+                snack: !!activity.snack,
+                napStart: activity.napStart || "",
+                napEnd: activity.napEnd || "",
+              };
             }
           });
-          return updated;
-        });
-      }
+        }
+        return updated;
+      });
     } catch (err) {
       console.error("Error fetching activities:", err);
     }
@@ -115,11 +140,18 @@ export default function DailyActivities() {
     const loadData = async () => {
       setLoading(true);
       await fetchChildren();
-      await fetchActivities();
+      // fetchActivities zostanie wywołane przez useEffect poniżej, 
+      // bo fetchChildren ustawia stan początkowy
       setLoading(false);
     };
     loadData();
-  }, [fetchChildren, fetchActivities]);
+  }, [fetchChildren]);
+
+  useEffect(() => {
+    if (children.length > 0) {
+      fetchActivities();
+    }
+  }, [selectedDate, children.length, fetchActivities]);
 
   const handleMealToggle = (childId: string, mealKey: keyof Pick<ChildActivity, "breakfast" | "secondBreakfast" | "lunch" | "snack">) => {
     setActivities(prev => ({
@@ -171,20 +203,25 @@ export default function DailyActivities() {
         : [activities[selectedChild]];
 
       for (const childActivity of childrenToSave) {
-        if (childActivity.activities.length > 0) {
-          await fetch("/api/activities", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              childId: childActivity.childId,
-              date: selectedDate,
-              title: `Aktywności dnia ${selectedDate}`,
-              activities: childActivity.activities,
-            }),
-          });
-        }
+        await fetch("/api/activities", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            childId: childActivity.childId,
+            date: selectedDate,
+            title: `Aktywności dnia ${selectedDate}`,
+            activities: childActivity.activities || [],
+            breakfast: childActivity.breakfast,
+            secondBreakfast: childActivity.secondBreakfast,
+            lunch: childActivity.lunch,
+            snack: childActivity.snack,
+            napStart: childActivity.napStart,
+            napEnd: childActivity.napEnd,
+          }),
+        });
       }
-      showModal('success', 'Zapisano aktywności!');
+      showModal('success', 'Zapisano pomyślnie!');
+      fetchActivities(); // Odśwież dane po zapisie
     } catch (err) {
       console.error("Error saving activities:", err);
       showModal('error', 'Wystąpił błąd podczas zapisywania');

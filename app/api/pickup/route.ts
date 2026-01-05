@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { verifyToken } from "@/lib/session";
 import { Prisma } from "@prisma/client";
+import { verifyPickupCode } from "@/lib/pickup-code";
 
 type SessionUser = {
   id: string;
@@ -75,7 +76,7 @@ export async function GET(req: Request) {
       startOfDay.setHours(0, 0, 0, 0);
       const endOfDay = new Date(targetDate);
       endOfDay.setHours(23, 59, 59, 999);
-      
+
       where.pickupDate = {
         gte: startOfDay,
         lte: endOfDay,
@@ -124,10 +125,18 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { childId, pickupDate, pickupTime, authorizedPerson, verificationMethod, notes } = body;
+    const { childId, pickupDate, pickupTime, authorizedPerson, verificationMethod, notes, verificationCode } = body;
 
-    if (!childId || !pickupDate || !pickupTime || !authorizedPerson) {
+    if (!childId || !pickupDate || !pickupTime || (!authorizedPerson && !verificationCode)) {
       return NextResponse.json({ error: "Brak wymaganych pól" }, { status: 400 });
+    }
+
+    // Jeśli podano kod weryfikacyjny, sprawdź go
+    if (verificationCode) {
+      const isValid = await verifyPickupCode(verificationCode, childId);
+      if (!isValid) {
+        return NextResponse.json({ error: "Nieprawidłowy lub zużyty kod odbioru" }, { status: 400 });
+      }
     }
 
     const child = await prisma.child.findUnique({

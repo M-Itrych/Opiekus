@@ -4,6 +4,9 @@ function generatePickupCode(): string {
     return Math.floor(10000 + Math.random() * 90000).toString();
 }
 
+/**
+ * Zwraca datę dzisiejszą z wyzerowaną godziną (Y-M-D 00:00:00)
+ */
 function getTodayDate(): Date {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -61,4 +64,40 @@ export async function verifyPickupCode(code: string, childId: string): Promise<b
     });
 
     return true;
+}
+
+/**
+ * Generuje kody dla wszystkich dzieci, które jeszcze go nie mają na dziś
+ */
+export async function generateAllMissingPickupCodes(): Promise<number> {
+    const today = getTodayDate();
+    const children = await prisma.child.findMany({
+        select: { id: true }
+    });
+
+    let generatedCount = 0;
+
+    for (const child of children) {
+        const existing = await prisma.dailyPickupCode.findUnique({
+            where: {
+                childId_date: {
+                    childId: child.id,
+                    date: today
+                }
+            }
+        });
+
+        if (!existing) {
+            await prisma.dailyPickupCode.create({
+                data: {
+                    childId: child.id,
+                    code: generatePickupCode(),
+                    date: today
+                }
+            });
+            generatedCount++;
+        }
+    }
+
+    return generatedCount;
 }

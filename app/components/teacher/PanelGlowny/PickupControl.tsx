@@ -226,10 +226,14 @@ export default function PickupControl() {
             authorizedPerson: 'Osoba zweryfikowana kodem',
             verificationMethod: `Kod: ${verificationCode}`,
             notes: `Weryfikacja kodem: ${verificationCode}`,
+            verificationCode: verificationCode.trim(),
           }),
         });
 
-        if (!res.ok) throw new Error('Failed to save pickup');
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || 'Failed to verify code');
+        }
 
         const savedRecord: ApiPickupRecord = await res.json();
 

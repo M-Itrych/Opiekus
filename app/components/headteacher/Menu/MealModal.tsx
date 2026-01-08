@@ -178,26 +178,26 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 	if (!isOpen) return null;
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-			<div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
-				<div className="flex items-center justify-between p-6 border-b dark:border-zinc-800">
-					<div>
-						<h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-4">
+			<div className="bg-white dark:bg-zinc-900 rounded-lg sm:rounded-xl shadow-xl w-full max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col">
+				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-2 p-4 sm:p-6 border-b dark:border-zinc-800">
+					<div className="min-w-0 flex-1">
+						<h2 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">
 							{isEditMode ? "Edytuj posiłek" : "Dodaj posiłek"}
 						</h2>
 						{date && (
-							<p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+							<p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
 								{format(date, "EEEE, d MMMM yyyy", { locale: pl })}
 							</p>
 						)}
 					</div>
-					<Button variant="ghost" size="icon" onClick={onClose}>
-						<X className="h-5 w-5" />
+					<Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 sm:h-10 sm:w-10 shrink-0">
+						<X className="h-4 w-4 sm:h-5 sm:w-5" />
 					</Button>
 				</div>
 
-				<div className="flex-1 overflow-y-auto p-6">
-					<div className="space-y-6">
+				<div className="flex-1 overflow-y-auto p-4 sm:p-6">
+					<div className="space-y-4 sm:space-y-6">
 						{error && (
 							<div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
 								<AlertTriangle className="h-4 w-4 shrink-0" />
@@ -216,77 +216,79 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 						)}
 
 						<div className="space-y-2">
-							<Label>Typ posiłku</Label>
+							<Label className="text-xs sm:text-sm">Typ posiłku</Label>
 							<div className="grid grid-cols-3 gap-2">
 								{MEAL_TYPES.map(({ value, label, icon: Icon, color }) => (
 									<button
 										key={value}
 										type="button"
 										onClick={() => setMealType(value)}
-										className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all ${
+										className={`flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-3 rounded-lg border-2 transition-all ${
 											mealType === value
 												? color + " border-2"
 												: "border-zinc-200 hover:border-zinc-300 text-zinc-600"
 										}`}
 									>
-										<Icon className="h-5 w-5" />
-										<span className="text-sm font-medium">{label}</span>
+										<Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+										<span className="text-xs sm:text-sm font-medium text-center">{label}</span>
 									</button>
 								))}
 							</div>
 						</div>
 
 						<div className="space-y-2">
-							<Label>Dieta</Label>
-							<div className="grid grid-cols-3 gap-2">
+							<Label className="text-xs sm:text-sm">Dieta</Label>
+							<div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
 								{DIET_TYPES.map(({ value, label, icon: Icon, color }) => (
 									<button
 										key={value}
 										type="button"
 										onClick={() => setDiet(value)}
-										className={`flex items-center gap-2 p-2 rounded-lg border-2 transition-all text-left ${
+										className={`flex items-center gap-1.5 sm:gap-2 p-2 rounded-lg border-2 transition-all text-left ${
 											diet === value
 												? color + " border-2"
 												: "border-zinc-200 hover:border-zinc-300 text-zinc-600"
 										}`}
 									>
-										<Icon className="h-4 w-4 shrink-0" />
-										<span className="text-xs font-medium">{label}</span>
+										<Icon className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+										<span className="text-[10px] sm:text-xs font-medium break-words">{label}</span>
 									</button>
 								))}
 							</div>
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="name">Nazwa posiłku *</Label>
+							<Label htmlFor="name" className="text-xs sm:text-sm">Nazwa posiłku *</Label>
 							<Input
 								id="name"
 								value={name}
 								onChange={(e) => setName(e.target.value)}
 								placeholder="np. Zupa pomidorowa z makaronem"
+								className="text-xs sm:text-sm"
 							/>
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="description">Opis (opcjonalnie)</Label>
+							<Label htmlFor="description" className="text-xs sm:text-sm">Opis (opcjonalnie)</Label>
 							<Textarea
 								id="description"
 								value={description}
 								onChange={(e) => setDescription(e.target.value)}
 								placeholder="Dodatkowe informacje o posiłku..."
 								rows={3}
+								className="text-xs sm:text-sm"
 							/>
 						</div>
 
 						<div className="space-y-2">
-							<Label>Alergeny</Label>
+							<Label className="text-xs sm:text-sm">Alergeny</Label>
 							<div className="flex flex-wrap gap-2">
 								{COMMON_ALLERGENS.map((allergen) => (
 									<button
 										key={allergen}
 										type="button"
 										onClick={() => toggleAllergen(allergen)}
-										className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+										className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium border transition-all ${
 											allergens.includes(allergen)
 												? "bg-red-100 text-red-700 border-red-300"
 												: "bg-zinc-100 text-zinc-600 border-zinc-200 hover:border-zinc-300"
@@ -297,7 +299,7 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 								))}
 							</div>
 							{allergens.length > 0 && (
-								<p className="text-xs text-zinc-500 mt-2">
+								<p className="text-xs text-zinc-500 mt-2 break-words">
 									Wybrane: {allergens.join(", ")}
 								</p>
 							)}
@@ -305,42 +307,49 @@ export function MealModal({ isOpen, onClose, onSuccess, date, meal }: MealModalP
 					</div>
 				</div>
 
-				<div className="flex items-center justify-between p-6 border-t dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
+				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-2 p-4 sm:p-6 border-t dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
 					<div>
 						{isEditMode && (
 							<Button
 								variant="outline"
 								onClick={handleDelete}
 								disabled={isDeleting || isSaving}
-								className="text-red-600 hover:text-red-700 hover:bg-red-50"
+								className="text-xs sm:text-sm text-red-600 hover:text-red-700 hover:bg-red-50 w-full sm:w-auto"
 							>
 								{isDeleting ? (
-									<Loader2 className="h-4 w-4 animate-spin mr-2" />
+									<Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin mr-2" />
 								) : (
-									<Trash2 className="h-4 w-4 mr-2" />
+									<Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
 								)}
 								Usuń
 							</Button>
 						)}
 					</div>
-					<div className="flex items-center gap-2">
-						<Button variant="outline" onClick={onClose} disabled={isSaving || isDeleting}>
+					<div className="flex items-center gap-2 w-full sm:w-auto">
+						<Button variant="outline" onClick={onClose} disabled={isSaving || isDeleting} className="text-xs sm:text-sm flex-1 sm:flex-initial">
 							Anuluj
 						</Button>
 						<Button
 							onClick={handleSubmit}
 							disabled={isSaving || isDeleting}
-							className="bg-sky-600 hover:bg-sky-500 text-white"
+							className="bg-sky-600 hover:bg-sky-500 text-white text-xs sm:text-sm flex-1 sm:flex-initial"
 						>
 							{isSaving ? (
 								<>
-									<Loader2 className="h-4 w-4 animate-spin mr-2" />
-									Zapisywanie...
+									<Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin mr-2" />
+									<span className="hidden sm:inline">Zapisywanie...</span>
+									<span className="sm:hidden">Zapisywanie</span>
 								</>
 							) : isEditMode ? (
-								"Zapisz zmiany"
+								<>
+									<span className="hidden sm:inline">Zapisz zmiany</span>
+									<span className="sm:hidden">Zapisz</span>
+								</>
 							) : (
-								"Dodaj posiłek"
+								<>
+									<span className="hidden sm:inline">Dodaj posiłek</span>
+									<span className="sm:hidden">Dodaj</span>
+								</>
 							)}
 						</Button>
 					</div>

@@ -328,17 +328,17 @@ export default function MedicalDocumentsSection({ childId, canEdit = true }: Med
           {documents.map((doc) => (
             <li
               key={doc.id}
-              className="flex items-center justify-between gap-4 rounded-lg border border-gray-200 px-4 py-3 hover:bg-gray-50 transition-colors"
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 rounded-lg border border-gray-200 p-3 sm:px-4 sm:py-3 hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-start gap-3 flex-1 min-w-0">
                 <Description className="h-5 w-5 text-sky-500 mt-0.5 shrink-0" />
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-gray-800 truncate">{doc.title}</p>
                   <p className="text-xs text-sky-600">{documentTypeLabels[doc.documentType]}</p>
                   {doc.description && (
-                    <p className="text-xs text-gray-600 mt-0.5 truncate">{doc.description}</p>
+                    <p className="text-xs text-gray-600 mt-0.5 line-clamp-2 break-words">{doc.description}</p>
                   )}
-                  <div className="flex gap-4 mt-1">
+                  <div className="flex flex-col sm:flex-row sm:gap-4 gap-1 mt-1">
                     <p className="text-xs text-gray-500">
                       Dodano: {new Date(doc.uploadDate).toLocaleDateString('pl-PL')}
                     </p>
@@ -350,12 +350,12 @@ export default function MedicalDocumentsSection({ childId, canEdit = true }: Med
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 shrink-0 justify-end sm:justify-start">
                 <a
                   href={doc.fileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+                  className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors whitespace-nowrap"
                 >
                   Pobierz
                 </a>

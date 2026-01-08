@@ -301,47 +301,47 @@ export default function DocumentsList() {
 	};
 
 	return (
-		<div className="flex flex-col gap-6">
-			<section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-				<div className="mb-4 flex items-center justify-between">
+		<div className="flex flex-col gap-4 sm:gap-6">
+			<section className="rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-4 sm:p-6 shadow-sm">
+				<div className="mb-3 sm:mb-4 flex items-center justify-between">
 					<div>
-						<h2 className="text-lg font-semibold text-zinc-900">Aktywne dokumenty</h2>
-						<p className="text-sm text-zinc-500">
+						<h2 className="text-base sm:text-lg font-semibold text-zinc-900">Aktywne dokumenty</h2>
+						<p className="text-xs sm:text-sm text-zinc-500">
 							Najważniejsze dokumenty wymagające uwagi.
 						</p>
 					</div>
 				</div>
 				{activeDocuments.length === 0 ? (
-					<div className="flex items-center justify-center rounded-xl border border-dashed border-zinc-200 py-10 text-sm text-zinc-500">
+					<div className="flex items-center justify-center rounded-lg sm:rounded-xl border border-dashed border-zinc-200 py-8 sm:py-10 text-xs sm:text-sm text-zinc-500">
 						Brak aktywnych dokumentów.
 					</div>
 				) : (
-					<div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+					<div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
 						{activeDocuments.slice(0, 6).map((doc) => (
 							<div
 								key={doc.id}
-								className="flex flex-col gap-2 rounded-xl border border-sky-100 bg-sky-50/60 p-4"
+								className="flex flex-col gap-2 rounded-lg sm:rounded-xl border border-sky-100 bg-sky-50/60 p-3 sm:p-4"
 							>
-								<div className="flex items-start justify-between">
-									<div className="flex items-center gap-2 text-sm font-semibold text-sky-800">
-										<FileText className="h-5 w-5" />
-										{doc.title}
+								<div className="flex items-start justify-between gap-2">
+									<div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-sky-800 min-w-0 flex-1">
+										<FileText className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+										<span className="truncate">{doc.title}</span>
 									</div>
 									<a
 										href={doc.fileUrl}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="text-sky-600 hover:text-sky-800"
+										className="text-sky-600 hover:text-sky-800 shrink-0"
 									>
 										<ExternalLink className="h-4 w-4" />
 									</a>
 								</div>
 								{doc.description && (
-									<p className="text-sm text-sky-900/80 line-clamp-2">{doc.description}</p>
+									<p className="text-xs sm:text-sm text-sky-900/80 line-clamp-2 break-words">{doc.description}</p>
 								)}
-								<div className="flex items-center gap-2 text-xs text-sky-900/70">
-									<Calendar className="h-4 w-4" />
-									Dodano: {formatDate(doc.createdAt)}
+								<div className="flex items-center gap-2 text-[10px] sm:text-xs text-sky-900/70">
+									<Calendar className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+									<span>Dodano: {formatDate(doc.createdAt)}</span>
 								</div>
 							</div>
 						))}
@@ -349,36 +349,38 @@ export default function DocumentsList() {
 				)}
 			</section>
 
-			<section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-				<div className="flex items-center justify-between">
+			<section className="rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-4 sm:p-6 shadow-sm">
+				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
 					<div>
-						<h3 className="text-lg font-semibold text-zinc-900">Zarządzanie dokumentami</h3>
-            <p className="mt-1 text-sm text-zinc-500">
+						<h3 className="text-base sm:text-lg font-semibold text-zinc-900">Zarządzanie dokumentami</h3>
+            <p className="mt-1 text-xs sm:text-sm text-zinc-500">
               Dodawanie, edycja i archiwizacja dokumentów.
             </p>
           </div>
-          <Button className="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white" onClick={() => openModal()}>
-            <Plus className="h-4 w-4" />
-            Nowy dokument
+          <Button className="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white text-xs sm:text-sm w-full sm:w-auto justify-center" onClick={() => openModal()}>
+            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Nowy dokument</span>
+            <span className="sm:hidden">Nowy</span>
           </Button>
         </div>
 
-				<div className="mt-4 flex flex-wrap gap-4">
-					<div className="relative flex-1 min-w-[200px]">
-						<Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+				<div className="mt-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
+					<div className="relative flex-1 min-w-0">
+						<Search className="pointer-events-none absolute left-2 sm:left-3 top-1/2 h-3 w-3 sm:h-4 sm:w-4 -translate-y-1/2 text-zinc-400" />
 						<Input
 							type="text"
 							placeholder="Szukaj dokumentów..."
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
-							className="pl-10"
+							className="pl-8 sm:pl-10 text-xs sm:text-sm"
 						/>
 					</div>
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-							<Button variant="outline" className="flex items-center gap-2">
-								Status: {selectedStatus === "all" ? "Wszystkie" : statusLabels[selectedStatus.toUpperCase() as Status] ?? selectedStatus}
-								<ChevronDown className="h-4 w-4" />
+							<Button variant="outline" className="flex items-center gap-2 text-xs sm:text-sm w-full sm:w-auto justify-center">
+								<span className="hidden sm:inline">Status: </span>
+								{selectedStatus === "all" ? "Wszystkie" : statusLabels[selectedStatus.toUpperCase() as Status] ?? selectedStatus}
+								<ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent>
@@ -402,77 +404,79 @@ export default function DocumentsList() {
 				)}
 
 				{loading ? (
-					<div className="flex items-center justify-center py-12 text-zinc-500">
-						<Loader2 className="mr-2 h-5 w-5 animate-spin" />
-						Ładowanie dokumentów...
+					<div className="flex items-center justify-center py-8 sm:py-12 text-zinc-500">
+						<Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+						<span className="text-xs sm:text-sm">Ładowanie dokumentów...</span>
 					</div>
 				) : filteredDocuments.length === 0 ? (
-					<div className="mt-6 rounded-xl border border-dashed border-zinc-200 py-10 text-center text-sm text-zinc-500">
+					<div className="mt-4 sm:mt-6 rounded-lg sm:rounded-xl border border-dashed border-zinc-200 py-8 sm:py-10 text-center text-xs sm:text-sm text-zinc-500">
 						Brak dokumentów spełniających kryteria wyszukiwania.
 					</div>
 				) : (
-					<div className="mt-6 grid grid-cols-1 gap-4">
+					<div className="mt-4 sm:mt-6 grid grid-cols-1 gap-3 sm:gap-4">
 						{filteredDocuments.map((doc) => (
 							<div
 								key={doc.id}
-								className="flex items-start gap-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
+								className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 rounded-lg sm:rounded-xl border border-zinc-200 bg-white p-4 sm:p-5 shadow-sm"
 							>
-								<div className="mt-1">
-									<FileText className="h-5 w-5 text-zinc-400" />
+								<div className="mt-0.5 sm:mt-1 shrink-0">
+									<FileText className="h-4 w-4 sm:h-5 sm:w-5 text-zinc-400" />
 								</div>
-								<div className="flex-1">
-									<div className="flex items-start justify-between gap-4">
-										<div>
-											<h4 className="font-semibold text-zinc-900">{doc.title}</h4>
+								<div className="flex-1 min-w-0 w-full sm:w-auto">
+									<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
+										<div className="min-w-0 flex-1">
+											<h4 className="font-semibold text-sm sm:text-base text-zinc-900 break-words">{doc.title}</h4>
 											{doc.description && (
-												<p className="mt-1 text-sm text-zinc-600">{doc.description}</p>
+												<p className="mt-1 text-xs sm:text-sm text-zinc-600 line-clamp-2 break-words">{doc.description}</p>
 											)}
 										</div>
-										<span className={`rounded-full px-3 py-1 text-xs font-medium ${statusColors[doc.status]}`}>
+										<span className={`rounded-full px-2 sm:px-3 py-1 text-xs font-medium shrink-0 ${statusColors[doc.status]}`}>
 											{statusLabels[doc.status]}
 										</span>
 									</div>
-									<div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-zinc-600">
-										<span className="flex items-center gap-1">
-											<Calendar className="h-4 w-4" />
-											Dodano: {formatDate(doc.createdAt)}
+									<div className="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+										<span className="flex items-center gap-1 text-xs sm:text-sm text-zinc-600">
+											<Calendar className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+											<span>Dodano: {formatDate(doc.createdAt)}</span>
 										</span>
-										<div className="ml-auto flex items-center gap-2">
+										<div className="flex items-center gap-1 sm:gap-2 flex-wrap">
 											<a
 												href={doc.fileUrl}
 												target="_blank"
 												rel="noopener noreferrer"
-												className="flex items-center gap-1 text-sky-600 hover:text-sky-800"
+												className="flex items-center gap-1 text-xs sm:text-sm text-sky-600 hover:text-sky-800 px-2 py-1 rounded hover:bg-sky-50 transition-colors"
 											>
-												<Download className="h-4 w-4" />
-												Pobierz
+												<Download className="h-3 w-3 sm:h-4 sm:w-4" />
+												<span className="hidden sm:inline">Pobierz</span>
 											</a>
 											<Button
 												variant="ghost"
 												size="sm"
 												onClick={() => openModal(doc)}
-												className="text-zinc-600 hover:text-zinc-900"
+												className="text-xs sm:text-sm text-zinc-600 hover:text-zinc-900 h-8 px-2 sm:px-3"
 											>
-												Edytuj
+												<span className="hidden sm:inline">Edytuj</span>
+												<span className="sm:hidden">Edytuj</span>
 											</Button>
 											{doc.status === "AKTYWNY" && (
 												<Button
 													variant="ghost"
 													size="sm"
 													onClick={() => handleArchive(doc.id)}
-													className="text-amber-600 hover:text-amber-800"
+													className="text-xs sm:text-sm text-amber-600 hover:text-amber-800 h-8 px-2 sm:px-3"
 												>
-													<Archive className="h-4 w-4 mr-1" />
-													Archiwizuj
+													<Archive className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+													<span className="hidden sm:inline">Archiwizuj</span>
+													<span className="sm:hidden">Archiw</span>
 												</Button>
 											)}
 											<Button
 												variant="ghost"
 												size="sm"
 												onClick={() => handleDelete(doc.id)}
-												className="text-red-600 hover:text-red-800"
+												className="text-red-600 hover:text-red-800 h-8 w-8 p-0"
 											>
-												<Trash2 className="h-4 w-4" />
+												<Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
 											</Button>
 										</div>
 									</div>
@@ -484,27 +488,27 @@ export default function DocumentsList() {
 			</section>
 
 			{isModalOpen && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-					<div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
-						<div className="flex items-center justify-between border-b px-6 py-4">
-							<div>
-								<h3 className="text-lg font-semibold text-zinc-900">
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 sm:p-4">
+					<div className="w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden rounded-lg sm:rounded-2xl bg-white shadow-2xl flex flex-col">
+						<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-2 border-b px-4 sm:px-6 py-3 sm:py-4">
+							<div className="min-w-0 flex-1">
+								<h3 className="text-base sm:text-lg font-semibold text-zinc-900">
 									{editingId ? "Edytuj dokument" : "Dodaj nowy dokument"}
 								</h3>
-								<p className="text-sm text-zinc-500">
+								<p className="text-xs sm:text-sm text-zinc-500">
 									Uzupełnij szczegóły dokumentu.
 								</p>
 							</div>
 							<button
 								aria-label="Zamknij"
 								onClick={closeModal}
-								className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100 cursor-pointer"
+								className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100 cursor-pointer shrink-0"
 							>
-								<X className="h-5 w-5" />
+								<X className="h-4 w-4 sm:h-5 sm:w-5" />
 							</button>
 						</div>
 
-						<form onSubmit={handleSubmit} className="space-y-4 px-6 py-6">
+						<form onSubmit={handleSubmit} className="space-y-4 px-4 sm:px-6 py-4 sm:py-6 overflow-y-auto flex-1">
 							<div>
 								<label className="text-sm font-medium text-zinc-700">Tytuł dokumentu</label>
 								<Input

@@ -6,7 +6,6 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import LogoutIcon from '@mui/icons-material/Logout';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 interface NavbarTemplateItem {
@@ -44,17 +43,6 @@ export default function NavbarTemplate({ items }: NavbarTemplateProps) {
         fetchUserData();
     }, []);
         
-    const router = useRouter();
-    
-    const signOut = async () => {
-        try {
-            await fetch("/api/auth/logout", { method: "POST" });
-        } catch (error) {
-            console.error("Error logging out:", error);
-        } finally {
-            router.push("/Login");
-        }
-    };
     return (
         <div 
             className="group fixed left-0 top-0 flex flex-col items-center p-2 sm:p-4 w-[60px] sm:w-[80px] md:hover:w-[240px] h-screen shadow-xl shadow-slate-900/10 bg-linear-to-b from-white to-slate-50/50 transition-all duration-300 ease-out overflow-hidden border-r border-slate-200/60 z-50 hidden sm:flex"
@@ -134,7 +122,7 @@ export default function NavbarTemplate({ items }: NavbarTemplateProps) {
                 ))}
             </div>
 
-            <div className="flex flex-col items-center w-full mt-auto pt-4 border-t border-slate-200/60 gap-3">
+            <div className="flex flex-col items-center w-full mt-auto pt-4 border-t border-slate-200/60">
                 <div className="flex items-center justify-center group-hover:justify-start w-full p-3 rounded-xl bg-slate-50/50 hover:bg-slate-100/70 transition-all duration-300 ease-in-out relative min-h-[56px] group/user">
                     <span className="shrink-0 relative z-10 transition-transform duration-300 ease-in-out group-hover/user:scale-110 text-slate-600">
                         <AccountCircleIcon sx={{ fontSize: 32 }} />
@@ -162,38 +150,6 @@ export default function NavbarTemplate({ items }: NavbarTemplateProps) {
                         )}
                     </AnimatePresence>
                 </div>
-
-                <button 
-                    className="flex items-center justify-center group-hover:justify-start gap-2 p-3 rounded-xl hover:bg-sky-50 hover:text-sky-600 text-slate-600 w-full transition-all duration-300 ease-in-out overflow-visible transform hover:scale-[1.02] active:scale-[0.98] relative min-h-[48px] group/logout"
-                    onClick={() => {
-                        signOut();
-                    }}
-                >
-                    <span className="shrink-0 relative z-10 transition-transform duration-300 ease-in-out group-hover/logout:scale-110">
-                        <LogoutIcon />
-                    </span>
-                    <AnimatePresence>
-                        {isHovered && (
-                            <motion.span
-                                initial={{ opacity: 0, x: -16, maxWidth: 0 }}
-                                animate={{ opacity: 1, x: 0, maxWidth: 200 }}
-                                exit={{ 
-                                    opacity: 0, 
-                                    x: -16, 
-                                    maxWidth: 0,
-                                    transition: { duration: 0.15 }
-                                }}
-                                transition={{ 
-                                    duration: 0.25, 
-                                    ease: "easeOut",
-                                }}
-                                className="absolute left-14 text-sm whitespace-nowrap overflow-hidden font-semibold text-sky-600 cursor-pointer"
-                            >
-                                Wyloguj
-                            </motion.span>
-                        )}
-                    </AnimatePresence>
-                </button>
             </div>
         </div>
     )

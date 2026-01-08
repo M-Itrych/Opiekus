@@ -153,10 +153,10 @@ export default function TrainingList() {
 
   if (loading) {
     return (
-      <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <section className="flex w-full flex-col gap-4 sm:gap-6 rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-4 sm:px-6 sm:py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-sky-600" />
-          <span className="ml-2 text-zinc-600">Ładowanie szkoleń...</span>
+          <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-sky-600" />
+          <span className="ml-2 text-xs sm:text-sm text-zinc-600">Ładowanie szkoleń...</span>
         </div>
       </section>
     );
@@ -166,44 +166,44 @@ export default function TrainingList() {
     const status = getProgressStatus(selectedTraining);
 
     return (
-      <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="flex items-center gap-4">
+      <section className="flex w-full flex-col gap-4 sm:gap-6 rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-4 sm:px-6 sm:py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="flex items-center gap-2 sm:gap-4">
           <Button variant="ghost" size="sm" onClick={() => {
             setSelectedTraining(null);
             setViewMode("list");
           }}>
             <ChevronLeft className="h-4 w-4 mr-1" />
-            Powrót
+            <span className="hidden sm:inline">Powrót</span>
           </Button>
         </div>
 
-        <div className="border-b border-zinc-200 pb-4 dark:border-zinc-700">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className={`rounded-full px-3 py-1 text-xs font-medium ${categoryColors[selectedTraining.category] || categoryColors.INNE}`}>
+        <div className="border-b border-zinc-200 pb-3 sm:pb-4 dark:border-zinc-700">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <span className={`rounded-full px-2 sm:px-3 py-1 text-xs font-medium ${categoryColors[selectedTraining.category] || categoryColors.INNE}`}>
                   {categoryLabels[selectedTraining.category] || selectedTraining.category}
                 </span>
                 {selectedTraining.isRequired && (
-                  <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                  <span className="rounded-full bg-red-100 px-2 sm:px-3 py-1 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400">
                     Wymagane
                   </span>
                 )}
                 {status === "completed" && (
-                  <span className="flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                  <span className="flex items-center gap-1 rounded-full bg-green-100 px-2 sm:px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
                     <CheckCircle className="h-3 w-3" />
                     Ukończone
                   </span>
                 )}
               </div>
-              <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+              <h2 className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-100 break-words">
                 {selectedTraining.title}
               </h2>
               {selectedTraining.description && (
-                <p className="text-sm text-zinc-500 mt-1">{selectedTraining.description}</p>
+                <p className="text-xs sm:text-sm text-zinc-500 mt-1 break-words">{selectedTraining.description}</p>
               )}
             </div>
-            <div className="flex items-center gap-2 text-sm text-zinc-500">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-zinc-500 shrink-0">
               <Clock className="h-4 w-4" />
               <span>{selectedTraining.duration} min</span>
             </div>
@@ -217,41 +217,45 @@ export default function TrainingList() {
           />
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-700">
+        <div className="flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-3 border-t border-zinc-200 pt-3 sm:pt-4 dark:border-zinc-700">
           {status === "not_started" && (
-            <Button onClick={() => handleStartTraining(selectedTraining.id)} disabled={actionLoading}>
+            <Button onClick={() => handleStartTraining(selectedTraining.id)} disabled={actionLoading} className="w-full sm:w-auto">
               {actionLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Rozpoczynanie...
+                  <span className="hidden sm:inline">Rozpoczynanie...</span>
+                  <span className="sm:hidden">Rozpoczynanie</span>
                 </>
               ) : (
                 <>
                   <Play className="h-4 w-4 mr-2" />
-                  Rozpocznij szkolenie
+                  <span className="hidden sm:inline">Rozpocznij szkolenie</span>
+                  <span className="sm:hidden">Rozpocznij</span>
                 </>
               )}
             </Button>
           )}
           {status === "in_progress" && (
-            <Button onClick={() => handleCompleteTraining(selectedTraining.id)} disabled={actionLoading}>
+            <Button onClick={() => handleCompleteTraining(selectedTraining.id)} disabled={actionLoading} className="w-full sm:w-auto">
               {actionLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Kończenie...
+                  <span className="hidden sm:inline">Kończenie...</span>
+                  <span className="sm:hidden">Kończenie</span>
                 </>
               ) : (
                 <>
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  Oznacz jako ukończone
+                  <span className="hidden sm:inline">Oznacz jako ukończone</span>
+                  <span className="sm:hidden">Ukończ</span>
                 </>
               )}
             </Button>
           )}
           {status === "completed" && (
-            <div className="flex items-center gap-2 text-green-600">
+            <div className="flex items-center justify-center sm:justify-start gap-2 text-green-600">
               <Award className="h-5 w-5" />
-              <span className="font-medium">Szkolenie ukończone!</span>
+              <span className="font-medium text-sm sm:text-base">Szkolenie ukończone!</span>
             </div>
           )}
         </div>
@@ -260,49 +264,49 @@ export default function TrainingList() {
   }
 
   return (
-    <section className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <section className="flex w-full flex-col gap-4 sm:gap-6 rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-4 sm:px-6 sm:py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="flex flex-col gap-2 sm:gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+          <h2 className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-100">
             Szkolenia
           </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
             Moduły edukacyjne i szkolenia dla nauczycieli
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="rounded-lg sm:rounded-xl border border-green-200 bg-green-50 p-3 sm:p-4 dark:border-green-800 dark:bg-green-900/20">
           <div className="flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-green-600" />
-            <span className="text-sm font-medium text-green-700 dark:text-green-400">Ukończone</span>
+            <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+            <span className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-400">Ukończone</span>
           </div>
-          <p className="mt-2 text-2xl font-bold text-green-600">{completedCount}</p>
+          <p className="mt-2 text-xl sm:text-2xl font-bold text-green-600">{completedCount}</p>
         </div>
 
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
+        <div className="rounded-lg sm:rounded-xl border border-amber-200 bg-amber-50 p-3 sm:p-4 dark:border-amber-800 dark:bg-amber-900/20">
           <div className="flex items-center gap-2">
-            <Play className="h-5 w-5 text-amber-600" />
-            <span className="text-sm font-medium text-amber-700 dark:text-amber-400">W trakcie</span>
+            <Play className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+            <span className="text-xs sm:text-sm font-medium text-amber-700 dark:text-amber-400">W trakcie</span>
           </div>
-          <p className="mt-2 text-2xl font-bold text-amber-600">{inProgressCount}</p>
+          <p className="mt-2 text-xl sm:text-2xl font-bold text-amber-600">{inProgressCount}</p>
         </div>
 
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+        <div className="rounded-lg sm:rounded-xl border border-red-200 bg-red-50 p-3 sm:p-4 dark:border-red-800 dark:bg-red-900/20">
           <div className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-red-600" />
-            <span className="text-sm font-medium text-red-700 dark:text-red-400">Wymagane</span>
+            <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
+            <span className="text-xs sm:text-sm font-medium text-red-700 dark:text-red-400">Wymagane</span>
           </div>
-          <p className="mt-2 text-2xl font-bold text-red-600">{requiredNotCompleted}</p>
+          <p className="mt-2 text-xl sm:text-2xl font-bold text-red-600">{requiredNotCompleted}</p>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Filter className="h-4 w-4 text-zinc-400" />
+        <Filter className="h-4 w-4 text-zinc-400 shrink-0" />
         <button
           onClick={() => setSelectedCategory(null)}
-          className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${!selectedCategory
+          className={`rounded-full px-2 sm:px-3 py-1 text-xs font-medium transition-colors ${!selectedCategory
               ? "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400"
               : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400"
             }`}
@@ -313,7 +317,7 @@ export default function TrainingList() {
           <button
             key={key}
             onClick={() => setSelectedCategory(key)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${selectedCategory === key
+            className={`rounded-full px-2 sm:px-3 py-1 text-xs font-medium transition-colors ${selectedCategory === key
                 ? categoryColors[key]
                 : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400"
               }`}
@@ -335,30 +339,30 @@ export default function TrainingList() {
                   setSelectedTraining(training);
                   setViewMode("detail");
                 }}
-                className={`flex items-start gap-4 rounded-xl border p-4 text-left transition-all hover:shadow-md ${status === "completed"
+                className={`flex flex-col sm:flex-row items-start gap-3 sm:gap-4 rounded-lg sm:rounded-xl border p-3 sm:p-4 text-left transition-all hover:shadow-md ${status === "completed"
                     ? "border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-900/10"
                     : status === "in_progress"
                       ? "border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-900/10"
                       : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
                   }`}
               >
-                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${status === "completed"
+                <div className={`flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg sm:rounded-xl shrink-0 ${status === "completed"
                     ? "bg-green-100 text-green-600 dark:bg-green-900/30"
                     : status === "in_progress"
                       ? "bg-amber-100 text-amber-600 dark:bg-amber-900/30"
                       : "bg-sky-100 text-sky-600 dark:bg-sky-900/30"
                   }`}>
                   {status === "completed" ? (
-                    <CheckCircle className="h-6 w-6" />
+                    <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6" />
                   ) : status === "in_progress" ? (
-                    <Play className="h-6 w-6" />
+                    <Play className="h-5 w-5 sm:h-6 sm:w-6" />
                   ) : (
-                    <BookOpen className="h-6 w-6" />
+                    <BookOpen className="h-5 w-5 sm:h-6 sm:w-6" />
                   )}
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="flex-1 min-w-0 w-full sm:w-auto">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${categoryColors[training.category] || categoryColors.INNE}`}>
                       {categoryLabels[training.category] || training.category}
                     </span>
@@ -368,15 +372,15 @@ export default function TrainingList() {
                       </span>
                     )}
                   </div>
-                  <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                  <h3 className="font-semibold text-sm sm:text-base text-zinc-900 dark:text-zinc-100 break-words">
                     {training.title}
                   </h3>
                   {training.description && (
-                    <p className="text-sm text-zinc-500 truncate mt-1">
+                    <p className="text-xs sm:text-sm text-zinc-500 line-clamp-2 break-words mt-1">
                       {training.description}
                     </p>
                   )}
-                  <div className="flex items-center gap-4 mt-2 text-xs text-zinc-400">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-1 mt-2 text-xs text-zinc-400">
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       {training.duration} min
@@ -389,7 +393,7 @@ export default function TrainingList() {
                   </div>
                 </div>
 
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 self-end sm:self-auto">
                   {status === "completed" ? (
                     <Award className="h-5 w-5 text-green-500" />
                   ) : (
@@ -400,9 +404,9 @@ export default function TrainingList() {
             );
           })
         ) : (
-          <div className="py-12 text-center">
-            <BookOpen className="h-12 w-12 mx-auto text-zinc-300 dark:text-zinc-600 mb-4" />
-            <p className="text-zinc-500 dark:text-zinc-400">
+          <div className="py-8 sm:py-12 text-center">
+            <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-zinc-300 dark:text-zinc-600 mb-3 sm:mb-4" />
+            <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400">
               {selectedCategory
                 ? "Brak szkoleń w wybranej kategorii"
                 : "Brak dostępnych szkoleń"}

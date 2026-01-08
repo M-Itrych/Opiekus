@@ -9,7 +9,7 @@ export default function Menu() {
 			title="Jadłospis"
 			description="Zarządzanie i przeglądanie jadłospisów przedszkolnych"
 		>
-			<section className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+			<section className="flex flex-col gap-4 sm:gap-6 rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-4 sm:p-6 shadow-sm">
 				<MenuCalendar />
 			</section>
 		</HeadTeacherLayout>

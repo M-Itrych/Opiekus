@@ -158,37 +158,37 @@ export function MenuCalendar() {
 	};
 
 	return (
-		<div className="flex flex-col gap-6">
-			<div className="flex items-center gap-4">
-				<Button variant="outline" size="icon" onClick={handlePrevMonth}>
-					<ChevronLeft className="h-4 w-4" />
+		<div className="flex flex-col gap-4 sm:gap-6">
+			<div className="flex items-center gap-2 sm:gap-4">
+				<Button variant="outline" size="icon" onClick={handlePrevMonth} className="h-8 w-8 sm:h-10 sm:w-10">
+					<ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
 				</Button>
-				<h2 className="text-xl font-semibold text-zinc-900 min-w-[200px] text-center">
+				<h2 className="text-base sm:text-xl font-semibold text-zinc-900 min-w-[150px] sm:min-w-[200px] text-center">
 					{format(currentDate, "LLLL yyyy", { locale: pl })}
 				</h2>
-				<Button variant="outline" size="icon" onClick={handleNextMonth}>
-					<ChevronRight className="h-4 w-4" />
+				<Button variant="outline" size="icon" onClick={handleNextMonth} className="h-8 w-8 sm:h-10 sm:w-10">
+					<ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
 				</Button>
 			</div>
 
-			<div className="flex items-center gap-4 flex-wrap">
+			<div className="flex items-center gap-2 sm:gap-4 flex-wrap">
 				{Object.entries(MEAL_TYPES).map(([key, { label, icon: Icon, color }]) => (
-					<div key={key} className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${color}`}>
-						<Icon className="h-4 w-4" />
-						<span className="text-sm font-medium">{label}</span>
+					<div key={key} className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border text-xs sm:text-sm ${color}`}>
+						<Icon className="h-3 w-3 sm:h-4 sm:w-4" />
+						<span className="font-medium">{label}</span>
 					</div>
 				))}
 			</div>
 
 			{isLoading ? (
-				<div className="flex items-center justify-center py-20">
-					<Loader2 className="h-8 w-8 animate-spin text-sky-500" />
+				<div className="flex items-center justify-center py-12 sm:py-20">
+					<Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-sky-500" />
 				</div>
 			) : (
-				<div className="border border-zinc-200 rounded-xl overflow-hidden bg-white">
+				<div className="border border-zinc-200 rounded-lg sm:rounded-xl overflow-hidden bg-white">
 					<div className="grid grid-cols-7 bg-zinc-50 border-b border-zinc-200">
 						{WEEKDAYS.map((day) => (
-							<div key={day} className="py-3 text-center text-sm font-medium text-zinc-600">
+							<div key={day} className="py-2 sm:py-3 text-center text-xs sm:text-sm font-medium text-zinc-600">
 								{day}
 							</div>
 						))}
@@ -197,7 +197,7 @@ export function MenuCalendar() {
 					<div className="grid grid-cols-7">
 						{calendarDays.map((day, index) => {
 							if (!day) {
-								return <div key={`empty-${index}`} className="min-h-[120px] bg-zinc-50/50 border-b border-r border-zinc-100" />;
+								return <div key={`empty-${index}`} className="min-h-[80px] sm:min-h-[100px] md:min-h-[120px] bg-zinc-50/50 border-b border-r border-zinc-100" />;
 							}
 
 							const dateKey = format(day, "yyyy-MM-dd");
@@ -212,13 +212,13 @@ export function MenuCalendar() {
 								<div
 									key={dateKey}
 									onClick={() => handleDayClick(day)}
-									className={`min-h-[120px] p-2 border-b border-r border-zinc-100 cursor-pointer transition-colors hover:bg-sky-50/50 ${
+									className={`min-h-[80px] sm:min-h-[100px] md:min-h-[120px] p-1.5 sm:p-2 border-b border-r border-zinc-100 cursor-pointer transition-colors hover:bg-sky-50/50 ${
 										!isCurrentMonth ? "bg-zinc-50/50" : ""
 									} ${isExpanded ? "bg-sky-50/30" : ""}`}
 								>
-									<div className="flex items-center justify-between mb-2">
+									<div className="flex items-center justify-between mb-1 sm:mb-2">
 										<span
-											className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full ${
+											className={`text-xs sm:text-sm font-medium w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-full ${
 												isToday
 													? "bg-sky-500 text-white"
 													: isCurrentMonth
@@ -229,25 +229,25 @@ export function MenuCalendar() {
 											{format(day, "d")}
 										</span>
 										{dayMeals.length > 0 && (
-											<span className="text-xs text-zinc-400">
+											<span className="text-[10px] sm:text-xs text-zinc-400">
 												{dayMeals.length} {dayMeals.length === 1 ? "posiłek" : dayMeals.length < 5 ? "posiłki" : "posiłków"}
 											</span>
 										)}
 									</div>
 
-									<div className="flex flex-col gap-1">
+									<div className="flex flex-col gap-0.5 sm:gap-1">
 										{visibleMeals.map((meal) => {
 											const Icon = getMealIcon(meal.mealType);
 											return (
 												<div
 													key={meal.id}
 													onClick={(e) => handleMealClick(meal, e)}
-													className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs border truncate hover:opacity-80 transition-opacity ${getMealStyle(meal.mealType)}`}
+													className={`flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs border truncate hover:opacity-80 transition-opacity ${getMealStyle(meal.mealType)}`}
 												>
-													<Icon className="h-3 w-3 shrink-0" />
+													<Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0" />
 													<span className="truncate">{meal.name}</span>
 													{meal.diet && meal.diet !== "STANDARD" && (
-														<Leaf className="h-3 w-3 shrink-0 text-green-600" />
+														<Leaf className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0 text-green-600" />
 													)}
 												</div>
 											);
@@ -255,16 +255,16 @@ export function MenuCalendar() {
 										{hasMultipleMeals && (
 											<button
 												onClick={(e) => toggleDayExpanded(dateKey, e)}
-												className="flex items-center gap-1 text-xs text-sky-600 hover:text-sky-700 pl-1 py-0.5 transition-colors"
+												className="flex items-center gap-1 text-[10px] sm:text-xs text-sky-600 hover:text-sky-700 pl-0.5 sm:pl-1 py-0.5 transition-colors"
 											>
 												{isExpanded ? (
 													<>
-														<ChevronUp className="h-3 w-3" />
+														<ChevronUp className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
 														<span>Zwiń</span>
 													</>
 												) : (
 													<>
-														<ChevronDown className="h-3 w-3" />
+														<ChevronDown className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
 														<span>+{dayMeals.length - 1} więcej</span>
 													</>
 												)}

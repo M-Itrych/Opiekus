@@ -7,17 +7,35 @@ import SchoolOutlined from "@mui/icons-material/SchoolOutlined";
 import RestaurantMenuOutlined from "@mui/icons-material/RestaurantMenuOutlined";
 import CampaignOutlined from "@mui/icons-material/CampaignOutlined";
 import AccessTimeOutlined from "@mui/icons-material/AccessTimeOutlined";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import ChecklistIcon from "@mui/icons-material/Checklist";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function TeacherTopbar() {
     const pathname = usePathname().toLowerCase();
+    const router = useRouter();
+
+    const signOut = async () => {
+        try {
+            await fetch("/api/auth/logout", { method: "POST" });
+        } catch (error) {
+            console.error("Error logging out:", error);
+        } finally {
+            router.push("/Login");
+        }
+    };
 
     const topbarItems = [
         {
             label: "Panel główny",
             href: "/Teacher",
             Icon: HomeOutlined,
+        },
+        {
+            label: "Obecności",
+            href: "/Teacher/Attendance",
+            Icon: ChecklistIcon,
         },
         {
             label: "Moja grupa",
@@ -50,6 +68,11 @@ export default function TeacherTopbar() {
             Icon: CampaignOutlined,
         },
         {
+            label: "Zadania",
+            href: "/Teacher/Tasks",
+            Icon: AssignmentIcon,
+        },
+        {
             label: "Szkolenia",
             href: "/Teacher/Training",
             Icon: SchoolOutlined,
@@ -57,34 +80,42 @@ export default function TeacherTopbar() {
     ];
 
     return (
-        <header className="fixed left-0 sm:left-[80px] top-0 right-0 z-10 border-b border-zinc-200 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/80">
-            <nav className="flex w-full items-center gap-2 sm:gap-4 overflow-x-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm scrollbar-hide md:gap-6">
-                {topbarItems.map(({ href, Icon, label }) => {
-                    const normalizedHref = href.toLowerCase();
-                    const isActive = pathname === normalizedHref || pathname.startsWith(normalizedHref + "/");
+        <header className="fixed left-0 sm:left-[80px] top-0 right-0 z-50 border-b border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="flex items-center justify-between">
+                <nav className="flex items-center gap-1 sm:gap-1.5 md:gap-2 overflow-x-auto px-1 sm:px-2 md:px-4 flex-1 min-w-0 scrollbar-hide">
+                    {topbarItems.map(({ href, Icon, label }) => {
+                        const normalizedHref = href.toLowerCase();
+                        const isActive = pathname === normalizedHref || pathname.startsWith(normalizedHref + "/");
 
-                    return (
-                        <Link
-                            href={href}
-                            key={label}
-                            className={`group relative flex items-center gap-1.5 sm:gap-2 whitespace-nowrap px-1.5 sm:px-2 py-1 transition-colors duration-200 hover:text-primary ${
-                                isActive ? "text-sky-700" : "text-zinc-600"
-                            }`}
-                        >
-                            <Icon fontSize="small" />
-                            <span className="hidden sm:inline">{label}</span>
-                            <span
-                                aria-hidden
-                                className={`absolute inset-x-0 bottom-0 h-0.5 origin-center rounded-full transition-all duration-200 ${
-                                    isActive
-                                        ? "scale-100 bg-sky-500"
-                                        : "scale-0 bg-sky-300 group-hover:scale-100"
+                        return (
+                            <button
+                                key={label}
+                                onClick={() => router.push(href)}
+                                className={`group relative flex items-center gap-1 sm:gap-1.5 md:gap-2 whitespace-nowrap px-1.5 sm:px-2 md:px-3 py-2 sm:py-2.5 md:py-3 transition-colors duration-200 text-xs sm:text-sm shrink-0 ${
+                                    isActive ? "text-sky-700 bg-sky-50" : "text-zinc-600 hover:text-sky-600 hover:bg-gray-50"
                                 }`}
-                            />
-                        </Link>
-                    );
-                })}
-            </nav>
+                            >
+                                <Icon fontSize="small" />
+                                <span className="hidden sm:inline font-medium">{label}</span>
+                                {isActive && (
+                                    <span
+                                        aria-hidden
+                                        className="absolute inset-x-0 bottom-0 h-0.5 bg-sky-500 rounded-full"
+                                    />
+                                )}
+                            </button>
+                        );
+                    })}
+                </nav>
+                <button
+                    onClick={signOut}
+                    className="flex items-center gap-1 sm:gap-1.5 md:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 text-zinc-600 hover:text-red-600 hover:bg-red-50 transition-colors duration-200 text-xs sm:text-sm whitespace-nowrap border-l border-zinc-200 shrink-0"
+                    title="Wyloguj"
+                >
+                    <LogoutIcon fontSize="small" />
+                    <span className="hidden sm:inline font-medium">Wyloguj</span>
+                </button>
+            </div>
         </header>
     );
 }

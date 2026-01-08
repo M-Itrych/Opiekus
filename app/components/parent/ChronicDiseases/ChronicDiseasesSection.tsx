@@ -261,15 +261,15 @@ export default function ChronicDiseasesSection({ childId, canEdit = true }: Chro
           {diseases.map((disease) => (
             <li
               key={disease.id}
-              className="rounded-lg border border-gray-200 px-4 py-3 hover:bg-gray-50 transition-colors"
+              className="rounded-lg border border-gray-200 p-3 sm:px-4 sm:py-3 hover:bg-gray-50 transition-colors"
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
                 <div className="flex items-start gap-3 flex-1 min-w-0">
                   <LocalHospital className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-800">{disease.name}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-gray-800 break-words">{disease.name}</p>
                     {disease.description && (
-                      <p className="text-xs text-gray-600 mt-0.5">{disease.description}</p>
+                      <p className="text-xs text-gray-600 mt-0.5 line-clamp-2 break-words">{disease.description}</p>
                     )}
                     {disease.diagnosedAt && (
                       <p className="text-xs text-gray-500 mt-1">
@@ -277,12 +277,12 @@ export default function ChronicDiseasesSection({ childId, canEdit = true }: Chro
                       </p>
                     )}
                     {disease.notes && (
-                      <p className="text-xs text-amber-700 mt-1 italic">{disease.notes}</p>
+                      <p className="text-xs text-amber-700 mt-1 italic line-clamp-2 break-words">{disease.notes}</p>
                     )}
                   </div>
                 </div>
                 {canEdit && (
-                  <div className="flex items-center gap-1 shrink-0">
+                  <div className="flex items-center gap-1 shrink-0 justify-end sm:justify-start">
                     <button
                       onClick={() => handleEdit(disease)}
                       className="p-1.5 text-gray-500 hover:text-sky-600 hover:bg-sky-50 rounded-md transition-colors"

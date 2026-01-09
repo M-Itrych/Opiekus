@@ -40,7 +40,7 @@ async function getParentChildIds(parentId: string) {
     where: { parentId },
     select: { id: true },
   });
-  return children.map((child) => child.id);
+  return children.map((child: { id: string }) => child.id);
 }
 
 async function getTeacherGroupId(userId: string) {
